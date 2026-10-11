@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7f4">
+  <title>CommuteMatch — Tìm chuyến đi chung</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <script>try { const a = JSON.parse(localStorage.getItem("commutematch-session") || sessionStorage.getItem("commutematch-session")); if (!a?.email) document.documentElement.classList.add("auth-required") } catch { document.documentElement.classList.add("auth-required") }</script>
+</head>
+
+<body>
+  <div class="auth-page auth-gate" hidden>
+    <header class="auth-topbar"><a class="brand" href="index.html"><span class="brand-mark">C</span><span>commute<span
+            class="brand-light">match</span></span></a>
+      <div class="header-actions"><button class="theme-toggle" type="button" aria-label="Chuyển giao diện"><span
+            class="theme-icon">☾</span><span class="theme-label">Tối</span></button></div>
+    </header>
+    <main class="auth-main">
+      <section class="auth-side">
+        <p class="eyebrow"><span class="eyebrow-dot"></span> Cùng nhau thuận đường</p>
+        <h1>Mỗi chuyến đi<br>thêm kết nối.</h1>
+        <p>Đăng nhập để tìm chuyến phù hợp, chia sẻ hành trình và theo dõi hoạt động cộng đồng.</p>
+        <div class="auth-route" aria-hidden="true"><span>●</span><i></i><span>◆</span></div>
+      </section>
+      <section class="auth-card" aria-labelledby="login-title">
+        <p class="eyebrow small-eyebrow">CHÀO MỪNG BẠN ĐẾN VỚI COMMUTEMATCH</p>
+        <h2 id="login-title">Đăng nhập để tiếp tục</h2>
+        <p class="auth-intro">Nhập thông tin và chọn vai trò của bạn.</p>
+        <form id="login-form" novalidate><label for="login-email">Email</label><input id="login-email" name="email"
+            type="email" autocomplete="username" placeholder="ban@email.com" required><label for="login-password">Mật
+            khẩu</label>
+          <div class="password-wrap"><input id="login-password" name="password" type="password"
+              autocomplete="current-password" minlength="6" placeholder="Ít nhất 6 ký tự" required><button
+              class="show-password" type="button" aria-label="Hiện mật khẩu" aria-pressed="false">Hiện</button></div>
+          <label for="login-role">Vai trò</label><select id="login-role" name="role" required>
+            <option value="rider">Hành khách</option>
+            <option value="driver">Người chia sẻ xe</option>
+            <option value="coordinator">Điều phối viên</option>
+            <option value="admin">Quản trị viên</option>
+          </select>
+          <div class="form-options"><label class="remember-option"><input type="checkbox" name="remember"> <span>Ghi nhớ
+                đăng nhập</span></label><button type="button" class="forgot-button">Quên mật khẩu?</button></div>
+          <p class="form-message" id="form-message" role="status" aria-live="polite"></p><button class="login-submit"
+            type="submit"><span>Đăng nhập</span><span aria-hidden="true">→</span></button>
+        </form>
+        <p class="auth-note">Bản mô phỏng: dùng email hợp lệ và mật khẩu từ 6 ký tự.</p>
+        <p class="auth-note"><a href="forgot-password.html">Khôi phục mật khẩu</a> · <a href="register.html">Tạo tài
+            khoản mới</a> · <a href="help-center.html">Trợ giúp</a></p>
+      </section>
+    </main>
+    <footer class="auth-footer"><span>© 2026 CommuteMatch</span><span>Di chuyển tốt hơn, cùng nhau.</span><a
+        href="help-center.html">Trợ giúp</a></footer>
+  </div>
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="CommuteMatch trang chủ">
+      <span class="brand-mark">C</span><span>commute<span class="brand-light">match</span></span>
+    </a>
+    <nav class="main-nav" aria-label="Điều hướng chính">
+      <a class="active" href="#search">Tìm chuyến</a>
+      <a href="#trips">Chuyến của tôi</a>
+      <a href="#how">Cách hoạt động</a>
+    </nav>
+    <div class="header-actions"><button class="theme-toggle" type="button" aria-label="Chuyển sang giao diện tối"
+        title="Chuyển giao diện"><span class="theme-icon" aria-hidden="true">☾</span><span
+          class="theme-label">Tối</span></button><button class="profile" aria-label="Hồ sơ của Duc Anh"><span
+          class="avatar">DA</span><span class="profile-name">Duc Anh</span><span aria-hidden="true">⌄</span></button>
+    </div>
+  </header>
+
+  <main id="home">
+    <section class="hero" id="search">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-dot"></span> Đi cùng nhau, nhẹ gánh hơn</p>
+        <h1>Tìm người cùng<br>đường với bạn.</h1>
+        <p class="hero-text">Kết nối với những người có lịch trình tương tự và cùng nhau di chuyển thuận tiện hơn.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true"><span class="sun"></span><span class="road"></span><span
+          class="art-pin pin-one">⌖</span><span class="art-pin pin-two">⌖</span><span class="art-car">↗</span></div>
+    </section>
+
+    <section class="search-card" aria-label="Tìm chuyến đi">
+      <div class="search-fields">
+        <label class="field"><span class="field-icon green">●</span><span class="field-content"><span
+              class="field-label">Điểm đón</span><select name="origin" aria-label="Điểm đón" required>
+              <option value="Hồ Gươm" selected>Hồ Gươm</option>
+              <option value="Văn Miếu – Quốc Tử Giám">Văn Miếu – Quốc Tử Giám</option>
+            </select></span></label>
+        <span class="route-line" aria-hidden="true"></span>
+        <label class="field"><span class="field-icon coral">◆</span><span class="field-content"><span
+              class="field-label">Điểm đến</span><select name="destination" aria-label="Điểm đến" required>
+              <option value="Hồ Gươm">Hồ Gươm</option>
+              <option value="Văn Miếu – Quốc Tử Giám" selected>Văn Miếu – Quốc Tử Giám</option>
+            </select></span></label>
+        <label class="field date-field"><span class="field-icon date-icon">▦</span><span class="field-content"><span
+              class="field-label">Ngày khởi hành</span><input name="date" type="date" value="2026-09-25"
+              aria-label="Ngày khởi hành"></span></label>
+        <label class="field people-field"><span class="field-icon people-icon">♙</span><span class="field-content"><span
+              class="field-label">Số hành khách</span><select name="people" aria-label="Số hành khách">
+              <option value="1" selected>1 người</option>
+              <option value="2">2 người</option>
+              <option value="3">3 người</option>
+              <option value="4">4 người</option>
+              <option value="5">5 người</option>
+              <option value="6">6 người</option>
+              <option value="7">7 người</option>
+              <option value="8">8 người</option>
+              <option value="9">9 người</option>
+              <option value="10">10 người</option>
+              <option value="11">11 người</option>
+              <option value="12">12 người</option>
+              <option value="13">13 người</option>
+              <option value="14">14 người</option>
+              <option value="15">15 người</option>
+            </select></span></label>
+        <label class="field vehicle-field"><span class="field-icon">🚘</span><span class="field-content"><span
+              class="field-label">Loại xe</span><select name="vehicle" aria-label="Loại xe">
+              <option value="car4-petrol">4 chỗ (xe xăng)</option>
+              <option value="car4-electric">4 chỗ (xe điện)</option>
+              <option value="car7-petrol">7 chỗ (xăng)</option>
+              <option value="car7-electric">7 chỗ (điện)</option>
+              <option value="limo9">Limo (9 chỗ)</option>
+              <option value="van16">16 chỗ</option>
+            </select></span></label>
+      </div>
+      <button class="search-button" type="button" data-results-url="Hanhkhach/rider-match-results.html"><span
+          aria-hidden="true">⌕</span> Tìm chuyến</button>
+    </section>
+
+    <section class="results" id="trips">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow small-eyebrow">ĐI ĐẾN SÂN BAY</p>
+          <h2>Các chuyến ra sân bay</h2>
+          <p class="airport-results-note">Giá/người cập nhật theo loại xe và số hành khách đã chọn.</p>
+        </div><button class="filter-button" type="button" aria-expanded="false">☷ <span>Bộ lọc</span></button>
+      </div>
+      <div class="trip-filters" hidden aria-label="Lọc chuyến"><label>Giá tiền<select data-filter-price>
+            <option value="">Tất cả mức giá</option>
+            <option value="200000">Đến 200.000đ</option>
+            <option value="400000">Đến 400.000đ</option>
+            <option value="800000">Đến 800.000đ</option>
+          </select></label><label>Số km<select data-filter-km>
+            <option value="">Tất cả khoảng cách</option>
+            <option value="100">Đến 100 km</option>
+            <option value="200">Đến 200 km</option>
+            <option value="500">Đến 500 km</option>
+          </select></label><label>Số sao<select data-filter-rating>
+            <option value="">Mọi mức sao</option>
+            <option value="4.7">Từ 4,7 sao</option>
+            <option value="4.8">Từ 4,8 sao</option>
+            <option value="4.9">Từ 4,9 sao</option>
+          </select></label><button class="filter-reset" type="button">Đặt lại</button></div>
+      <div class="results-meta"><span class="result-count">Tìm thấy <strong>5 chuyến</strong> phù hợp</span><button
+          class="sort-button" type="button">Sắp xếp: <strong>Phù hợp nhất</strong>⌄</button></div>
+      <article class="trip-card featured" data-airport-distance="30">
+        <div class="match-badge">✦ Khớp 96%</div>
+        <div class="driver">
+          <div class="driver-avatar avatar-a">HL</div>
+          <div><strong>Hoàng Long</strong><span class="driver-meta">★ 4.9 <i>·</i> 24 chuyến</span><span
+              class="airport-car-info" data-airport-car>4 chỗ (xe xăng)</span></div>
+        </div>
+        <div class="trip-route">
+          <div class="route-stops"><span class="stop-dot start"></span><span class="stop-stem"></span><span
+              class="stop-dot end"></span></div>
+          <div class="stop-labels">
+            <div><strong>07:15 <span>Hồ Gươm</span></strong><small>Ước tính 30 km</small></div>
+            <div><strong>08:00 <span>Sân bay Nội Bài — Hà Nội</span></strong><small>Đưa đón sân bay · giờ hẹn linh
+                hoạt</small></div>
+          </div>
+        </div>
+        <div class="trip-side">
+          <div class="trip-price"><strong data-airport-price>60.000đ</strong><span>/ người</span></div>
+          <div class="seats">♙ Còn 2 chỗ</div><small data-airport-discount>Chưa áp dụng ưu đãi nhóm</small><button
+            class="details-button">Xem chuyến</button>
+        </div>
+      </article>
+      <article class="trip-card" data-airport-distance="120">
+        <div class="match-badge muted-badge">✦ Khớp 92%</div>
+        <div class="driver">
+          <div class="driver-avatar avatar-b">NT</div>
+          <div><strong>Ngọc Thảo</strong><span class="driver-meta">★ 4.8 <i>·</i> 18 chuyến</span><span
+              class="airport-car-info" data-airport-car>4 chỗ (xe xăng)</span></div>
+        </div>
+        <div class="trip-route">
+          <div class="route-stops"><span class="stop-dot start"></span><span class="stop-stem"></span><span
+              class="stop-dot end"></span></div>
+          <div class="stop-labels">
+            <div><strong>06:30 <span>Hồ Gươm</span></strong><small>Ước tính 120 km</small></div>
+            <div><strong>08:30 <span>Sân bay Cát Bi — Hải Phòng</span></strong><small>Đưa đón sân bay · giờ hẹn linh
+                hoạt</small></div>
+          </div>
+        </div>
+        <div class="trip-side">
+          <div class="trip-price"><strong data-airport-price>192.000đ</strong><span>/ người</span></div>
+          <div class="seats">♙ Còn 3 chỗ</div><small data-airport-discount>Chưa áp dụng ưu đãi nhóm</small><button
+            class="details-button">Xem chuyến</button>
+        </div>
+      </article>
+      <article class="trip-card" data-airport-distance="180">
+        <div class="match-badge muted-badge">✦ Khớp 88%</div>
+        <div class="driver">
+          <div class="driver-avatar avatar-c">QV</div>
+          <div><strong>Quốc Việt</strong><span class="driver-meta">★ 4.7 <i>·</i> 12 chuyến</span><span
+              class="airport-car-info" data-airport-car>4 chỗ (xe xăng)</span></div>
+        </div>
+        <div class="trip-route">
+          <div class="route-stops"><span class="stop-dot start"></span><span class="stop-stem"></span><span
+              class="stop-dot end"></span></div>
+          <div class="stop-labels">
+            <div><strong>05:45 <span>Hồ Gươm</span></strong><small>Ước tính 180 km</small></div>
+            <div><strong>08:30 <span>Sân bay Vân Đồn — Quảng Ninh</span></strong><small>Đưa đón sân bay · giờ hẹn linh
+                hoạt</small></div>
+          </div>
+        </div>
+        <div class="trip-side">
+          <div class="trip-price"><strong data-airport-price>288.000đ</strong><span>/ người</span></div>
+          <div class="seats">♙ Còn 2 chỗ</div><small data-airport-discount>Chưa áp dụng ưu đãi nhóm</small><button
+            class="details-button">Xem chuyến</button>
+        </div>
+      </article>
+      <article class="trip-card" data-airport-distance="160">
+        <div class="match-badge muted-badge">✦ Khớp 84%</div>
+        <div class="driver">
+          <div class="driver-avatar avatar-a">MP</div>
+          <div><strong>Mai Phương</strong><span class="driver-meta">★ 4.8 <i>·</i> 9 chuyến</span><span
+              class="airport-car-info" data-airport-car>4 chỗ (xe xăng)</span></div>
+        </div>
+        <div class="trip-route">
+          <div class="route-stops"><span class="stop-dot start"></span><span class="stop-stem"></span><span
+              class="stop-dot end"></span></div>
+          <div class="stop-labels">
+            <div><strong>06:00 <span>Hồ Gươm</span></strong><small>Ước tính 160 km</small></div>
+            <div><strong>08:30 <span>Sân bay Thọ Xuân — Thanh Hóa</span></strong><small>Đưa đón sân bay · giờ hẹn linh
+                hoạt</small></div>
+          </div>
+        </div>
+        <div class="trip-side">
+          <div class="trip-price"><strong data-airport-price>256.000đ</strong><span>/ người</span></div>
+          <div class="seats">♙ Còn 2 chỗ</div><small data-airport-discount>Chưa áp dụng ưu đãi nhóm</small><button
+            class="details-button">Xem chuyến</button>
+        </div>
+      </article>
+      <article class="trip-card" data-airport-distance="460">
+        <div class="match-badge muted-badge">✦ Khớp 80%</div>
+        <div class="driver">
+          <div class="driver-avatar avatar-c">TN</div>
+          <div><strong>Thành Nam</strong><span class="driver-meta">★ 4.9 <i>·</i> 31 chuyến</span><span
+              class="airport-car-info" data-airport-car>4 chỗ (xe xăng)</span></div>
+        </div>
+        <div class="trip-route">
+          <div class="route-stops"><span class="stop-dot start"></span><span class="stop-stem"></span><span
+              class="stop-dot end"></span></div>
+          <div class="stop-labels">
+            <div><strong>04:30 <span>Hồ Gươm</span></strong><small>Ước tính 460 km</small></div>
+            <div><strong>13:00 <span>Sân bay Điện Biên — Điện Biên</span></strong><small>Đưa đón sân bay · giờ hẹn linh
+                hoạt</small></div>
+          </div>
+        </div>
+        <div class="trip-side">
+          <div class="trip-price"><strong data-airport-price>736.000đ</strong><span>/ người</span></div>
+          <div class="seats">♙ Còn 2 chỗ</div><small data-airport-discount>Chưa áp dụng ưu đãi nhóm</small><button
+            class="details-button">Xem chuyến</button>
+        </div>
+      </article>
+      <button class="more-button" type="button">Xem thêm chuyến <span aria-hidden="true">→</span></button>
+    </section>
+    <section class="role-shortcuts" aria-label="Các khu vực theo vai trò">
+      <div>
+        <p class="eyebrow small-eyebrow">COMMUTEMATCH</p>
+        <h2>Các khu vực sử dụng</h2>
+        <p>Mở giao diện mô phỏng theo từng vai trò.</p>
+      </div>
+      <div class="role-shortcut-links"><a href="Hanhkhach/rider-trip-search.html">Hành khách <span>→</span></a><a
+          href="Nguoichiase/driver-trip-create.html">Người chia sẻ xe <span>→</span></a><a
+          href="Dieuphoi/coordinator-mobility-dashboard.html">Điều phối viên <span>→</span></a><a
+          href="admin/admin-dashboard.html">Quản trị viên <span>→</span></a></div>
+    </section>
+  </main>
+  <section class="benefit-strip">
+    <div><strong>Giảm chi phí</strong><span>Chia sẻ chuyến đi, xem giá rõ ràng theo xe và quãng đường.</span></div>
+    <div><strong>Tiết kiệm thời gian</strong><span>Ghép người cùng tuyến và thống nhất điểm gặp trước.</span></div>
+    <div><strong>Chủ động hành trình</strong><span>Theo dõi trạng thái chuyến và nhận thông báo cập nhật.</span></div>
+  </section>
+  <section class="how-steps" id="how">
+    <div>
+      <p class="eyebrow small-eyebrow">CÁCH HOẠT ĐỘNG</p>
+      <h2>Đi chung chỉ với vài bước</h2>
+    </div>
+    <div class="how-step-grid">
+      <article><b>01</b>
+        <h3>Chọn hành trình</h3>
+        <p>Chọn điểm đón, điểm đến, ngày giờ, loại xe và số hành khách.</p>
+      </article>
+      <article><b>02</b>
+        <h3>Ghép chuyến</h3>
+        <p>Xem tuyến sân bay, giá dự kiến và thông tin người chia sẻ xe.</p>
+      </article>
+      <article><b>03</b>
+        <h3>Cùng khởi hành</h3>
+        <p>Xác nhận điểm gặp, theo dõi chuyến và gửi đánh giá sau khi đi.</p>
+      </article>
+    </div>
+    <div class="landing-cta"><a class="primary-action" href="#login">Đăng nhập</a><a class="outline-action"
+        href="register.html">Tạo tài khoản</a></div>
+  </section>
+  <footer><span>© 2026 CommuteMatch</span><span>Di chuyển tốt hơn, cùng nhau.</span><a href="#home">Trợ giúp</a>
+  </footer>
+  <div class="toast" role="status" aria-live="polite"></div>
+  <dialog class="trip-dialog"><button class="dialog-close" type="button" aria-label="Đóng">×</button>
+    <p class="eyebrow small-eyebrow">CHI TIẾT CHUYẾN ĐI</p>
+    <h2 class="dialog-title">Chuyến đi</h2>
+    <div class="dialog-body"></div><button class="request-button" type="button">Gửi yêu cầu tham gia</button>
+  </dialog>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/account-menu.js"></script>
+  <script src="js/google-maps-config.js"></script>
+  <script src="js/northern-locations.js"></script>
+  <script src="js/trip-estimator.js"></script>
+</body>
+
+</html>
