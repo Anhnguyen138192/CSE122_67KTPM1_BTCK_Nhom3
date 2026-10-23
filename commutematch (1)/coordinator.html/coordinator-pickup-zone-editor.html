@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biên Tập Điểm Đón An Toàn – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="coordinator-pickup-zone-management.html">Trạm đón</a> / <span>Biên tập trạm</span>
+          </div>
+          <h1 class="page-title" id="editorTitle">➕ Thêm Trạm Đón An Toàn Mới</h1>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 800px; margin: 0 auto;">
+        <div class="card-body" style="padding: 2rem;">
+          <form id="zoneEditorForm" onsubmit="savePickupZone(event)">
+            <div class="form-group">
+              <label class="form-label" for="zName">Tên trạm đón quy ước <span class="required">*</span></label>
+              <input type="text" id="zName" class="form-control" placeholder="ví dụ: Trạm đón Nhà Văn Hóa Sinh Viên (Sảnh Trước)" required>
+            </div>
+
+            <div class="d-grid grid-cols-2 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="zArea">Khu vực quản lý <span class="required">*</span></label>
+                <select id="zArea" class="form-select" required>
+                  <option value="ĐHQG TP.HCM">ĐHQG TP.HCM</option>
+                  <option value="Quận Bình Thạnh">Quận Bình Thạnh</option>
+                  <option value="Khu Công Nghệ Cao Thủ Đức">Khu Công Nghệ Cao (SHTP)</option>
+                  <option value="TP.Thủ Đức">TP.Thủ Đức (Trung tâm)</option>
+                </select>
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label" for="zCoordinates">Tọa độ GPS (Vĩ độ, Kinh độ) <span class="required">*</span></label>
+                <input type="text" id="zCoordinates" class="form-control" placeholder="ví dụ: 10.8752, 106.8015" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="zAddress">Địa chỉ chi tiết / Điểm mốc nhận diện <span class="required">*</span></label>
+              <input type="text" id="zAddress" class="form-control" placeholder="ví dụ: Cổng sau KTX Khu B, đối diện cây xăng Petrolimex..." required>
+            </div>
+
+            <div class="d-grid grid-cols-2 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="zCapacity">Sức chứa người chờ cùng lúc</label>
+                <input type="number" id="zCapacity" class="form-control" value="20" min="5" max="100">
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label" for="zSafetyScore">Điểm an toàn thẩm định (0 - 10)</label>
+                <input type="number" id="zSafetyScore" class="form-control" value="9.5" min="5" max="10" step="0.1">
+              </div>
+            </div>
+
+            <!-- Tiêu chí an toàn Checkboxes -->
+            <div class="ai-panel mb-3">
+              <div class="font-bold mb-2">🛡️ Tiêu chuẩn hạ tầng an toàn:</div>
+              <div class="d-grid grid-cols-2 gap-2" style="font-size: 0.88rem;">
+                <label class="d-flex items-center gap-2" style="cursor: pointer;">
+                  <input type="checkbox" id="zHasSidewalk" checked> Có vỉa hè rộng &gt; 3m cho người đi bộ
+                </label>
+                <label class="d-flex items-center gap-2" style="cursor: pointer;">
+                  <input type="checkbox" id="zHasLighting" checked> Có hệ thống đèn cao áp chiếu sáng ban đêm
+                </label>
+                <label class="d-flex items-center gap-2" style="cursor: pointer;">
+                  <input type="checkbox" id="zHasCCTV" checked> Có camera an ninh quan sát (CCTV)
+                </label>
+                <label class="d-flex items-center gap-2" style="cursor: pointer;">
+                  <input type="checkbox" id="zHasShelter" checked> Có mái che mưa nắng / Gần bảo vệ
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="zNotes">Ghi chú lưu ý khi dừng đỗ:</label>
+              <textarea id="zNotes" class="form-control" rows="2" placeholder="Ví dụ: Xe dừng sát lề phải tối đa 45 giây, không cản trở lối ra vào trạm xe buýt..."></textarea>
+            </div>
+
+            <div class="d-flex justify-between items-center mt-4">
+              <a href="coordinator-pickup-zone-management.html" class="btn btn-outline">Hủy bỏ</a>
+              <button type="submit" class="btn btn-primary btn-lg">💾 Lưu Trạm Đón</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    let editingId = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      editingId = urlParams.get("id");
+
+      if (editingId) {
+        document.getElementById("editorTitle").innerText = "✏️ Cập Nhật Trạm Đón An Toàn";
+        const z = window.Storage.getById("pickupZones", editingId);
+        if (z) {
+          document.getElementById("zName").value = z.name;
+          document.getElementById("zArea").value = z.area;
+          document.getElementById("zCoordinates").value = z.coordinates;
+          document.getElementById("zAddress").value = z.address;
+          document.getElementById("zCapacity").value = z.capacity || 20;
+          document.getElementById("zSafetyScore").value = z.safetyScore || 9.5;
+          document.getElementById("zHasSidewalk").checked = z.hasSidewalk;
+          document.getElementById("zHasLighting").checked = z.hasLighting;
+          document.getElementById("zHasCCTV").checked = z.hasCCTV;
+          document.getElementById("zNotes").value = z.notes || "";
+        }
+      }
+    });
+
+    function savePickupZone(e) {
+      e.preventDefault();
+
+      const zoneData = {
+        name: document.getElementById("zName").value.trim(),
+        area: document.getElementById("zArea").value,
+        coordinates: document.getElementById("zCoordinates").value.trim(),
+        address: document.getElementById("zAddress").value.trim(),
+        capacity: parseInt(document.getElementById("zCapacity").value) || 20,
+        safetyScore: parseFloat(document.getElementById("zSafetyScore").value) || 9.5,
+        hasSidewalk: document.getElementById("zHasSidewalk").checked,
+        hasLighting: document.getElementById("zHasLighting").checked,
+        hasCCTV: document.getElementById("zHasCCTV").checked,
+        status: "active",
+        notes: document.getElementById("zNotes").value.trim()
+      };
+
+      if (editingId) {
+        window.Storage.update("pickupZones", editingId, zoneData);
+        window.Toast.show("Đã cập nhật trạm đón thành công!", "success");
+      } else {
+        zoneData.id = "zone_" + Date.now();
+        window.Storage.insert("pickupZones", zoneData);
+        window.Toast.show("Đã thêm trạm đón mới vào danh mục!", "success");
+      }
+
+      setTimeout(() => {
+        window.location.href = "coordinator-pickup-zone-management.html";
+      }, 700);
+    }
+  </script>
+</body>
+</html>

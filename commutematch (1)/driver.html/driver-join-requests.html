@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Yêu Cầu Ghép Chuyến – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="driver-dashboard.html">Tài xế</a> / <span>Yêu cầu ghép chuyến</span>
+          </div>
+          <h1 class="page-title">👥 Phê Duyệt Yêu Cầu Ghép Chuyến</h1>
+        </div>
+      </div>
+
+      <!-- Tabs Lọc Trạng Thái -->
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchRequestTab('pending', this)">
+          ⏳ Đang Chờ Duyệt (<span id="reqCountPending">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchRequestTab('accepted', this)">
+          ✓ Đã Phê Duyệt (<span id="reqCountAccepted">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchRequestTab('rejected', this)">
+          ✕ Đã Từ Chối (<span id="reqCountRejected">0</span>)
+        </button>
+      </div>
+
+      <!-- Danh sách thẻ yêu cầu -->
+      <div id="requestsContainer" class="d-flex flex-column gap-3">
+        <!-- Rendered dynamically -->
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    let activeReqTab = 'pending';
+
+    document.addEventListener("DOMContentLoaded", renderRequests);
+
+    function renderRequests() {
+      const allRequests = window.Storage.get("joinRequests");
+      const pending = allRequests.filter(r => r.status === 'pending');
+      const accepted = allRequests.filter(r => r.status === 'accepted');
+      const rejected = allRequests.filter(r => r.status === 'rejected' || r.status === 'cancelled');
+
+      document.getElementById("reqCountPending").innerText = pending.length;
+      document.getElementById("reqCountAccepted").innerText = accepted.length;
+      document.getElementById("reqCountRejected").innerText = rejected.length;
+
+      let list = [];
+      if (activeReqTab === 'pending') list = pending;
+      else if (activeReqTab === 'accepted') list = accepted;
+      else if (activeReqTab === 'rejected') list = rejected;
+
+      const container = document.getElementById("requestsContainer");
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="card">
+            <div class="empty-state">
+              <div class="empty-icon">👥</div>
+              <div class="empty-title">Không có yêu cầu nào trong mục này</div>
+              <div class="empty-desc">Toàn bộ yêu cầu ghép chuyến của hành khách đã được xử lý xong!</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(req => `
+        <div class="card" style="border-left: 4px solid ${
+          req.status === 'accepted' ? 'var(--success)' :
+          req.status === 'rejected' ? 'var(--danger)' : 'var(--warning)'
+        };">
+          <div class="card-body">
+            <div class="d-flex justify-between items-start flex-wrap gap-2 mb-3">
+              <div class="d-flex items-center gap-2">
+                <div class="avatar" style="width: 48px; height: 48px; font-size: 1.1rem; background-color: #059669; color: white;">
+                  ${req.riderAvatar || 'KH'}
+                </div>
+                <div>
+                  <h3 style="font-size: 1.15rem; margin-bottom: 0.2rem;"><a href="profile-overview.html?userId=${encodeURIComponent(req.riderId || "")}">${req.riderName}</a></h3>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">
+                    📞 ${req.riderPhone || '0901 234 567'} • Điểm uy tín: <strong style="color: var(--primary);">98/100</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="text-right">
+                <span class="badge ${
+                  req.status === 'accepted' ? 'badge-success' :
+                  req.status === 'rejected' ? 'badge-danger' : 'badge-warning'
+                } mb-1">
+                  ${req.status === 'accepted' ? 'Đã Chấp Nhận' : req.status === 'rejected' ? 'Đã Từ Chối' : 'Chờ Phê Duyệt'}
+                </span>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">
+                  Thời gian gửi: ${new Date(req.requestTime || Date.now()).toLocaleTimeString('vi-VN')}
+                </div>
+              </div>
+            </div>
+
+            <!-- Details Box -->
+            <div style="background-color: var(--bg-muted); padding: 0.85rem 1rem; border-radius: var(--radius-md); font-size: 0.88rem; margin-bottom: 1rem;">
+              <div class="d-flex justify-between mb-1">
+                <span>🚏 Điểm đón mong muốn: <strong>${req.pickupPoint}</strong></span>
+                <span>🏁 Điểm xuống: <strong>${req.dropoffPoint || 'ĐH Bách Khoa CS2'}</strong></span>
+              </div>
+              <div class="d-flex justify-between text-muted" style="font-size: 0.82rem;">
+                <span>💬 Lời nhắn: "${req.note || 'Không có lời nhắn'}"</span>
+                <span>Chia sẻ xăng: <strong style="color: var(--primary);">${(req.cost || 12000).toLocaleString('vi-VN')} đ</strong></span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-end gap-2">
+              <a href="messages-chat.html?userId=${encodeURIComponent(req.riderId || "")}" class="btn btn-outline btn-sm">💬 Nhắn tin</a>
+              ${req.status === 'pending' ? `
+                <button class="btn btn-outline text-danger btn-sm" onclick="handleRejectRequest('${req.id}')">
+                  ✕ Từ Chối
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="handleAcceptRequest('${req.id}')">
+                  ✓ Phê Duyệt Ghép Chuyến
+                </button>
+              ` : ""}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function switchRequestTab(tab, btn) {
+      activeReqTab = tab;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderRequests();
+    }
+
+    function handleAcceptRequest(reqId) {
+      const all = window.Storage.get("joinRequests");
+      const req = all.find(r => r.id === reqId);
+      if (!req) return;
+
+      window.Storage.update("joinRequests", reqId, { status: "accepted" });
+
+      // Cập nhật số chỗ của trip
+      const trip = window.Storage.getById("trips", req.tripId);
+      if (trip && trip.availableSeats > 0) {
+        window.Storage.update("trips", trip.id, { availableSeats: Math.max(0, trip.availableSeats - 1) });
+      }
+
+      // Gửi notification cho rider
+      window.Storage.insert("notifications", {
+        userId: req.riderId,
+        title: "Yêu cầu ghép chuyến đã được duyệt! 🎉",
+        message: `Tài xế đã chấp nhận yêu cầu của bạn. Hãy sẵn sàng lúc 07:15 sáng mai tại ${req.pickupPoint}.`,
+        time: "Vừa xong",
+        type: "trip_approved",
+        unread: true,
+        link: "rider-my-trips.html"
+      });
+
+      window.Toast.show(`Đã phê duyệt yêu cầu của ${req.riderName}!`, "success");
+      renderRequests();
+    }
+
+    function handleRejectRequest(reqId) {
+      if (!confirm("Bạn có chắc chắn muốn từ chối yêu cầu này?")) return;
+      window.Storage.update("joinRequests", reqId, { status: "rejected" });
+      window.Toast.show("Đã từ chối yêu cầu ghép chuyến.", "info");
+      renderRequests();
+    }
+  </script>
+</body>
+</html>

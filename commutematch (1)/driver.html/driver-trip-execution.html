@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Điều Hành Chuyến Đi Trực Tiếp – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="driver-schedule.html">Lịch trình</a> / <span>Điều hành chuyến đi</span>
+          </div>
+          <h1 class="page-title">🚦 Phòng Điều Hành Chuyến Đi (Driver Cockpit)</h1>
+        </div>
+        <span class="badge badge-primary" id="cockpitBadge">ĐANG CHỜ KHỞI HÀNH</span>
+      </div>
+
+      <div class="d-grid grid-cols-12 gap-3">
+        <!-- Cột trái: Trạng thái & Nút điều khiển -->
+        <div style="grid-column: span 7;" class="col-12 col-md-7">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Hành Trình: KTX Khu B → ĐH Bách Khoa CS2</h3>
+            </div>
+            <div class="card-body">
+              <!-- Stepper -->
+              <div class="ai-panel text-center mb-4" style="padding: 1.5rem;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;" id="execIcon">🛵</div>
+                <h3 style="font-size: 1.3rem; margin-bottom: 0.25rem;" id="execTitle">
+                  Chuẩn bị xuất phát đến điểm đón
+                </h3>
+                <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;" id="execSub">
+                  Điểm hẹn: <strong>Trạm đón KTX Khu B - Cổng phụ Cây Xăng</strong> (Hành khách đã sẵn sàng).
+                </p>
+
+                <div class="d-flex justify-center gap-2">
+                  <button type="button" class="btn btn-primary btn-lg" id="btnMainAction" onclick="handleExecAction()">
+                    🚀 Bắt Đầu Đi Đón Khách
+                  </button>
+                </div>
+              </div>
+
+              <!-- An toàn & Kiểm tra trước khi nổ máy -->
+              <div style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md); font-size: 0.88rem;">
+                <div class="font-bold mb-2">📋 Danh sách kiểm tra an toàn (Safety Checklist):</div>
+                <label class="d-flex items-center gap-2 mb-1" style="cursor: pointer;">
+                  <input type="checkbox" id="chkHelmet" checked> Đã chuẩn bị sẵn mũ bảo hiểm thứ hai cho hành khách
+                </label>
+                <label class="d-flex items-center gap-2 mb-1" style="cursor: pointer;">
+                  <input type="checkbox" id="chkGas" checked> Xe đủ nhiên liệu xăng / pin di chuyển cả tuyến
+                </label>
+                <label class="d-flex items-center gap-2" style="cursor: pointer;">
+                  <input type="checkbox" id="chkMirror" checked> Gương chiếu hậu và phanh xe hoạt động chuẩn
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Danh sách hành khách cần đón -->
+        <div style="grid-column: span 5;" class="col-12 col-md-5">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Hành Khách Đi Cùng</h3>
+            </div>
+            <div class="card-body">
+              <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; background-color: var(--bg-surface); margin-bottom: 1rem;">
+                <div class="d-flex items-center justify-between mb-2">
+                  <div class="d-flex items-center gap-2">
+                    <div class="avatar" style="width: 42px; height: 42px; background-color: #059669; color: white;">NA</div>
+                    <div>
+                      <div class="font-bold">Nguyễn Văn An</div>
+                      <div style="font-size: 0.78rem; color: var(--text-muted);">MSSV: 2210045 (Bách Khoa)</div>
+                    </div>
+                  </div>
+                  <span class="badge badge-success" id="passengerBoardStatus">Đã có mặt tại trạm</span>
+                </div>
+
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  📍 Điểm đón: <strong>Trạm KTX Khu B - Cổng phụ</strong><br>
+                  🏁 Điểm xuống: <strong>ĐH Bách Khoa CS2 (Cổng 1)</strong>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <a href="tel:0901234567" class="btn btn-outline btn-sm flex-1">📞 Gọi điện</a>
+                  <a href="messages-chat.html" class="btn btn-outline btn-sm flex-1">💬 Nhắn tin</a>
+                </div>
+              </div>
+
+              <!-- Thống kê chia sẻ xăng của chuyến này -->
+              <div class="d-flex justify-between items-center" style="background-color: var(--primary-light); padding: 0.75rem 1rem; border-radius: var(--radius-md);">
+                <span class="font-bold" style="color: var(--primary); font-size: 0.9rem;">Bù tiền xăng thu được:</span>
+                <strong style="font-size: 1.15rem; color: var(--primary);">12.000 đ</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    let execPhase = 1;
+
+    function handleExecAction() {
+      const btn = document.getElementById("btnMainAction");
+      const badge = document.getElementById("cockpitBadge");
+      const title = document.getElementById("execTitle");
+      const sub = document.getElementById("execSub");
+      const icon = document.getElementById("execIcon");
+
+      if (execPhase === 1) {
+        execPhase = 2;
+        badge.innerText = "ĐÃ ĐẾN TRẠM ĐÓN";
+        badge.className = "badge badge-warning";
+        icon.innerText = "📍";
+        title.innerText = "Bạn đã có mặt tại trạm đón KTX Khu B";
+        sub.innerText = "Vui lòng kiểm tra nhận diện khách và đưa mũ bảo hiểm cho bạn Nguyễn Văn An.";
+        btn.innerText = "✓ Khách Đã Lên Xe & Xuất Phát";
+        btn.className = "btn btn-secondary btn-lg";
+        window.Toast.show("Đã thông báo cho hành khách: Tài xế đã tới trạm đón!", "info");
+      } else if (execPhase === 2) {
+        execPhase = 3;
+        badge.innerText = "ĐANG DI CHUYỂN";
+        badge.className = "badge badge-primary";
+        icon.innerText = "🛵💨";
+        title.innerText = "Đang di chuyển trên lộ trình đến ĐH Bách Khoa";
+        sub.innerText = "Hãy duy trì tốc độ an toàn và tuân thủ tín hiệu giao thông.";
+        btn.innerText = "🏁 Kết Thúc Chuyến Đi An Toàn";
+        btn.className = "btn btn-success btn-lg";
+        document.getElementById("passengerBoardStatus").innerText = "Đang trên xe";
+        window.Toast.show("Bắt đầu di chuyển! Chúc bạn và hành khách thượng lộ bình an.", "success");
+      } else if (execPhase === 3) {
+        execPhase = 4;
+        badge.innerText = "ĐÃ HOÀN THÀNH";
+        badge.className = "badge badge-success";
+        icon.innerText = "🎉";
+        title.innerText = "Chuyến đi đã hoàn thành an toàn!";
+        sub.innerText = "Đã ghi nhận +12.000 đ vào lịch sử bù đắp chi phí xăng xe của bạn.";
+        btn.innerText = "💰 Xem Lịch Sử Bù Xăng";
+        btn.onclick = () => window.location.href = "driver-earnings-history.html";
+
+        window.Storage.update("trips", "trip_101", { status: "completed" });
+        window.Toast.show("Hoàn thành chuyến xe! Cảm ơn bạn đã đóng góp vì môi trường xanh.", "success");
+      }
+    }
+  </script>
+</body>
+</html>

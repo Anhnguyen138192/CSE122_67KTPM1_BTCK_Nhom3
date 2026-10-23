@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trung Tâm Thông Báo – CommuteMatch</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="index.html">Trang chủ</a> / <span>Thông báo</span>
+          </div>
+          <h1 class="page-title">🔔 Trung Tâm Thông Báo</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline btn-sm" onclick="markAllAsRead()">✓ Đánh dấu đã đọc hết</button>
+          <button class="btn btn-outline btn-sm text-danger" onclick="clearAllNotifs()">🗑️ Xóa tất cả</button>
+        </div>
+      </div>
+
+      <!-- Tabs Lọc -->
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="filterTab('all', this)">Tất cả (<span id="countAll">0</span>)</button>
+        <button class="tab-btn" onclick="filterTab('unread', this)">Chưa đọc (<span id="countUnread">0</span>)</button>
+      </div>
+
+      <div class="card">
+        <div class="card-body" id="notifListContainer" style="padding: 0;">
+          <!-- Render notifications -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    let currentFilter = 'all';
+
+    document.addEventListener("DOMContentLoaded", renderNotifications);
+
+    function renderNotifications() {
+      const all = window.Storage.get("notifications");
+      const unread = all.filter(n => n.unread);
+
+      document.getElementById("countAll").innerText = all.length;
+      document.getElementById("countUnread").innerText = unread.length;
+
+      const list = currentFilter === 'unread' ? unread : all;
+      const container = document.getElementById("notifListContainer");
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🔔</div>
+            <div class="empty-title">Không có thông báo nào</div>
+            <div class="empty-desc">Bạn đã xem hết toàn bộ các cập nhật và thông báo từ chuyến đi!</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(item => `
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); background-color: ${item.unread ? 'rgba(5, 150, 105, 0.04)' : 'transparent'}; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; transition: var(--transition);">
+          <div style="flex: 1;">
+            <div class="d-flex items-center gap-2 mb-1">
+              ${item.unread ? '<span class="badge badge-primary" style="font-size: 0.68rem;">MỚI</span>' : ''}
+              <h4 style="font-size: 0.98rem; font-weight: 700; color: var(--text-main); margin: 0;">${item.title}</h4>
+              <span style="font-size: 0.78rem; color: var(--text-light); margin-left: auto;">${item.time}</span>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">${item.message}</p>
+            ${item.link ? `<a href="${item.link}" class="btn btn-outline btn-sm" style="font-size: 0.78rem; padding: 0.2rem 0.5rem;">Xem chi tiết →</a>` : ''}
+          </div>
+          <div class="d-flex items-center gap-1">
+            <button class="btn btn-outline btn-sm" title="Đánh dấu đã đọc" onclick="toggleRead('${item.id}')">
+              ${item.unread ? '👁️' : '↩️'}
+            </button>
+            <button class="btn btn-outline btn-sm text-danger" title="Xóa thông báo" onclick="deleteNotif('${item.id}')">
+              &times;
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterTab(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderNotifications();
+    }
+
+    function toggleRead(id) {
+      const all = window.Storage.get("notifications");
+      const target = all.find(n => n.id === id);
+      if (target) {
+        window.Storage.update("notifications", id, { unread: !target.unread });
+        renderNotifications();
+      }
+    }
+
+    function markAllAsRead() {
+      const all = window.Storage.get("notifications");
+      all.forEach(n => { n.unread = false; });
+      localStorage.setItem("commutematch_notifications", JSON.stringify(all));
+      window.Toast.show("Đã đánh dấu tất cả thông báo là đã đọc.", "success");
+      renderNotifications();
+    }
+
+    function deleteNotif(id) {
+      window.Storage.delete("notifications", id);
+      window.Toast.show("Đã xóa thông báo.", "info");
+      renderNotifications();
+    }
+
+    function clearAllNotifs() {
+      if (!confirm("Bạn có chắc chắn muốn xóa toàn bộ thông báo?")) return;
+      localStorage.setItem("commutematch_notifications", JSON.stringify([]));
+      window.Toast.show("Đã dọn sạch hộp thư thông báo.", "info");
+      renderNotifications();
+    }
+  </script>
+</body>
+</html>

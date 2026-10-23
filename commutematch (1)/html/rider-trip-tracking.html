@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theo Dõi Chuyến Đi Trực Tiếp – CommuteMatch</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider-my-trips.html">Chuyến đi</a> / <span>Theo dõi trực tiếp</span>
+          </div>
+          <h1 class="page-title">📍 Theo Dõi Chuyến Đi Trực Tiếp</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="messages-chat.html" class="btn btn-outline btn-sm">💬 Nhắn tin tài xế</a>
+          <button class="btn btn-danger btn-sm" onclick="triggerSos()">🚨 Báo Động Khẩn Cấp (SOS)</button>
+        </div>
+      </div>
+
+      <div class="d-grid grid-cols-12 gap-3">
+        <!-- Cột trái: Trạng thái hành trình & Check-in -->
+        <div style="grid-column: span 7;" class="col-12 col-md-7">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Tiến Độ Hành Trình Thời Gian Thực</h3>
+              <span class="badge badge-primary" id="trackStatusBadge">TÀI XẾ ĐANG ĐẾN</span>
+            </div>
+            <div class="card-body">
+              <!-- Live Progress Stepper -->
+              <div style="display: flex; justify-content: space-between; position: relative; margin-bottom: 2rem; margin-top: 0.5rem;">
+                <div style="position: absolute; top: 15px; left: 10%; right: 10%; height: 4px; background-color: var(--border-color); z-index: 1;">
+                  <div id="stepProgressBar" style="height: 100%; width: 40%; background: var(--ai-gradient); transition: width 0.4s ease;"></div>
+                </div>
+
+                <div class="text-center" style="position: relative; z-index: 2;">
+                  <div id="step1Circle" class="avatar" style="width: 32px; height: 32px; margin: 0 auto 0.4rem; background-color: var(--primary); color: white; font-size: 0.85rem;">✓</div>
+                  <div style="font-size: 0.8rem; font-weight: 700;">Đã nhận cuốc</div>
+                </div>
+                <div class="text-center" style="position: relative; z-index: 2;">
+                  <div id="step2Circle" class="avatar" style="width: 32px; height: 32px; margin: 0 auto 0.4rem; background-color: var(--primary); color: white; font-size: 0.85rem;">2</div>
+                  <div style="font-size: 0.8rem; font-weight: 700;">Đang đến trạm</div>
+                </div>
+                <div class="text-center" style="position: relative; z-index: 2;">
+                  <div id="step3Circle" class="avatar" style="width: 32px; height: 32px; margin: 0 auto 0.4rem; background-color: var(--bg-muted); color: var(--text-muted); font-size: 0.85rem;">3</div>
+                  <div style="font-size: 0.8rem; font-weight: 700;">Đang di chuyển</div>
+                </div>
+                <div class="text-center" style="position: relative; z-index: 2;">
+                  <div id="step4Circle" class="avatar" style="width: 32px; height: 32px; margin: 0 auto 0.4rem; background-color: var(--bg-muted); color: var(--text-muted); font-size: 0.85rem;">4</div>
+                  <div style="font-size: 0.8rem; font-weight: 700;">Đến nơi an toàn</div>
+                </div>
+              </div>
+
+              <!-- Live Status Alert Box -->
+              <div class="ai-panel mb-3 text-center" style="padding: 1.5rem;">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;" id="trackIcon">🛵💨</div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 0.25rem;" id="trackMainText">
+                  Tài xế đang cách trạm đón khoảng 400m
+                </h3>
+                <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;" id="trackSubText">
+                  Dự kiến có mặt lúc <strong>07:12</strong> (sớm hơn 3 phút so với giờ hẹn). Hãy ra điểm hẹn sẵn sàng!
+                </p>
+
+                <!-- Check-in Button -->
+                <button class="btn btn-primary btn-lg" id="btnCheckin" onclick="performCheckin()">
+                  📍 Tôi Đã Có Mặt Tại Trạm Đón (Check-in)
+                </button>
+              </div>
+
+              <!-- Information of Pickup Zone (AI-2 verification) -->
+              <div style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md); font-size: 0.88rem;">
+                <div class="d-flex justify-between mb-1">
+                  <span class="text-muted">Điểm đón quy ước:</span>
+                  <strong class="font-bold">Trạm đón KTX Khu B - Cổng phụ Cây Xăng</strong>
+                </div>
+                <div class="d-flex justify-between mb-1">
+                  <span class="text-muted">Đặc điểm nhận diện:</span>
+                  <span>Đèn LED cao áp, vỉa hè rộng 4m trước cổng KTX</span>
+                </div>
+                <div class="d-flex justify-between">
+                  <span class="text-muted">Điểm đến:</span>
+                  <strong class="font-bold">ĐH Bách Khoa CS2 (Cổng 1)</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Bản đồ mô phỏng xe chạy & Thông tin tài xế -->
+        <div style="grid-column: span 5;" class="col-12 col-md-5">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Tài Xế Đang Đón Bạn</h3>
+            </div>
+            <div class="card-body">
+              <div class="d-flex items-center gap-2 mb-3">
+                <div class="avatar" style="width: 50px; height: 50px; background-color: #0d9488; color: white; font-size: 1.2rem;">
+                  MQ
+                </div>
+                <div>
+                  <div class="font-bold" style="font-size: 1.05rem;">Trần Minh Quân</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">Honda Air Blade 2022 (Đen Nhám)</div>
+                  <div class="badge badge-success mt-1">Biển số: 59-X3 888.99</div>
+                </div>
+              </div>
+
+              <div class="d-grid grid-cols-2 gap-2 mb-3">
+                <a href="tel:0912345678" class="btn btn-outline btn-sm">📞 Gọi điện</a>
+                <a href="messages-chat.html" class="btn btn-outline btn-sm">💬 Nhắn Zalo/Chat</a>
+              </div>
+
+              <!-- Bản đồ trực quan mô phỏng vị trí GPS -->
+              <div style="background-color: var(--bg-body); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem 1rem; text-align: center;">
+                <div style="font-size: 2.2rem; animation: bounce 1.5s infinite;">📍</div>
+                <div class="font-bold mt-1" style="font-size: 0.95rem;">Đường Lưu Hữu Phước, ĐHQG</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">Tọa độ: 10.8805, 106.7820 (GPS ±3m)</div>
+                <span class="badge badge-ai mt-2">Vị trí trực tiếp cập nhật mỗi 5 giây</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    let trackStep = 2; // 2: approaching, 3: riding, 4: completed
+
+    function performCheckin() {
+      if (trackStep === 2) {
+        trackStep = 3;
+        document.getElementById("stepProgressBar").style.width = "75%";
+        document.getElementById("step3Circle").style.backgroundColor = "var(--primary)";
+        document.getElementById("step3Circle").style.color = "white";
+        document.getElementById("step3Circle").innerText = "✓";
+        document.getElementById("trackStatusBadge").innerText = "ĐANG DI CHUYỂN";
+        document.getElementById("trackIcon").innerText = "🛵💨";
+        document.getElementById("trackMainText").innerText = "Bạn đang trên đường cùng tài xế Quân";
+        document.getElementById("trackSubText").innerText = "Dự kiến đến ĐH Bách Khoa CS2 lúc 07:28 (khoảng 13 phút di chuyển).";
+        document.getElementById("btnCheckin").innerText = "🏁 Xác Nhận Đã Đến Nơi An Toàn";
+        document.getElementById("btnCheckin").classList.replace("btn-primary", "btn-secondary");
+        window.Toast.show("Đã check-in điểm đón! Chúc bạn có chuyến đi an toàn.", "success");
+      } else if (trackStep === 3) {
+        trackStep = 4;
+        document.getElementById("stepProgressBar").style.width = "100%";
+        document.getElementById("step4Circle").style.backgroundColor = "var(--success)";
+        document.getElementById("step4Circle").style.color = "white";
+        document.getElementById("step4Circle").innerText = "✓";
+        document.getElementById("trackStatusBadge").innerText = "HOÀN THÀNH";
+        document.getElementById("trackIcon").innerText = "🎉";
+        document.getElementById("trackMainText").innerText = "Chuyến đi đã hoàn thành xuất sắc!";
+        document.getElementById("trackSubText").innerText = "Bạn đã góp phần giảm 1.8 kg CO2 cho môi trường học đường.";
+        document.getElementById("btnCheckin").innerText = "⭐ Viết Đánh Giá Cho Tài Xế";
+        document.getElementById("btnCheckin").onclick = () => {
+          window.location.href = "rider-trip-review.html?tripId=trip_101&driverId=u_driver1";
+        };
+        window.Toast.show("Chuyến đi hoàn tất! Hãy để lại đánh giá cho bạn đồng hành.", "success");
+      }
+    }
+
+    function triggerSos() {
+      if (confirm("KÍCH HOẠT SOS KHẨN CẤP?\n\nHệ thống sẽ phát tín hiệu vị trí GPS hiện tại đến Ban Quản lý Di chuyển và lực lượng bảo vệ KTX.")) {
+        window.Toast.show("ĐÃ PHÁT TÍN HIỆU CỨU HỘ SOS ĐẾN BẢO VỆ ĐHQG!", "error");
+      }
+    }
+  </script>
+</body>
+</html>

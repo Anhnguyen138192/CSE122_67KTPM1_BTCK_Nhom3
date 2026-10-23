@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thẩm Định Hồ Sơ KYC – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="admin-user-management.html">Người dùng</a> / <span>Thẩm định KYC</span>
+          </div>
+          <h1 class="page-title">📄 Thẩm Định Hồ Sơ Định Danh (KYC Verification)</h1>
+        </div>
+        <a href="admin-user-management.html" class="btn btn-outline btn-sm">← Quay lại danh sách</a>
+      </div>
+
+      <div class="d-grid grid-cols-12 gap-3">
+        <!-- Cột trái: Hồ sơ cá nhân & Tài liệu KYC -->
+        <div style="grid-column: span 7;" class="col-12 col-md-7">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Hồ Sơ Thành Viên</h3>
+              <span class="badge badge-warning" id="kycStatusBadge">Chờ duyệt KYC</span>
+            </div>
+            <div class="card-body">
+              <div class="d-flex items-center gap-3 mb-3">
+                <div class="avatar" id="admUserAvatar" style="width: 56px; height: 56px; font-size: 1.5rem; background-color: #059669; color: white;">
+                  U
+                </div>
+                <div>
+                  <h3 style="font-size: 1.3rem; margin-bottom: 0.2rem;" id="admUserName">Nguyễn Văn An</h3>
+                  <div style="font-size: 0.85rem; color: var(--text-muted);" id="admUserRole">Hành khách (Rider)</div>
+                  <div style="font-size: 0.85rem; color: var(--primary);" id="admUserUniv">ĐH Bách Khoa ĐHQG-HCM</div>
+                </div>
+              </div>
+
+              <div class="d-grid grid-cols-2 gap-2 mb-3" style="font-size: 0.88rem; background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md);">
+                <div>Email: <strong id="admUserEmail">an.nguyen@sinhvien.edu.vn</strong></div>
+                <div>Điện thoại: <strong id="admUserPhone">0901 234 567</strong></div>
+                <div>MSSV: <strong id="admUserStudentId">2210045</strong></div>
+                <div>Ngày tham gia: <strong id="admUserJoined">15/09/2023</strong></div>
+              </div>
+
+              <!-- Giấy tờ KYC tải lên -->
+              <div class="ai-panel mb-3">
+                <div class="font-bold mb-2" style="font-size: 0.95rem;">📸 Tài liệu định danh đối chiếu:</div>
+                <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 2rem 1rem; text-align: center; background-color: var(--bg-surface);">
+                  <div style="font-size: 2.8rem; margin-bottom: 0.5rem;">🪪</div>
+                  <div class="font-bold">Ảnh Thẻ Sinh Viên & CCCD Mặt Trước</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Tập tin: <code>the_sinhvien_2210045.jpg</code> (Độ nét cao, không bị lóa sáng)
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Quyết định thẩm định của Admin -->
+        <div style="grid-column: span 5;" class="col-12 col-md-5">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Quyết Định Phê Duyệt</h3>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Ghi chú thẩm định:</label>
+                <textarea id="kycReviewNotes" class="form-control" rows="3" placeholder="Ghi nhận thông tin khớp thẻ sinh viên, đủ điều kiện cấp huy hiệu Đã Xác Thực..."></textarea>
+              </div>
+
+              <div class="d-flex flex-column gap-2">
+                <button type="button" class="btn btn-primary btn-block" onclick="approveKyc()">
+                  ✓ Phê Duyệt Xác Thực KYC
+                </button>
+                <button type="button" class="btn btn-outline text-danger btn-block btn-sm" onclick="rejectKyc()">
+                  ✕ Từ Chối (Yêu cầu gửi lại ảnh rõ hơn)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Điều chỉnh Điểm Uy Tín -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title" style="font-size: 0.95rem;">Điều Chỉnh Điểm Uy Tín (Trust Score)</h3>
+            </div>
+            <div class="card-body" style="font-size: 0.88rem;">
+              <div class="d-flex justify-between items-center mb-3">
+                <span>Điểm hiện tại:</span>
+                <strong class="font-bold text-primary" style="font-size: 1.2rem;" id="admTrustVal">98 / 100</strong>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline btn-sm flex-1 text-success" onclick="adjustTrust(5)">+5 Thưởng uy tín</button>
+                <button class="btn btn-outline btn-sm flex-1 text-danger" onclick="adjustTrust(-5)">-5 Phạt vi phạm</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    let targetUser = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const uid = urlParams.get("id") || "u_rider1";
+
+      targetUser = window.Storage.getById("users", uid) || window.Storage.get("users")[0];
+      if (!targetUser) return;
+
+      document.getElementById("admUserName").innerText = targetUser.name;
+      document.getElementById("admUserAvatar").innerText = targetUser.avatar || "U";
+      document.getElementById("admUserRole").innerText = targetUser.roleLabel;
+      document.getElementById("admUserUniv").innerText = targetUser.university || targetUser.department || "ĐHQG-HCM";
+      document.getElementById("admUserEmail").innerText = targetUser.email;
+      document.getElementById("admUserPhone").innerText = targetUser.phone;
+      document.getElementById("admUserStudentId").innerText = targetUser.studentId || "N/A";
+      document.getElementById("admUserJoined").innerText = targetUser.joinedDate || "15/09/2023";
+      document.getElementById("admTrustVal").innerText = `${targetUser.trustScore || 95} / 100`;
+
+      if (targetUser.kycStatus === 'approved') {
+        document.getElementById("kycStatusBadge").innerText = "Đã phê duyệt";
+        document.getElementById("kycStatusBadge").className = "badge badge-success";
+      }
+    });
+
+    function approveKyc() {
+      window.Storage.update("users", targetUser.id, {
+        kycStatus: "approved",
+        trustScore: Math.min(100, (targetUser.trustScore || 90) + 5)
+      });
+
+      window.Storage.insert("notifications", {
+        userId: targetUser.id,
+        title: "Hồ sơ KYC đã được phê duyệt! 🎓",
+        message: "Ban quản trị đã xác thực thẻ sinh viên của bạn. Bạn đã đạt huy hiệu Đã Xác Thực.",
+        time: "Vừa xong",
+        type: "kyc_approved",
+        unread: true,
+        link: "profile-overview.html"
+      });
+
+      window.Toast.show("Đã phê duyệt định danh KYC thành công!", "success");
+      setTimeout(() => {
+        window.location.href = "admin-user-management.html";
+      }, 700);
+    }
+
+    function rejectKyc() {
+      const notes = document.getElementById("kycReviewNotes").value.trim() || "Ảnh mờ hoặc không đọc rõ MSSV.";
+      window.Storage.update("users", targetUser.id, { kycStatus: "rejected" });
+      window.Toast.show("Đã từ chối hồ sơ và gửi yêu cầu chụp lại.", "info");
+      setTimeout(() => {
+        window.location.href = "admin-user-management.html";
+      }, 700);
+    }
+
+    function adjustTrust(delta) {
+      const nextScore = Math.min(100, Math.max(0, (targetUser.trustScore || 95) + delta));
+      window.Storage.update("users", targetUser.id, { trustScore: nextScore });
+      targetUser.trustScore = nextScore;
+      document.getElementById("admTrustVal").innerText = `${nextScore} / 100`;
+      window.Toast.show(`Đã cập nhật điểm uy tín thành: ${nextScore}/100`, "info");
+    }
+  </script>
+</body>
+</html>

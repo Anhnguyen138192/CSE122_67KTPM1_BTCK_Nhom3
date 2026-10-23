@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Phương Tiện Cá Nhân – CommuteMatch</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="profile-overview.html">Hồ sơ</a> / <span>Phương tiện</span>
+          </div>
+          <h1 class="page-title">🛵 Phương Tiện Cá Nhân (Xe Máy & Ô Tô)</h1>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddVehicleModal()">
+          ➕ Thêm Phương Tiện Mới
+        </button>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3 class="card-title">Danh Sách Xe Đã Đăng Ký</h3>
+        </div>
+        <div class="card-body">
+          <div id="vehiclesList" class="d-grid grid-cols-2 gap-3">
+            <!-- Render vehicles dynamically from Storage -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Thêm Phương Tiện -->
+  <div class="modal-backdrop" id="vehicleModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="card-title" id="modalTitle">Thêm Xe Chia Sẻ Mới</h3>
+        <button class="btn btn-outline btn-sm" onclick="window.Modal.close('vehicleModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="vehicleForm" onsubmit="handleSaveVehicle(event)">
+          <div class="form-group">
+            <label class="form-label">Loại phương tiện <span class="required">*</span></label>
+            <select id="vType" class="form-select" required>
+              <option value="Xe máy số">Xe máy số (Wave, Sirius, Future)</option>
+              <option value="Xe máy tay ga">Xe máy tay ga (Air Blade, Vision, Lead)</option>
+              <option value="Xe máy điện">Xe máy điện (VinFast, Dat Bike)</option>
+              <option value="Ô tô 4-5 chỗ">Ô tô 4-5 chỗ (Vios, City, Fadil)</option>
+              <option value="Ô tô 7 chỗ">Ô tô 7 chỗ (Xpander, Innova)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tên đời xe & Hãng <span class="required">*</span></label>
+            <input type="text" id="vModel" class="form-control" placeholder="ví dụ: Honda Air Blade 2022" required>
+          </div>
+
+          <div class="d-grid grid-cols-2 gap-2">
+            <div class="form-group">
+              <label class="form-label">Biển kiểm soát <span class="required">*</span></label>
+              <input type="text" id="vPlate" class="form-control" placeholder="59-X3 888.99" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Số chỗ có thể chở <span class="required">*</span></label>
+              <input type="number" id="vSeats" class="form-control" value="1" min="1" max="6" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Màu sắc xe</label>
+            <input type="text" id="vColor" class="form-control" placeholder="Đen nhám, Trắng, Đỏ...">
+          </div>
+
+          <div class="form-group">
+            <label class="d-flex items-center gap-1" style="font-size: 0.85rem; cursor: pointer;">
+              <input type="checkbox" id="vInsurance" checked> Xe có bảo hiểm TNDS bắt buộc còn hiệu lực
+            </label>
+          </div>
+
+          <div class="modal-footer" style="padding-right: 0; padding-bottom: 0;">
+            <button type="button" class="btn btn-outline" onclick="window.Modal.close('vehicleModal')">Đóng</button>
+            <button type="submit" class="btn btn-primary">Lưu Phương Tiện</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", renderVehicles);
+
+    function renderVehicles() {
+      const u = window.Storage.getCurrentUser();
+      const container = document.getElementById("vehiclesList");
+
+      // Giả lập danh sách xe của user
+      const vehicles = u.vehiclesList || (u.vehicle ? [u.vehicle] : []);
+
+      if (vehicles.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state" style="grid-column: span 2;">
+            <div class="empty-icon">🛵</div>
+            <div class="empty-title">Chưa có phương tiện nào</div>
+            <div class="empty-desc">Nếu bạn muốn chia sẻ chuyến đi với bạn bè, hãy thêm xe máy hoặc ô tô của mình ngay.</div>
+            <button class="btn btn-primary" onclick="openAddVehicleModal()">➕ Thêm phương tiện đầu tiên</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = vehicles.map((v, i) => `
+        <div class="card" style="border-left: 4px solid var(--primary);">
+          <div class="card-body">
+            <div class="d-flex justify-between items-start mb-2">
+              <div>
+                <span class="badge badge-success mb-1">Đang sử dụng chính</span>
+                <h4 style="font-size: 1.1rem;">${v.type || v.model || 'Xe máy'}</h4>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">${v.color || 'Màu tiêu chuẩn'}</div>
+              </div>
+              <span style="font-size: 1.8rem;">${(v.type || '').includes('Ô tô') ? '🚗' : '🛵'}</span>
+            </div>
+
+            <div style="background-color: var(--bg-muted); padding: 0.75rem; border-radius: var(--radius-md); font-size: 0.88rem; margin-bottom: 1rem;">
+              <div class="d-flex justify-between mb-1">
+                <span class="text-muted">Biển số:</span>
+                <strong class="font-bold">${v.plate}</strong>
+              </div>
+              <div class="d-flex justify-between">
+                <span class="text-muted">Số chỗ trống:</span>
+                <span>${v.seatsTotal || v.seats || 1} người</span>
+              </div>
+            </div>
+
+            <div class="d-flex justify-end gap-1">
+              <button class="btn btn-outline btn-sm" onclick="window.Toast.show('Phương tiện đã được kiểm tra đạt chuẩn an toàn!', 'success')">Kiểm định</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteVehicle(${i})">Xóa xe</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openAddVehicleModal() {
+      document.getElementById("vehicleForm").reset();
+      window.Modal.open("vehicleModal");
+    }
+
+    function handleSaveVehicle(e) {
+      e.preventDefault();
+      const u = window.Storage.getCurrentUser();
+      const type = document.getElementById("vType").value;
+      const model = document.getElementById("vModel").value.trim();
+      const plate = document.getElementById("vPlate").value.trim();
+      const seats = parseInt(document.getElementById("vSeats").value) || 1;
+      const color = document.getElementById("vColor").value.trim();
+
+      const newV = {
+        type: `${type} (${model})`,
+        plate: plate,
+        seatsTotal: seats,
+        color: color || "Tiêu chuẩn"
+      };
+
+      const currentList = u.vehiclesList || (u.vehicle ? [u.vehicle] : []);
+      currentList.push(newV);
+
+      window.Storage.update("users", u.id, {
+        vehicle: newV,
+        vehiclesList: currentList,
+        role: "driver",
+        roleLabel: "Người chia sẻ xe"
+      });
+
+      window.Modal.close("vehicleModal");
+      window.Toast.show("Đã thêm phương tiện mới thành công!", "success");
+      renderVehicles();
+    }
+
+    function deleteVehicle(index) {
+      if (!confirm("Bạn có chắc chắn muốn xóa phương tiện này?")) return;
+      const u = window.Storage.getCurrentUser();
+      const currentList = u.vehiclesList || (u.vehicle ? [u.vehicle] : []);
+      currentList.splice(index, 1);
+
+      window.Storage.update("users", u.id, {
+        vehiclesList: currentList,
+        vehicle: currentList[0] || null
+      });
+
+      window.Toast.show("Đã xóa phương tiện.", "info");
+      renderVehicles();
+    }
+  </script>
+</body>
+</html>

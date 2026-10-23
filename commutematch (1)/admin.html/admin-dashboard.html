@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Điều Hành Quản Trị Viên – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="index.html">Trang chủ</a> / <span>Quản trị viên</span>
+          </div>
+          <h1 class="page-title">⚡ Bảng Điều Hành Quản Trị Hệ Thống (Admin)</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="admin-platform-settings.html" class="btn btn-outline btn-sm">⚙️ Cấu hình hệ thống</a>
+          <a href="admin-user-management.html" class="btn btn-primary btn-sm">👥 Quản lý thành viên</a>
+        </div>
+      </div>
+
+      <!-- System Health Indicator -->
+      <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.75rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+        <div class="d-flex items-center gap-2">
+          <span style="font-size: 0.8rem; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: var(--success); box-shadow: 0 0 8px var(--success);"></span>
+          <span class="font-bold" style="font-size: 0.9rem;">Hạ tầng vận hành ổn định 100% SLA</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">• Phiên bản Frontend Core v2.6.4</span>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="admin-system-logs.html" class="btn btn-outline btn-sm" style="font-size: 0.78rem;">Xem Audit Logs</a>
+          <button class="btn btn-outline btn-sm text-danger" style="font-size: 0.78rem;" onclick="window.Storage.resetDefaults()">Reset Seed Data</button>
+        </div>
+      </div>
+
+      <!-- Core System KPIs -->
+      <div class="d-grid grid-cols-4 gap-3 mb-4">
+        <div class="stat-card">
+          <div class="stat-icon primary">👥</div>
+          <div class="stat-content">
+            <div class="stat-value" id="statUsersCount">5.240</div>
+            <div class="stat-label">Tổng thành viên đăng ký</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon secondary">🛣️</div>
+          <div class="stat-content">
+            <div class="stat-value" id="statTripsCount">1.420</div>
+            <div class="stat-label">Tổng chuyến đi ghép</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon warning">📄</div>
+          <div class="stat-content">
+            <div class="stat-value">1 hồ sơ</div>
+            <div class="stat-label">Hồ sơ KYC chờ duyệt</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ai">🌱</div>
+          <div class="stat-content">
+            <div class="stat-value">3.280 kg</div>
+            <div class="stat-label">CO2 đã cắt giảm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Modules -->
+      <div class="d-grid grid-cols-12 gap-3 mb-4">
+        <!-- Module 1: Người dùng & KYC cần thẩm định -->
+        <div style="grid-column: span 6;" class="col-12 col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Hồ Sơ Cần Thẩm Định KYC</h3>
+              <a href="admin-user-management.html" style="font-size: 0.85rem;">Xem tất cả →</a>
+            </div>
+            <div class="card-body p-0">
+              <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+                <div class="d-flex items-center gap-2">
+                  <div class="avatar" style="width: 38px; height: 38px; background-color: #059669; color: white;">TM</div>
+                  <div>
+                    <div class="font-bold" style="font-size: 0.92rem;">Trần Thị Mai</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);">ĐH Bách Khoa • Đăng ký Tài xế (Vision 2023)</div>
+                  </div>
+                </div>
+                <a href="admin-user-detail.html?id=u_rider1" class="btn btn-primary btn-sm">Thẩm định</a>
+              </div>
+              <div style="padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+                <div class="d-flex items-center gap-2">
+                  <div class="avatar" style="width: 38px; height: 38px; background-color: #2563eb; color: white;">HP</div>
+                  <div>
+                    <div class="font-bold" style="font-size: 0.92rem;">Lê Hoàng Phúc</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);">Cựu SV KCNC • Gia hạn bằng lái ô tô B2</div>
+                  </div>
+                </div>
+                <span class="badge badge-success">Đã xác minh</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Module 2: Giám sát tham số nền tảng -->
+        <div style="grid-column: span 6;" class="col-12 col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Tham Số Điều Hành Nền Tảng</h3>
+              <a href="admin-platform-settings.html" style="font-size: 0.85rem;">Cấu hình →</a>
+            </div>
+            <div class="card-body" style="font-size: 0.88rem;">
+              <div class="d-flex justify-between mb-2">
+                <span class="text-muted">Giá trần xăng xe máy:</span>
+                <strong class="font-bold text-primary">3.500 đ / km</strong>
+              </div>
+              <div class="d-flex justify-between mb-2">
+                <span class="text-muted">Giá trần chia sẻ ô tô:</span>
+                <strong class="font-bold text-primary">8.000 đ / km</strong>
+              </div>
+              <div class="d-flex justify-between mb-2">
+                <span class="text-muted">Bán kính ghép nối tối đa:</span>
+                <strong>2.5 km</strong>
+              </div>
+              <div class="d-flex justify-between">
+                <span class="text-muted">Điểm uy tín tối thiểu mở chuyến:</span>
+                <strong class="text-success">80 / 100 điểm</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Audit Logs Preview -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Nhật Ký Kiểm Toán Hệ Thống Gần Nhất (Audit Trail)</h3>
+          <a href="admin-system-logs.html" style="font-size: 0.85rem;">Xem toàn bộ log →</a>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Tài khoản thực hiện</th>
+                  <th>Hành động</th>
+                  <th>Chi tiết</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody id="adminRecentLogs">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const logs = window.Storage.get("auditLogs");
+      const tbody = document.getElementById("adminRecentLogs");
+
+      tbody.innerHTML = logs.slice(0, 4).map(l => `
+        <tr>
+          <td><span style="font-size: 0.8rem; color: var(--text-muted);">${l.timestamp}</span></td>
+          <td><strong>${l.user}</strong></td>
+          <td><span class="badge badge-primary" style="font-size: 0.72rem;">${l.action}</span></td>
+          <td style="font-size: 0.85rem;">${l.details}</td>
+          <td><span class="badge badge-success" style="font-size: 0.72rem;">${l.status}</span></td>
+        </tr>
+      `).join('');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi Tiết Chuyến Xe & Danh Sách Khách – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="driver-schedule.html">Lịch trình</a> / <span>Chi tiết chuyến xe</span>
+          </div>
+          <h1 class="page-title">Chi Tiết Chuyến Xe & Hành Khách</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="driver-schedule.html" class="btn btn-outline btn-sm">← Quay lại lịch trình</a>
+          <a href="#" id="btnGoExecution" class="btn btn-primary btn-sm">🚦 Mở Phòng Điều Hành</a>
+        </div>
+      </div>
+
+      <div class="d-grid grid-cols-12 gap-3">
+        <!-- Cột trái: Thông tin chuyến xe -->
+        <div style="grid-column: span 7;" class="col-12 col-md-7">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Thông Tin Chuyến Xe</h3>
+              <span class="badge badge-success" id="badgeTripStatus">Đang mở đăng ký</span>
+            </div>
+            <div class="card-body">
+              <div class="font-bold mb-1" style="font-size: 1.25rem;" id="dtTripRoute">
+                KTX Khu B ĐHQG → ĐH Bách Khoa CS2
+              </div>
+              <div style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+                📅 Ngày: <strong id="dtTripDate">20/10/2026</strong> • Khởi hành lúc: <strong style="color: var(--primary);" id="dtTripTime">07:15</strong>
+              </div>
+
+              <div class="d-grid grid-cols-3 gap-2 text-center mb-3">
+                <div style="background-color: var(--bg-muted); padding: 0.75rem; border-radius: var(--radius-md);">
+                  <div class="text-muted" style="font-size: 0.78rem;">Tổng số ghế</div>
+                  <strong class="font-bold" id="dtTotalSeats">1 chỗ</strong>
+                </div>
+                <div style="background-color: var(--bg-muted); padding: 0.75rem; border-radius: var(--radius-md);">
+                  <div class="text-muted" style="font-size: 0.78rem;">Ghế còn trống</div>
+                  <strong class="font-bold text-success" id="dtAvailSeats">0 chỗ</strong>
+                </div>
+                <div style="background-color: var(--bg-muted); padding: 0.75rem; border-radius: var(--radius-md);">
+                  <div class="text-muted" style="font-size: 0.78rem;">Bù tiền xăng</div>
+                  <strong class="font-bold text-primary" id="dtFare">12.000 đ</strong>
+                </div>
+              </div>
+
+              <div style="font-size: 0.88rem; margin-bottom: 0.75rem;">
+                🚏 Trạm đón quy ước: <strong id="dtPickupName">Trạm đón KTX Khu B - Cổng phụ</strong>
+              </div>
+              <div style="font-size: 0.88rem; margin-bottom: 1.25rem;">
+                🛵 Xe: <strong id="dtVehicle">Honda Air Blade (59-X3 888.99)</strong>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline btn-sm" id="btnToggleSeats" onclick="toggleSeatRegistration()">
+                  🔒 Tạm Khóa Đăng Ký Chỗ
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Danh sách hành khách trong chuyến -->
+        <div style="grid-column: span 5;" class="col-12 col-md-5">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Hành Khách Đã Nhận Ghế</h3>
+              <span class="badge badge-primary" id="passengersCountBadge">1 khách</span>
+            </div>
+            <div class="card-body p-0" id="passengersListContainer">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    let activeTrip = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tripId = urlParams.get("id") || "trip_101";
+
+      activeTrip = window.Storage.getById("trips", tripId) || window.Storage.get("trips")[0];
+      if (!activeTrip) return;
+
+      document.getElementById("dtTripRoute").innerText = `${activeTrip.origin} → ${activeTrip.destination}`;
+      document.getElementById("dtTripDate").innerText = activeTrip.departureDate;
+      document.getElementById("dtTripTime").innerText = activeTrip.departureTime;
+      document.getElementById("dtTotalSeats").innerText = `${activeTrip.totalSeats} chỗ`;
+      document.getElementById("dtAvailSeats").innerText = `${activeTrip.availableSeats} chỗ`;
+      document.getElementById("dtFare").innerText = `${(activeTrip.costSharing || 12000).toLocaleString('vi-VN')} đ`;
+      document.getElementById("dtPickupName").innerText = activeTrip.pickupZoneName || "Trạm đón KTX Khu B";
+      document.getElementById("dtVehicle").innerText = activeTrip.vehicleInfo;
+
+      document.getElementById("btnGoExecution").href = `driver-trip-execution.html?id=${activeTrip.id}`;
+
+      // Render accepted passengers
+      renderPassengers();
+    });
+
+    function renderPassengers() {
+      const requests = window.Storage.get("joinRequests").filter(
+        r => r.tripId === activeTrip.id && (r.status === 'accepted' || r.status === 'pending')
+      );
+
+      const container = document.getElementById("passengersListContainer");
+      document.getElementById("passengersCountBadge").innerText = `${requests.length} người`;
+
+      if (requests.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state" style="padding: 2rem 1rem;">
+            <div style="font-size: 0.88rem; color: var(--text-muted);">Chưa có hành khách nào tham gia chuyến này.</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = requests.map(r => `
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;">
+          <div class="d-flex items-center gap-2">
+            <div class="avatar" style="width: 40px; height: 40px; background-color: #059669; color: white;">${r.riderAvatar || 'KH'}</div>
+            <div>
+              <div class="font-bold" style="font-size: 0.95rem;">${r.riderName}</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">📞 ${r.riderPhone || '0901 234 567'}</div>
+              <div style="font-size: 0.78rem; color: var(--primary);">Đón: ${r.pickupPoint}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="badge ${r.status === 'accepted' ? 'badge-success' : 'badge-warning'} mb-1" style="font-size: 0.72rem;">
+              ${r.status === 'accepted' ? 'Đã duyệt' : 'Chờ duyệt'}
+            </span>
+            <div>
+              <a href="messages-chat.html" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">💬 Nhắn tin</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleSeatRegistration() {
+      const isFull = activeTrip.availableSeats === 0;
+      const nextSeats = isFull ? activeTrip.totalSeats : 0;
+
+      window.Storage.update("trips", activeTrip.id, { availableSeats: nextSeats });
+      activeTrip.availableSeats = nextSeats;
+
+      document.getElementById("dtAvailSeats").innerText = `${nextSeats} chỗ`;
+      document.getElementById("btnToggleSeats").innerText = nextSeats === 0 ? "🔓 Mở Lại Nhận Khách" : "🔒 Tạm Khóa Đăng Ký Chỗ";
+      window.Toast.show(nextSeats === 0 ? "Đã khóa nhận khách cho chuyến này." : "Đã mở lại đăng ký.", "info");
+    }
+  </script>
+</body>
+</html>

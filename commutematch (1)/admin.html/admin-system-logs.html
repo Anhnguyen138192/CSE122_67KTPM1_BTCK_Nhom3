@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nhật Ký Hệ Thống & Audit Trail – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="admin-dashboard.html">Quản trị</a> / <span>Nhật ký hệ thống</span>
+          </div>
+          <h1 class="page-title">📜 Nhật Ký Hệ Thống & Vết Kiểm Toán (Audit Trail)</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline btn-sm" onclick="exportLogs()">📥 Xuất Nhật Ký</button>
+          <button class="btn btn-outline btn-sm text-danger" onclick="clearLogs()">Dọn sạch logs</button>
+        </div>
+      </div>
+
+      <!-- Filter Controls -->
+      <div class="card mb-3">
+        <div class="card-body" style="padding: 1rem 1.25rem;">
+          <div class="d-flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex-1" style="min-width: 260px;">
+              <input type="text" id="logSearchInput" class="form-control" placeholder="Tìm theo người dùng, hành động, ID..." oninput="filterLogsTable()">
+            </div>
+            <div class="d-flex gap-2">
+              <select id="logActionFilter" class="form-select" onchange="filterLogsTable()">
+                <option value="all">Tất cả hành động</option>
+                <option value="TẠO MỚI">TẠO MỚI (Insert)</option>
+                <option value="CẬP NHẬT">CẬP NHẬT (Update)</option>
+                <option value="XÓA">XÓA (Delete)</option>
+                <option value="CẤU HÌNH">CẤU HÌNH (Settings)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logs Table Card -->
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Tài khoản thực hiện</th>
+                  <th>Hành động</th>
+                  <th>Chi tiết tác vụ</th>
+                  <th>Mã nhật ký</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody id="logsTableBody">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", renderLogsTable);
+
+    function renderLogsTable() {
+      const logs = window.Storage.get("auditLogs");
+      const tbody = document.getElementById("logsTableBody");
+
+      if (logs.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center p-4">
+              <div class="empty-state">
+                <div class="empty-icon">📜</div>
+                <div class="empty-title">Chưa có nhật ký kiểm toán nào</div>
+                <div class="empty-desc">Mọi thao tác thay đổi dữ liệu sẽ tự động được ghi nhận tại đây.</div>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = logs.map(l => `
+        <tr>
+          <td><span style="font-size: 0.8rem; color: var(--text-muted);">${l.timestamp}</span></td>
+          <td><strong style="color: var(--text-main); font-size: 0.9rem;">${l.user}</strong></td>
+          <td><span class="badge badge-primary" style="font-size: 0.72rem;">${l.action}</span></td>
+          <td style="font-size: 0.85rem;">${l.details}</td>
+          <td><code>${l.id}</code></td>
+          <td><span class="badge badge-success" style="font-size: 0.72rem;">${l.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function filterLogsTable() {
+      const q = document.getElementById("logSearchInput").value.toLowerCase();
+      const action = document.getElementById("logActionFilter").value;
+      const rows = document.querySelectorAll("#logsTableBody tr");
+
+      rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        const matchesQ = text.includes(q);
+        const matchesAction = action === "all" || text.includes(action.toLowerCase());
+        r.style.display = matchesQ && matchesAction ? "" : "none";
+      });
+    }
+
+    function exportLogs() {
+      window.Toast.show("Đang kết xuất tệp Audit Logs (JSON/CSV)...", "info");
+      setTimeout(() => {
+        window.Toast.show("Đã xuất nhật ký hệ thống thành công!", "success");
+      }, 1000);
+    }
+
+    function clearLogs() {
+      if (!confirm("Bạn có chắc chắn muốn dọn sạch nhật ký kiểm toán?")) return;
+      localStorage.setItem("commutematch_auditLogs", JSON.stringify([]));
+      window.Toast.show("Đã xóa trắng nhật ký hệ thống.", "info");
+      renderLogsTable();
+    }
+  </script>
+</body>
+</html>

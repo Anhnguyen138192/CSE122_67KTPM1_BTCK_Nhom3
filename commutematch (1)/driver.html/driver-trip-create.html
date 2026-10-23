@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng Tạo Chuyến Đi Mới – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="driver-dashboard.html">Tài xế</a> / <span>Tạo chuyến</span>
+          </div>
+          <h1 class="page-title">➕ Đăng Tạo Chuyến Đi Chia Sẻ</h1>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 820px; margin: 0 auto;">
+        <div class="card-body" style="padding: 2rem;">
+          <form id="createTripForm" onsubmit="handleCreateTrip(event)">
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+              1. Lộ Trình & Trạm Đón Dọc Tuyến
+            </h3>
+
+            <div class="d-grid grid-cols-2 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripOrigin">Điểm xuất phát <span class="required">*</span></label>
+                <input type="text" id="tripOrigin" class="form-control" placeholder="ví dụ: KTX Khu B ĐHQG..." required value="KTX Khu B ĐHQG (Cổng Sau)" onchange="triggerAiZoneRecommendation()">
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripDestination">Điểm đến <span class="required">*</span></label>
+                <input type="text" id="tripDestination" class="form-control" placeholder="ví dụ: ĐH Bách Khoa CS2..." required value="ĐH Bách Khoa Cơ Sở 2 (Dĩ An)" onchange="triggerAiZoneRecommendation()">
+              </div>
+            </div>
+
+            <!-- AI-2: Meeting Point Recommender for Driver -->
+            <div class="ai-panel mb-3" id="driverAiZoneBox">
+              <div class="d-flex items-center justify-between mb-1">
+                <span class="ai-badge">AI-2 GỢI Ý TRẠM ĐÓN TỐI ƯU</span>
+                <span class="badge badge-success">Không làm bạn đi vòng (0 phút đường vòng)</span>
+              </div>
+              <div class="font-bold" style="font-size: 1rem; color: var(--text-main); margin-bottom: 0.25rem;" id="aiRecZoneTitle">
+                Trạm đón KTX Khu B - Cổng phụ Cây Xăng Petrolimex
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;" id="aiRecZoneReason">
+                Điểm dừng thuận tiện trên trục đường xuất phát, vỉa hè rộng 4m giúp khách lên xe nhanh trong 30 giây mà không cản trở giao thông.
+              </p>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-primary btn-sm" onclick="window.Toast.show('Đã chốt trạm đón này cho lộ trình!', 'success')">
+                  ✓ Đồng ý đón tại trạm này
+                </button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('zoneSelectGroup').style.display='block'">
+                  Chọn trạm khác
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group" id="zoneSelectGroup" style="display: none;">
+              <label class="form-label">Chọn trạm đón an toàn từ danh mục:</label>
+              <select id="tripZoneSelect" class="form-select">
+                <!-- Dynamically loaded -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Các điểm trạm dừng chính trên đường (cách nhau bởi dấu phẩy):</label>
+              <input type="text" id="tripRoutePoints" class="form-control" value="KTX Khu B, Ngã 3 621, ĐH KHTN CS2, ĐH Bách Khoa CS2">
+            </div>
+
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin: 1.5rem 0 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+              2. Thời Gian & Phương Tiện
+            </h3>
+
+            <div class="d-grid grid-cols-3 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripDate">Ngày khởi hành <span class="required">*</span></label>
+                <input type="date" id="tripDate" class="form-control" required>
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripTime">Giờ xuất phát <span class="required">*</span></label>
+                <input type="time" id="tripTime" class="form-control" value="07:15" required>
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripSeats">Số chỗ trống <span class="required">*</span></label>
+                <input type="number" id="tripSeats" class="form-control" min="1" max="4" value="1" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Phương tiện sử dụng</label>
+              <input type="text" id="tripVehicle" class="form-control" value="Honda Air Blade 2022 (59-X3 888.99)" required>
+            </div>
+
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin: 1.5rem 0 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+              3. Mức Chia Sẻ Chi Phí Xăng Xe
+            </h3>
+
+            <div class="d-grid grid-cols-2 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripFare">Đóng góp chi phí xăng (VNĐ/người) <span class="required">*</span></label>
+                <input type="number" id="tripFare" class="form-control" value="12000" min="5000" max="35000" step="1000" required>
+                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
+                  Quy định mức trần: Tối đa 35.000 đ cho chặng đi học nội khu và liên quận.
+                </div>
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripNotes">Ghi chú thêm cho hành khách</label>
+                <input type="text" id="tripNotes" class="form-control" placeholder="ví dụ: Có sẵn nón bảo hiểm sạch, balo vừa phải...">
+              </div>
+            </div>
+
+            <div class="d-flex justify-between items-center mt-4">
+              <a href="driver-dashboard.html" class="btn btn-outline">Hủy bỏ</a>
+              <button type="submit" class="btn btn-primary btn-lg">
+                🚀 Đăng Chuyến Xe Lên Nền Tảng
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById("tripDate").value = tomorrow.toISOString().split("T")[0];
+
+      // Nạp danh mục trạm đón
+      const zones = window.Storage.get("pickupZones");
+      document.getElementById("tripZoneSelect").innerHTML = zones.map(z => `
+        <option value="${z.id}">${z.name} - ${z.area}</option>
+      `).join('');
+
+      triggerAiZoneRecommendation();
+    });
+
+    async function triggerAiZoneRecommendation() {
+      const origin = document.getElementById("tripOrigin").value;
+      const res = await window.AIEngine.recommendPickupZone("Trạm xuất phát", origin);
+      if (res.success) {
+        document.getElementById("aiRecZoneTitle").innerText = res.zone.name;
+        document.getElementById("aiRecZoneReason").innerText = `Điểm đón ${res.zone.name} có vỉa hè an toàn, ánh sáng tốt và nằm ngay trục đường xuất phát của bạn.`;
+        document.getElementById("tripZoneSelect").value = res.zone.id;
+      }
+    }
+
+    function handleCreateTrip(e) {
+      e.preventDefault();
+      const currentUser = window.Storage.getCurrentUser();
+
+      const origin = document.getElementById("tripOrigin").value.trim();
+      const destination = document.getElementById("tripDestination").value.trim();
+      const date = document.getElementById("tripDate").value;
+      const time = document.getElementById("tripTime").value;
+      const seats = parseInt(document.getElementById("tripSeats").value) || 1;
+      const vehicle = document.getElementById("tripVehicle").value.trim();
+      const fare = parseInt(document.getElementById("tripFare").value) || 12000;
+      const notes = document.getElementById("tripNotes").value.trim();
+      const points = document.getElementById("tripRoutePoints").value.split(",").map(p => p.trim());
+      const zoneId = document.getElementById("tripZoneSelect").value;
+      const zone = window.Storage.getById("pickupZones", zoneId);
+
+      const newTrip = {
+        id: "trip_" + Date.now(),
+        driverId: currentUser.id,
+        driverName: currentUser.name,
+        driverAvatar: currentUser.avatar || "TX",
+        driverRating: currentUser.rating || 4.9,
+        driverPhone: currentUser.phone,
+        vehicleInfo: vehicle,
+        vehicleType: vehicle.includes("Ô tô") ? "car" : "motorbike",
+        origin: origin,
+        destination: destination,
+        departureTime: time,
+        departureDate: date,
+        totalSeats: seats,
+        availableSeats: seats,
+        costSharing: fare,
+        status: "scheduled",
+        pickupZoneId: zoneId,
+        pickupZoneName: zone ? zone.name : "Trạm đón KTX Khu B",
+        routePoints: points.length ? points : [origin, destination],
+        notes: notes || "Ưu tiên sinh viên, chuẩn bị sẵn mũ bảo hiểm.",
+        aiMatchScore: 95
+      };
+
+      window.Storage.insert("trips", newTrip);
+      window.Toast.show("Đăng tạo chuyến đi thành công! Chuyến xe đã sẵn sàng nhận khách.", "success");
+
+      setTimeout(() => {
+        window.location.href = "driver-schedule.html";
+      }, 700);
+    }
+  </script>
+</body>
+</html>

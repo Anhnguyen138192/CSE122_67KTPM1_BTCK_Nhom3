@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lịch Sử Chia Sẻ Chi Phí Xăng – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="driver-dashboard.html">Tài xế</a> / <span>Lịch sử bù xăng</span>
+          </div>
+          <h1 class="page-title">💰 Lịch Sử Bù Đắp Chi Phí Xăng Xe</h1>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="exportReport()">
+          📥 Xuất Báo Cáo Tháng
+        </button>
+      </div>
+
+      <!-- Financial Metrics Grid -->
+      <div class="d-grid grid-cols-3 gap-3 mb-4">
+        <div class="stat-card">
+          <div class="stat-icon primary">💵</div>
+          <div class="stat-content">
+            <div class="stat-value" id="totalEarned">1.850.000 đ</div>
+            <div class="stat-label">Tổng tiền xăng được bù (Học kỳ)</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon secondary">⛽</div>
+          <div class="stat-content">
+            <div class="stat-value">~78 Lít</div>
+            <div class="stat-label">Tương đương lượng xăng tiết kiệm</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon warning">🎫</div>
+          <div class="stat-content">
+            <div class="stat-value">68 lượt</div>
+            <div class="stat-label">Lượt khách đã chia sẻ ghế</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transaction Table Card -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Nhật Ký Đóng Góp Chi Phí Theo Chuyến</h3>
+          <div class="d-flex gap-2">
+            <select class="form-select" style="font-size: 0.85rem; padding: 0.25rem 0.65rem;" onchange="window.Toast.show('Đã lọc theo ' + this.value, 'info')">
+              <option value="Tháng 10/2026">Tháng 10/2026</option>
+              <option value="Tháng 09/2026">Tháng 09/2026</option>
+              <option value="Tất cả thời gian">Tất cả thời gian</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Chuyến đi</th>
+                  <th>Hành khách</th>
+                  <th>Hình thức</th>
+                  <th>Số tiền</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>20/10/2026 <strong>07:28</strong></td>
+                  <td>KTX Khu B → ĐH Bách Khoa CS2</td>
+                  <td>Nguyễn Văn An</td>
+                  <td>Chuyển khoản QR</td>
+                  <td><strong style="color: var(--primary);">+12.000 đ</strong></td>
+                  <td><span class="badge badge-success">Đã nhận</span></td>
+                </tr>
+                <tr>
+                  <td>19/10/2026 <strong>07:30</strong></td>
+                  <td>KTX Khu B → ĐH KHTN CS2</td>
+                  <td>Nguyễn Văn An</td>
+                  <td>Tiền mặt</td>
+                  <td><strong style="color: var(--primary);">+10.000 đ</strong></td>
+                  <td><span class="badge badge-success">Đã nhận</span></td>
+                </tr>
+                <tr>
+                  <td>18/10/2026 <strong>17:25</strong></td>
+                  <td>ĐH KHTN CS2 → Metro Bình Thái</td>
+                  <td>Trần Hải Đăng</td>
+                  <td>Chuyển khoản QR</td>
+                  <td><strong style="color: var(--primary);">+15.000 đ</strong></td>
+                  <td><span class="badge badge-success">Đã nhận</span></td>
+                </tr>
+                <tr>
+                  <td>17/10/2026 <strong>07:15</strong></td>
+                  <td>KTX Khu B → ĐH Bách Khoa CS2</td>
+                  <td>Phạm Quỳnh Chi</td>
+                  <td>Tiền mặt</td>
+                  <td><strong style="color: var(--primary);">+12.000 đ</strong></td>
+                  <td><span class="badge badge-success">Đã nhận</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card-footer" style="font-size: 0.82rem; color: var(--text-muted);">
+          Lưu ý: CommuteMatch là nền tảng phi thương mại. Chi phí nhận được chỉ bù đắp chi phí tiêu hao nhiên liệu thực tế.
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    function exportReport() {
+      window.Toast.show("Đang xuất file sao kê chi phí bù xăng (CSV/Excel)...", "info");
+      setTimeout(() => {
+        window.Toast.show("Đã xuất báo cáo tháng thành công!", "success");
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

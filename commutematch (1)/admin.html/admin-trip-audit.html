@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kiểm Toán Chuyến Đi – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="admin-dashboard.html">Quản trị</a> / <span>Kiểm toán chuyến đi</span>
+          </div>
+          <h1 class="page-title">🔍 Giám Sát & Kiểm Toán Toàn Bộ Chuyến Xe</h1>
+        </div>
+      </div>
+
+      <!-- Filters & Price Cap Alert -->
+      <div class="card mb-3">
+        <div class="card-body" style="padding: 1rem 1.25rem;">
+          <div class="d-flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex-1" style="min-width: 260px;">
+              <input type="text" id="auditSearchInput" class="form-control" placeholder="Tìm theo tài xế, tuyến đường, biển số..." oninput="filterAuditTable()">
+            </div>
+            <div class="d-flex gap-2">
+              <select id="auditStatusSelect" class="form-select" onchange="filterAuditTable()">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="scheduled">Sắp khởi hành</option>
+                <option value="completed">Đã hoàn thành</option>
+                <option value="cancelled">Đã hủy</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit Table Card -->
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Mã chuyến</th>
+                  <th>Lộ trình</th>
+                  <th>Thời gian</th>
+                  <th>Tài xế & Phương tiện</th>
+                  <th>Số ghế</th>
+                  <th>Mức chia sẻ</th>
+                  <th>Tuân thủ giá trần</th>
+                  <th>Trạng thái</th>
+                  <th>Can thiệp Admin</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", renderAuditTable);
+
+    function renderAuditTable() {
+      const trips = window.Storage.get("trips");
+      const tbody = document.getElementById("auditTableBody");
+
+      tbody.innerHTML = trips.map(t => {
+        const isCompliant = (t.costSharing || 12000) <= 35000;
+        return `
+          <tr>
+            <td><code>${t.id}</code></td>
+            <td>
+              <strong style="color: var(--text-main); font-size: 0.92rem;">${t.origin}</strong><br>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">đến ${t.destination}</span>
+            </td>
+            <td>
+              ${t.departureDate}<br>
+              <strong>${t.departureTime}</strong>
+            </td>
+            <td>
+              <strong>${t.driverName}</strong><br>
+              <span style="font-size: 0.78rem; color: var(--text-muted);">${t.vehicleInfo}</span>
+            </td>
+            <td>${t.availableSeats} / ${t.totalSeats} ghế</td>
+            <td>
+              <strong style="color: var(--primary);">${(t.costSharing || 12000).toLocaleString('vi-VN')} đ</strong>
+            </td>
+            <td>
+              <span class="badge ${isCompliant ? 'badge-success' : 'badge-danger'}">
+                ${isCompliant ? '✓ Đúng quy định' : '⚠️ Vượt giá trần'}
+              </span>
+            </td>
+            <td>
+              <span class="badge ${
+                t.status === 'scheduled' ? 'badge-primary' :
+                t.status === 'completed' ? 'badge-success' : 'badge-danger'
+              }">
+                ${t.status === 'scheduled' ? 'Sắp đi' : t.status === 'completed' ? 'Đã chạy' : 'Đã hủy'}
+              </span>
+            </td>
+            <td>
+              <div class="d-flex gap-1">
+                ${t.status === 'scheduled' ? `
+                  <button class="btn btn-outline btn-sm text-danger" onclick="forceCancelTrip('${t.id}')">
+                    Buộc hủy
+                  </button>
+                ` : `
+                  <a href="rider-trip-detail.html?id=${t.id}" class="btn btn-outline btn-sm">Xem</a>
+                `}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterAuditTable() {
+      const q = document.getElementById("auditSearchInput").value.toLowerCase();
+      const st = document.getElementById("auditStatusSelect").value;
+      const rows = document.querySelectorAll("#auditTableBody tr");
+
+      rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        const matchesQ = text.includes(q);
+        const matchesSt = st === "all" || text.includes(st);
+        r.style.display = matchesQ && matchesSt ? "" : "none";
+      });
+    }
+
+    function forceCancelTrip(tripId) {
+      if (!confirm("CAN THIỆP ADMIN: Bạn có chắc chắn muốn buộc hủy chuyến đi này do vi phạm điều khoản?")) return;
+      window.Storage.update("trips", tripId, {
+        status: "cancelled",
+        cancelReason: "Hủy cưỡng chế bởi Quản trị viên"
+      });
+      window.Toast.show("Đã hủy cưỡng chế chuyến xe vi phạm.", "info");
+      renderAuditTable();
+    }
+  </script>
+</body>
+</html>

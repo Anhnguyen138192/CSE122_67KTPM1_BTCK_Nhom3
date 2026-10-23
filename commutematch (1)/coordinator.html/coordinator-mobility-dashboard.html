@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Điều Phối Lưu Lượng – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="index.html">Trang chủ</a> / <span>Điều phối viên</span>
+          </div>
+          <h1 class="page-title">📈 Trung Tâm Điều Phối Di Chuyển Cộng Đồng</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="coordinator-demand-heatmap.html" class="btn btn-ai btn-sm">🔥 Bản Đồ Nhiệt AI-3</a>
+          <a href="coordinator-pickup-zone-editor.html" class="btn btn-primary btn-sm">➕ Thêm Trạm Đón</a>
+        </div>
+      </div>
+
+      <!-- Key Mobility KPIs -->
+      <div class="d-grid grid-cols-4 gap-3 mb-4">
+        <div class="stat-card">
+          <div class="stat-icon primary">👥</div>
+          <div class="stat-content">
+            <div class="stat-value">1.420</div>
+            <div class="stat-label">Lượt di chuyển hôm nay</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon secondary">🚗</div>
+          <div class="stat-content">
+            <div class="stat-value">94.2%</div>
+            <div class="stat-label">Tỷ lệ ghép chuyến thành công</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon warning">⚠️</div>
+          <div class="stat-content">
+            <div class="stat-value" id="countPendingReports">2</div>
+            <div class="stat-label">Báo cáo sự cố cần xử lý</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ai">🚏</div>
+          <div class="stat-content">
+            <div class="stat-value">5 trạm</div>
+            <div class="stat-label">Trạm đón an toàn hoạt động</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Congestion Alert Banner -->
+      <div class="ai-panel mb-4">
+        <div class="d-flex justify-between items-center flex-wrap gap-2">
+          <div>
+            <div class="d-flex items-center gap-2 mb-1">
+              <span class="ai-badge">AI-3 CẢNH BÁO QUÁ TẢI GIỜ CAO ĐIỂM</span>
+              <span class="badge badge-warning">Cần can thiệp điều phối</span>
+            </div>
+            <p style="font-size: 0.88rem; margin: 0;">
+              Trạm đón <strong>KTX Khu B (Cổng phụ)</strong> đang có 38 sinh viên tìm chuyến trong khi chỉ có 12 tài xế đăng ký lúc 07:15.
+            </p>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-ai btn-sm" onclick="sendIncentiveBroadcast()">
+              📢 Phát Thông Báo Khuyến Khích Mở Chuyến
+            </button>
+            <a href="coordinator-demand-heatmap.html" class="btn btn-outline btn-sm">Xem Bản Đồ Nhiệt →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobility Trends & Trạm đón giám sát -->
+      <div class="d-grid grid-cols-12 gap-3 mb-4">
+        <!-- Biểu đồ lưu lượng mô phỏng theo khung giờ -->
+        <div style="grid-column: span 7;" class="col-12 col-lg-7">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Mật Độ Nhu Cầu Theo Khung Giờ (24h)</h3>
+            </div>
+            <div class="card-body">
+              <div style="display: flex; align-items: flex-end; justify-content: space-between; height: 180px; padding: 1rem 0; border-bottom: 2px solid var(--border-color);">
+                <div class="text-center" style="width: 12%;">
+                  <div style="background-color: var(--primary-light); height: 35px; border-radius: 4px 4px 0 0;"></div>
+                  <div style="font-size: 0.72rem; margin-top: 0.4rem;">06:00</div>
+                </div>
+                <div class="text-center" style="width: 12%;">
+                  <div style="background: var(--ai-gradient); height: 160px; border-radius: 4px 4px 0 0;"></div>
+                  <div style="font-size: 0.72rem; margin-top: 0.4rem; font-weight: bold; color: var(--danger);">07:15 🔥</div>
+                </div>
+                <div class="text-center" style="width: 12%;">
+                  <div style="background-color: var(--primary-light); height: 60px; border-radius: 4px 4px 0 0;"></div>
+                  <div style="font-size: 0.72rem; margin-top: 0.4rem;">09:00</div>
+                </div>
+                <div class="text-center" style="width: 12%;">
+                  <div style="background-color: var(--primary-light); height: 45px; border-radius: 4px 4px 0 0;"></div>
+                  <div style="font-size: 0.72rem; margin-top: 0.4rem;">11:30</div>
+                </div>
+                <div class="text-center" style="width: 12%;">
+                  <div style="background-color: var(--primary-light); height: 50px; border-radius: 4px 4px 0 0;"></div>
+                  <div style="font-size: 0.72rem; margin-top: 0.4rem;">14:00</div>
+                </div>
+                <div class="text-center" style="width: 12%;">
+                  <div style="background: var(--ai-gradient); height: 145px; border-radius: 4px 4px 0 0;"></div>
+                  <div style="font-size: 0.72rem; margin-top: 0.4rem; font-weight: bold; color: var(--danger);">17:15 🔥</div>
+                </div>
+                <div class="text-center" style="width: 12%;">
+                  <div style="background-color: var(--primary-light); height: 30px; border-radius: 4px 4px 0 0;"></div>
+                  <div style="font-size: 0.72rem; margin-top: 0.4rem;">19:00</div>
+                </div>
+              </div>
+              <div class="d-flex justify-between items-center mt-2" style="font-size: 0.78rem; color: var(--text-muted);">
+                <span>🟢 Xanh: Lưu lượng ổn định</span>
+                <span>🔥 Gradient: Giờ cao điểm tắc nghẽn (07:15 & 17:15)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bảng trạng thái trạm đón an toàn -->
+        <div style="grid-column: span 5;" class="col-12 col-lg-5">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Tình Trạng Trạm Đón An Toàn</h3>
+              <a href="coordinator-pickup-zone-management.html" style="font-size: 0.85rem;">Quản lý →</a>
+            </div>
+            <div class="card-body p-0">
+              <div id="dashboardZonesList">
+                <!-- Loaded dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const zones = window.Storage.get("pickupZones");
+      const reports = window.Storage.get("reports").filter(r => r.status === 'investigating' || r.status === 'pending');
+      document.getElementById("countPendingReports").innerText = reports.length;
+
+      const container = document.getElementById("dashboardZonesList");
+      container.innerHTML = zones.slice(0, 4).map(z => `
+        <div style="padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div class="font-bold" style="font-size: 0.88rem;">${z.name}</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">${z.area} • Chỉ số an toàn: ${z.safetyScore}/10</div>
+          </div>
+          <span class="badge ${z.status === 'active' ? 'badge-success' : 'badge-warning'}">
+            ${z.status === 'active' ? 'Đang hoạt động' : 'Tạm đóng'}
+          </span>
+        </div>
+      `).join('');
+    });
+
+    function sendIncentiveBroadcast() {
+      window.Storage.insert("notifications", {
+        userId: "u_driver1",
+        title: "Khuyến khích mở chuyến KTX Khu B! 🚗",
+        message: "Hiện có 38 sinh viên đang tìm chuyến sáng mai lúc 07:15. Hãy mở chuyến để hỗ trợ bạn bè nhé!",
+        time: "Vừa xong",
+        type: "incentive",
+        unread: true,
+        link: "driver-trip-create.html"
+      });
+      window.Toast.show("Đã phát thông báo khuyến khích mở chuyến tới các tài xế trong bán kính 3km!", "success");
+    }
+  </script>
+</body>
+</html>

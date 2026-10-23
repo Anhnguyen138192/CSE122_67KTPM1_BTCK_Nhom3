@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cấu Hình Nền Tảng – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="admin-dashboard.html">Quản trị</a> / <span>Cài đặt tham số</span>
+          </div>
+          <h1 class="page-title">⚙️ Cấu Hình Tham Số & Thuật Toán Nền Tảng</h1>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 840px; margin: 0 auto;">
+        <div class="card-body" style="padding: 2rem;">
+          <form id="settingsForm" onsubmit="savePlatformSettings(event)">
+            <!-- Nhóm 1: Mức trần chi phí xăng xe -->
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+              1. Giới Hạn Chi Phí Xăng Xe (Phi Thương Mại)
+            </h3>
+
+            <div class="d-grid grid-cols-2 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="cfgMaxMotorbike">Mức trần xe máy (VNĐ / km) <span class="required">*</span></label>
+                <input type="number" id="cfgMaxMotorbike" class="form-control" value="3500" min="1000" max="6000" step="500" required>
+                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">Khuyến nghị: 3.000 - 3.500 đ/km</div>
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label" for="cfgMaxCar">Mức trần ô tô 4-7 chỗ (VNĐ / km) <span class="required">*</span></label>
+                <input type="number" id="cfgMaxCar" class="form-control" value="8000" min="4000" max="15000" step="500" required>
+                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">Khuyến nghị: 7.000 - 8.500 đ/km</div>
+              </div>
+            </div>
+
+            <div class="d-grid grid-cols-2 gap-3 mb-4">
+              <div class="form-group mb-0">
+                <label class="form-label" for="cfgMaxRadius">Bán kính ghép nối tối đa (km)</label>
+                <input type="number" id="cfgMaxRadius" class="form-control" value="2.5" min="1" max="10" step="0.5" required>
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label" for="cfgMinTrust">Điểm uy tín tối thiểu để mở chuyến</label>
+                <input type="number" id="cfgMinTrust" class="form-control" value="80" min="50" max="95" required>
+              </div>
+            </div>
+
+            <!-- Nhóm 2: Trọng số thuật toán AI-1 Matching -->
+            <h3 style="font-size: 1.15rem; color: var(--ai-purple); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+              2. Trọng Số Thuật Toán AI Matching (AI-1 Weights)
+            </h3>
+
+            <div class="ai-panel mb-4">
+              <div class="d-grid grid-cols-3 gap-3 mb-2">
+                <div class="form-group mb-0">
+                  <label class="form-label">Trùng khớp tuyến (%)</label>
+                  <input type="number" id="cfgAiRoute" class="form-control" value="50" min="10" max="80" required>
+                </div>
+                <div class="form-group mb-0">
+                  <label class="form-label">Độ lệch giờ (%)</label>
+                  <input type="number" id="cfgAiTime" class="form-control" value="30" min="10" max="60" required>
+                </div>
+                <div class="form-group mb-0">
+                  <label class="form-label">Đánh giá sao (%)</label>
+                  <input type="number" id="cfgAiRating" class="form-control" value="20" min="5" max="40" required>
+                </div>
+              </div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">
+                Tổng tỷ trọng các thành phần phải bằng chính xác 100%.
+              </div>
+            </div>
+
+            <!-- Nhóm 3: Trạng thái hệ thống -->
+            <h3 style="font-size: 1.15rem; color: var(--secondary); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+              3. Chế Độ Vận Hành Hệ Thống
+            </h3>
+
+            <div class="form-group mb-4">
+              <label class="form-label">Trạng thái máy chủ & nền tảng:</label>
+              <select id="cfgPlatformStatus" class="form-select">
+                <option value="operational" selected>🟢 Hoạt động bình thường (Operational)</option>
+                <option value="maintenance">🟡 Chế độ bảo trì định kỳ (Maintenance Mode)</option>
+              </select>
+            </div>
+
+            <div class="d-flex justify-between items-center">
+              <button type="button" class="btn btn-outline" onclick="window.Storage.resetDefaults()">
+                🔄 Khôi phục mặc định
+              </button>
+              <button type="submit" class="btn btn-primary btn-lg">
+                💾 Lưu & Áp Dụng Cấu Hình
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const s = window.Storage.getSettings();
+      if (s) {
+        document.getElementById("cfgMaxMotorbike").value = s.maxFarePerKm || 3500;
+        document.getElementById("cfgMaxCar").value = s.maxFareCarPerKm || 8000;
+        document.getElementById("cfgMaxRadius").value = s.maxDetourRadiusKm || 2.5;
+        document.getElementById("cfgMinTrust").value = s.minTrustScoreToShare || 80;
+        document.getElementById("cfgAiRoute").value = s.aiWeightRouteMatch || 50;
+        document.getElementById("cfgAiTime").value = s.aiWeightTimeDelta || 30;
+        document.getElementById("cfgAiRating").value = s.aiWeightDriverRating || 20;
+        document.getElementById("cfgPlatformStatus").value = s.platformStatus || "operational";
+      }
+    });
+
+    function savePlatformSettings(e) {
+      e.preventDefault();
+
+      const routeW = parseInt(document.getElementById("cfgAiRoute").value) || 50;
+      const timeW = parseInt(document.getElementById("cfgAiTime").value) || 30;
+      const rateW = parseInt(document.getElementById("cfgAiRating").value) || 20;
+
+      if (routeW + timeW + rateW !== 100) {
+        window.Toast.show(`Tổng 3 trọng số AI hiện tại là ${routeW + timeW + rateW}%, phải bằng đúng 100%!`, "error");
+        return;
+      }
+
+      const newSettings = {
+        maxFarePerKm: parseInt(document.getElementById("cfgMaxMotorbike").value) || 3500,
+        maxFareCarPerKm: parseInt(document.getElementById("cfgMaxCar").value) || 8000,
+        maxDetourRadiusKm: parseFloat(document.getElementById("cfgMaxRadius").value) || 2.5,
+        minTrustScoreToShare: parseInt(document.getElementById("cfgMinTrust").value) || 80,
+        aiWeightRouteMatch: routeW,
+        aiWeightTimeDelta: timeW,
+        aiWeightDriverRating: rateW,
+        platformStatus: document.getElementById("cfgPlatformStatus").value
+      };
+
+      window.Storage.saveSettings(newSettings);
+      window.Toast.show("Đã lưu các tham số nền tảng thành công!", "success");
+    }
+  </script>
+</body>
+</html>

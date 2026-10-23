@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bản Đồ Nhiệt Nhu Cầu AI-3 – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="coordinator-mobility-dashboard.html">Điều phối viên</a> / <span>Bản đồ nhiệt AI</span>
+          </div>
+          <h1 class="page-title">🔥 Bản Đồ Nhiệt Nhu Cầu Di Chuyển (AI-3 Heatmap)</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-ai btn-sm" onclick="runAiDemandSimulation()">
+            🔄 Quét Lại Lưu Lượng AI
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="openDispatchModal()">
+            📢 Điều Phối Chuyến Xe Khẩn Cấp
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Controls for Simulation -->
+      <div class="card mb-4">
+        <div class="card-body" style="padding: 1.25rem;">
+          <div class="d-grid grid-cols-3 gap-3 items-center">
+            <div class="form-group mb-0">
+              <label class="form-label">Chọn khung giờ phân tích:</label>
+              <select id="timeSlotSelect" class="form-select" onchange="runAiDemandSimulation()">
+                <option value="morning_peak" selected>🌅 Cao điểm sáng (07:00 - 08:30)</option>
+                <option value="noon">☀️ Buổi trưa tan học (11:30 - 13:00)</option>
+                <option value="evening_peak">🌆 Cao điểm chiều về (16:45 - 18:30)</option>
+              </select>
+            </div>
+            <div class="form-group mb-0">
+              <label class="form-label">Khu vực trọng điểm:</label>
+              <select id="areaSelect" class="form-select" onchange="runAiDemandSimulation()">
+                <option value="all" selected>Tất cả các khu vực (ĐHQG, KCNC, Bình Thạnh)</option>
+                <option value="dhqg">Khu đô thị ĐHQG TP.HCM</option>
+                <option value="kcnc">Khu Công Nghệ Cao (SHTP)</option>
+              </select>
+            </div>
+            <div class="d-flex items-center gap-2 pt-3">
+              <span class="badge badge-ai">Mô hình AI: Heuristic Demand Density v2.4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Summary & Explainability Banner -->
+      <div class="ai-panel mb-4" id="aiHeatmapSummaryPanel">
+        <div class="d-flex items-center justify-between mb-2">
+          <div class="d-flex items-center gap-2">
+            <span class="ai-badge">KẾT QUẢ PHÂN TÍCH AI-3</span>
+            <span class="font-bold" id="aiPeakZoneTitle">Điểm nghẽn nghiêm trọng nhất: KTX Khu B ĐHQG</span>
+          </div>
+          <span class="badge badge-danger" id="aiDeficitBadge">Thiếu khoảng 26 chỗ xe</span>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--text-main); margin-bottom: 0.75rem;" id="aiExplainText">
+          Lý do: Số lượng sinh viên Bách Khoa và Tự Nhiên đăng ký tìm chuyến lúc 07:15 sáng cao gấp 3.2 lần số chuyến xe mà tài xế đã đăng tải. Điểm đón cổng phụ có nguy cơ quá tải người đứng chờ.
+        </p>
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary btn-sm" onclick="sendIncentiveBroadcast()">
+            📢 Phát Lệnh Khuyến Khích Mở Chuyến (+15% Điểm Uy Tín)
+          </button>
+          <a href="coordinator-pickup-zone-editor.html" class="btn btn-outline btn-sm">
+            🚏 Mở Thêm Trạm Đón Phụ Giảm Tải
+          </a>
+        </div>
+      </div>
+
+      <!-- Visual Heatmap Simulation Grid -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3 class="card-title">Mô Phỏng Trực Quan Mật Độ Cung - Cầu Trạm Đón</h3>
+          <div class="d-flex gap-2" style="font-size: 0.8rem;">
+            <span style="color: var(--danger);">■ Đỏ: Quá tải (&gt;85% nhu cầu)</span>
+            <span style="color: var(--warning);">■ Vàng: Nhu cầu cao (70-85%)</span>
+            <span style="color: var(--primary);">■ Xanh: Cân bằng (&lt;70%)</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="heatmapCardsGrid" class="d-grid grid-cols-3 gap-3">
+            <!-- Loaded dynamically from AIEngine -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", runAiDemandSimulation);
+
+    async function runAiDemandSimulation() {
+      window.Toast.show("AI đang quét mật độ nhu cầu các khu vực...", "info", 1500);
+
+      const res = await window.AIEngine.analyzeMobilityDemand();
+      const container = document.getElementById("heatmapCardsGrid");
+
+      container.innerHTML = res.zonesAnalysis.map(z => `
+        <div class="card" style="border-top: 5px solid ${
+          z.status === 'high_congestion' ? 'var(--danger)' :
+          z.status === 'moderate' ? 'var(--warning)' : 'var(--primary)'
+        };">
+          <div class="card-body">
+            <div class="d-flex justify-between items-start mb-2">
+              <span class="badge ${
+                z.status === 'high_congestion' ? 'badge-danger' :
+                z.status === 'moderate' ? 'badge-warning' : 'badge-success'
+              }">${z.statusLabel}</span>
+              <strong style="font-size: 1.25rem; color: ${
+                z.status === 'high_congestion' ? 'var(--danger)' : 'var(--primary)'
+              };">${z.demandIndex}/100</strong>
+            </div>
+
+            <h4 style="font-size: 1rem; margin-bottom: 0.25rem;">${z.zoneName}</h4>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">${z.area}</div>
+
+            <!-- Demand bar -->
+            <div style="background-color: var(--border-color); height: 8px; border-radius: var(--radius-full); overflow: hidden; margin-bottom: 0.75rem;">
+              <div style="width: ${z.demandIndex}%; height: 100%; background: ${
+                z.status === 'high_congestion' ? 'var(--danger)' :
+                z.status === 'moderate' ? 'var(--warning)' : 'var(--primary)'
+              };"></div>
+            </div>
+
+            <div style="font-size: 0.8rem; background-color: var(--bg-muted); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); margin-bottom: 0.75rem;">
+              <div class="d-flex justify-between">
+                <span>Chuyến xe hiện có:</span>
+                <strong>${z.supplyTrips} chuyến</strong>
+              </div>
+              <div class="d-flex justify-between">
+                <span>Giờ cao điểm:</span>
+                <span class="text-danger font-bold">${z.surgeHours}</span>
+              </div>
+            </div>
+
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0;">
+              💡 <strong>AI Khuyến nghị:</strong> ${z.aiRecommendation}
+            </p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function sendIncentiveBroadcast() {
+      window.Toast.show("Đã gửi thông báo ưu tiên mở chuyến đến tất cả tài xế lân cận!", "success");
+    }
+
+    function openDispatchModal() {
+      window.Toast.show("Đang mở bảng điều phối lưu lượng khẩn cấp...", "info");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tìm Kiếm Chuyến Đi Nâng Cao – CommuteMatch</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider-dashboard.html">Hành khách</a> / <span>Tìm chuyến</span>
+          </div>
+          <h1 class="page-title">🔍 Tìm Kiếm Chuyến Đi Cùng Hướng</h1>
+        </div>
+      </div>
+
+      <!-- Quick Route Suggestions (Chips) -->
+      <div class="mb-3">
+        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-right: 0.5rem;">Tuyến phổ biến:</span>
+        <button class="btn btn-outline btn-sm" onclick="setQuickSearch('KTX Khu B', 'ĐH Bách Khoa CS2', '07:15')">
+          🎓 KTX Khu B → Bách Khoa CS2 (07:15)
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="setQuickSearch('Hàng Xanh', 'Khu Công Nghệ Cao', '07:30')">
+          🏢 Hàng Xanh → Khu CNC Q9 (07:30)
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="setQuickSearch('ĐH Khoa Học Tự Nhiên', 'Ga Metro Bình Thái', '17:15')">
+          🚇 KHTN → Metro Bình Thái (17:15)
+        </button>
+      </div>
+
+      <!-- Search Form Card -->
+      <div class="card mb-4" style="max-width: 840px;">
+        <div class="card-body">
+          <form id="searchForm" onsubmit="handleSearch(event)">
+            <div class="d-grid grid-cols-2 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchOrigin">
+                  📍 Điểm đón / Nơi khởi hành <span class="required">*</span>
+                </label>
+                <input type="text" id="searchOrigin" class="form-control" placeholder="ví dụ: KTX Khu B ĐHQG..." required value="KTX Khu B">
+                <div class="form-feedback">Vui lòng nhập điểm đón.</div>
+              </div>
+
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchDestination">
+                  🏁 Điểm đến <span class="required">*</span>
+                </label>
+                <input type="text" id="searchDestination" class="form-control" placeholder="ví dụ: ĐH Bách Khoa Cơ Sở 2..." required value="ĐH Bách Khoa Cơ Sở 2">
+                <div class="form-feedback">Vui lòng nhập điểm đến.</div>
+              </div>
+            </div>
+
+            <div class="d-grid grid-cols-3 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchDate">Ngày đi <span class="required">*</span></label>
+                <input type="date" id="searchDate" class="form-control" required>
+              </div>
+
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchTime">Giờ muốn đi (Khoảng) <span class="required">*</span></label>
+                <input type="time" id="searchTime" class="form-control" value="07:15" required>
+              </div>
+
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchSeats">Số chỗ cần đi</label>
+                <select id="searchSeats" class="form-select">
+                  <option value="1" selected>1 người (Xe máy hoặc Ô tô)</option>
+                  <option value="2">2 người (Cần xe ô tô)</option>
+                  <option value="3">3 người (Cần xe ô tô)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Bộ lọc nâng cao -->
+            <div style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+              <div class="font-bold mb-2" style="font-size: 0.88rem;">Bộ lọc bổ sung:</div>
+              <div class="d-flex items-center gap-3 flex-wrap">
+                <label class="d-flex items-center gap-1" style="font-size: 0.88rem; cursor: pointer;">
+                  <input type="checkbox" id="filterMotorbike" checked> Chỉ hiển thị Xe Máy
+                </label>
+                <label class="d-flex items-center gap-1" style="font-size: 0.88rem; cursor: pointer;">
+                  <input type="checkbox" id="filterCar" checked> Hiển thị Ô tô
+                </label>
+                <label class="d-flex items-center gap-1" style="font-size: 0.88rem; cursor: pointer;">
+                  <input type="checkbox" id="filterHighRating" checked> Ưu tiên tài xế đánh giá ⭐ 4.8+
+                </label>
+              </div>
+            </div>
+
+            <div class="d-flex justify-between items-center">
+              <span style="font-size: 0.85rem; color: var(--text-muted);">
+                ✨ Thuật toán AI Matching sẽ tự động tính toán điểm tương thích ngay khi tìm kiếm.
+              </span>
+              <button type="submit" class="btn btn-primary btn-lg">
+                🚀 Tìm Kiếm & Chấm Điểm AI
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Đặt ngày mặc định là hôm nay hoặc ngày mai
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById("searchDate").value = tomorrow.toISOString().split("T")[0];
+    });
+
+    function setQuickSearch(origin, dest, time) {
+      document.getElementById("searchOrigin").value = origin;
+      document.getElementById("searchDestination").value = dest;
+      document.getElementById("searchTime").value = time;
+      window.Toast.show(`Đã nạp nhanh lộ trình: ${origin} → ${dest}`, "info");
+    }
+
+    function handleSearch(e) {
+      e.preventDefault();
+      const origin = document.getElementById("searchOrigin").value.trim();
+      const destination = document.getElementById("searchDestination").value.trim();
+      const date = document.getElementById("searchDate").value;
+      const time = document.getElementById("searchTime").value;
+      const seats = parseInt(document.getElementById("searchSeats").value) || 1;
+
+      if (!origin || !destination) {
+        window.Toast.show("Vui lòng nhập cả điểm đón và điểm đến!", "error");
+        return;
+      }
+
+      // Lưu tiêu chí tìm kiếm vào sessionStorage để trang Match Results xử lý
+      sessionStorage.setItem("commute_search_criteria", JSON.stringify({
+        origin, destination, date, time, seats
+      }));
+
+      window.location.href = "rider-match-results.html";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biên Bản Hòa Giải Sự Cố – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="coordinator-report-center.html">Báo cáo</a> / <span>Chi tiết hòa giải</span>
+          </div>
+          <h1 class="page-title">⚖️ Biên Bản Xử Lý & Hòa Giải Sự Cố</h1>
+        </div>
+        <a href="coordinator-report-center.html" class="btn btn-outline btn-sm">← Quay lại danh sách</a>
+      </div>
+
+      <div class="d-grid grid-cols-12 gap-3">
+        <!-- Cột trái: Thông tin sự cố & Lời tường trình -->
+        <div style="grid-column: span 7;" class="col-12 col-md-7">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title" id="repDetailTitle">Tiêu đề sự cố</h3>
+              <span class="badge badge-warning" id="repDetailStatus">Đang xử lý</span>
+            </div>
+            <div class="card-body">
+              <div class="ai-panel mb-3" style="border-color: rgba(217, 119, 6, 0.3);">
+                <div class="font-bold mb-1" style="color: var(--warning);">Lời tường trình từ người phản ánh:</div>
+                <p id="repDetailDesc" style="font-size: 0.9rem; color: var(--text-main); margin: 0; line-height: 1.5;">
+                  Mô tả sự cố...
+                </p>
+              </div>
+
+              <!-- Hai bên liên quan -->
+              <div class="d-grid grid-cols-2 gap-3 mb-3">
+                <div style="background-color: var(--bg-muted); padding: 0.85rem; border-radius: var(--radius-md);">
+                  <div class="text-muted" style="font-size: 0.78rem;">Người gửi báo cáo:</div>
+                  <strong class="font-bold" id="repReporterName">Nguyễn Văn An</strong>
+                  <div style="font-size: 0.75rem; color: var(--primary);">Hành khách (MSSV: 2210045)</div>
+                </div>
+
+                <div style="background-color: var(--bg-muted); padding: 0.85rem; border-radius: var(--radius-md);">
+                  <div class="text-muted" style="font-size: 0.78rem;">Đối tượng bị phản ánh:</div>
+                  <strong class="font-bold" id="repReportedName">Lê Hoàng Phúc</strong>
+                  <div style="font-size: 0.75rem; color: var(--danger);">Tài xế Ô tô Vios</div>
+                </div>
+              </div>
+
+              <!-- Lịch sử tin nhắn đối chất giữa hai bên -->
+              <div class="card mb-3">
+                <div class="card-header" style="padding: 0.75rem 1rem;">
+                  <h4 style="font-size: 0.88rem; margin: 0;">Trích xuất tin nhắn trao đổi trên hệ thống:</h4>
+                </div>
+                <div class="card-body p-2" style="font-size: 0.82rem; max-height: 140px; overflow-y: auto;">
+                  <div class="mb-1"><strong>07:25 (Hành khách An):</strong> "Anh ơi em đang đứng ở trạm Bus Hàng Xanh rồi ạ."</div>
+                  <div class="mb-1 text-muted"><strong>07:35 (Hành khách An):</strong> "Anh gần tới chưa ạ, em sợ trễ giờ thi."</div>
+                  <div class="mb-1" style="color: var(--secondary);"><strong>07:42 (Tài xế Phúc):</strong> "Anh bị kẹt xe cứng ở chân cầu Sài Gòn, 3 phút nữa anh tới nhé."</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Form biên bản & Biện pháp chế tài của Điều phối viên -->
+        <div style="grid-column: span 5;" class="col-12 col-md-5">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Kết Luận Hòa Giải Của Điều Phối Viên</h3>
+            </div>
+            <div class="card-body">
+              <form id="resolveReportForm" onsubmit="handleResolve(event)">
+                <div class="form-group">
+                  <label class="form-label" for="coordNotes">Ghi chú xác minh & Biên bản hòa giải <span class="required">*</span></label>
+                  <textarea id="coordNotes" class="form-control" rows="4" required placeholder="Ghi nhận nguyên nhân khách quan, giải pháp hỗ trợ hai bên..."></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Chế tài áp dụng:</label>
+                  <select id="penaltySelect" class="form-select">
+                    <option value="none">Nhắc nhở nhẹ nhàng (Không trừ điểm)</option>
+                    <option value="warning">Cảnh cáo bằng văn bản</option>
+                    <option value="minus_trust">Trừ 5 điểm uy tín (Trust Score)</option>
+                    <option value="temp_ban">Tạm đình chỉ tài khoản 7 ngày</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="d-flex items-center gap-2" style="font-size: 0.85rem; cursor: pointer;">
+                    <input type="checkbox" id="sendNotificationToBoth" checked> Gửi kết luận qua thông báo cho cả 2 bên
+                  </label>
+                </div>
+
+                <div class="d-flex flex-column gap-2 mt-3">
+                  <button type="submit" class="btn btn-primary btn-block">
+                    ✓ Hoàn Tất & Đóng Báo Cáo
+                  </button>
+                  <button type="button" class="btn btn-outline btn-block btn-sm" onclick="dismissReport()">
+                    Bác bỏ báo cáo (Không có vi phạm)
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    let currentReport = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const repId = urlParams.get("id") || "rep_301";
+
+      currentReport = window.Storage.getById("reports", repId) || window.Storage.get("reports")[0];
+      if (!currentReport) return;
+
+      document.getElementById("repDetailTitle").innerText = currentReport.title;
+      document.getElementById("repDetailDesc").innerText = currentReport.description;
+      document.getElementById("repReporterName").innerText = currentReport.reporterName;
+      document.getElementById("repReportedName").innerText = currentReport.reportedUserName;
+      document.getElementById("coordNotes").value = currentReport.coordinatorNotes || "Đã liên hệ xác minh hai bên. Nhắc nhở tài xế chủ động nhắn tin khi có kẹt xe đột xuất.";
+
+      if (currentReport.status === 'resolved') {
+        document.getElementById("repDetailStatus").innerText = "Đã giải quyết";
+        document.getElementById("repDetailStatus").className = "badge badge-success";
+      }
+    });
+
+    function handleResolve(e) {
+      e.preventDefault();
+      const notes = document.getElementById("coordNotes").value.trim();
+
+      window.Storage.update("reports", currentReport.id, {
+        status: "resolved",
+        coordinatorNotes: notes
+      });
+
+      window.Toast.show("Đã hoàn tất biên bản hòa giải và đóng sự cố!", "success");
+
+      setTimeout(() => {
+        window.location.href = "coordinator-report-center.html";
+      }, 700);
+    }
+
+    function dismissReport() {
+      if (!confirm("Bác bỏ khiếu nại này do không đủ căn cứ vi phạm?")) return;
+      window.Storage.update("reports", currentReport.id, {
+        status: "dismissed",
+        coordinatorNotes: "Đã bác bỏ khiếu nại do nguyên nhân bất khả kháng."
+      });
+      window.Toast.show("Đã bác bỏ báo cáo.", "info");
+      setTimeout(() => {
+        window.location.href = "coordinator-report-center.html";
+      }, 600);
+    }
+  </script>
+</body>
+</html>

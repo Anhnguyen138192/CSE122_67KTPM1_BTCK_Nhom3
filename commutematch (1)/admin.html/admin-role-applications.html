@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duyệt Đơn Ứng Tuyển – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs"><a href="admin-dashboard.html">Quản trị</a> / <span>Đơn ứng tuyển</span></div>
+          <h1 class="page-title">Duyệt đơn ứng tuyển vai trò</h1>
+          <p>Duyệt đơn sẽ thêm vai trò được cấp vào tài khoản; không thay đổi vai trò đang sử dụng.</p>
+        </div>
+      </div>
+      <section class="card">
+        <div class="card-body">
+          <div id="applicationList"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="app-footer"></div>
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", renderApplications);
+
+    function renderApplications() {
+      const pending = window.Storage.get("roleApplications").filter((application) => application.status === "pending");
+      const host = document.getElementById("applicationList");
+      if (!pending.length) {
+        host.innerHTML = '<p style="color: var(--text-muted);">Hiện không có đơn ứng tuyển đang chờ duyệt.</p>';
+        return;
+      }
+
+      host.innerHTML = pending.map((application) => {
+        const applicant = window.Storage.getById("users", application.userId);
+        const details = application.details || {};
+        const fields = application.role === "driver"
+          ? [["Loại xe", details.vehicleType], ["Biển số", details.vehiclePlate], ["Giấy phép lái xe", details.driverLicense]]
+          : [["Đơn vị", details.affiliation], ["Kinh nghiệm / lý do", details.motivation]];
+        const images = application.role === "driver"
+          ? [["Ảnh phương tiện", details.vehiclePhoto], ["Ảnh GPLX", details.driverLicensePhoto], ["Ảnh CCCD", details.citizenIdPhoto]]
+          : [["Ảnh CCCD", details.citizenIdPhoto]];
+        return `
+          <article class="card mb-3">
+            <div class="card-body">
+              <div class="d-flex justify-between items-center flex-wrap gap-2">
+                <div>
+                  <h2>${application.role === "driver" ? "Ứng tuyển tài xế" : "Ứng tuyển điều phối viên"}</h2>
+                  <p><strong>${escapeHtml(applicant ? applicant.name : application.userName)}</strong>${applicant ? ` · ${escapeHtml(applicant.email)}` : ""}</p>
+                </div>
+                <span class="badge badge-warning">Chờ duyệt</span>
+              </div>
+              <dl class="mt-2">
+                ${fields.map(([label, value]) => `<div class="mb-1"><dt style="font-weight:700;">${label}</dt><dd>${escapeHtml(value || "—")}</dd></div>`).join("")}
+              </dl>
+              <div class="d-grid grid-cols-2 gap-2 mt-2">
+                ${images.map(([label, image]) => renderImage(label, image)).join("")}
+              </div>
+              <div class="d-flex gap-2 mt-2">
+                <button class="btn btn-primary" onclick="reviewApplication('${application.id}', true)">Duyệt và cấp vai trò</button>
+                <button class="btn btn-outline text-danger" onclick="reviewApplication('${application.id}', false)">Từ chối</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function reviewApplication(id, approved) {
+      const result = window.Auth.reviewRoleApplication(id, approved);
+      window.Toast.show(result.message, result.success ? "success" : "error");
+      if (result.success) renderApplications();
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[character]);
+    }
+
+    function renderImage(label, image) {
+      if (!image || !/^data:image\/jpeg;base64,/.test(image.dataUrl || "")) return "";
+      return `<div><strong>${label}</strong><br><img src="${image.dataUrl}" alt="${label}" loading="lazy" style="display:block;max-width:100%;max-height:260px;object-fit:contain;margin-top:.4rem;border:1px solid var(--border-color);border-radius:var(--radius-md);"><small>${escapeHtml(image.fileName || "Ảnh đã tải lên")}</small></div>`;
+    }
+  </script>
+</body>
+</html>

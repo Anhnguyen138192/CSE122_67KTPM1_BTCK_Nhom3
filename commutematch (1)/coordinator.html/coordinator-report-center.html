@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trung Tâm Tiếp Nhận & Xử Lý Sự Cố – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="coordinator-mobility-dashboard.html">Điều phối viên</a> / <span>Báo cáo sự cố</span>
+          </div>
+          <h1 class="page-title">⚠️ Trung Tâm Xử Lý Báo Cáo & Khiếu Nại</h1>
+        </div>
+      </div>
+
+      <!-- Tabs Lọc Báo Cáo -->
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchReportTab('all', this)">
+          Tất cả báo cáo (<span id="repTotalCount">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchReportTab('investigating', this)">
+          ⏳ Đang Xử Lý / Hòa Giải (<span id="repActiveCount">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchReportTab('resolved', this)">
+          ✓ Đã Giải Quyết (<span id="repResolvedCount">0</span>)
+        </button>
+      </div>
+
+      <!-- Danh sách báo cáo sự cố -->
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Tiêu đề khiếu nại</th>
+                  <th>Người gửi báo cáo</th>
+                  <th>Đối tượng phản ánh</th>
+                  <th>Phân loại</th>
+                  <th>Mức ưu tiên</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="reportsTableBody">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    let reportFilter = 'all';
+
+    document.addEventListener("DOMContentLoaded", renderReportsTable);
+
+    function renderReportsTable() {
+      const allReports = window.Storage.get("reports");
+      const active = allReports.filter(r => r.status === 'investigating' || r.status === 'pending');
+      const resolved = allReports.filter(r => r.status === 'resolved' || r.status === 'dismissed');
+
+      document.getElementById("repTotalCount").innerText = allReports.length;
+      document.getElementById("repActiveCount").innerText = active.length;
+      document.getElementById("repResolvedCount").innerText = resolved.length;
+
+      let list = allReports;
+      if (reportFilter === 'investigating') list = active;
+      else if (reportFilter === 'resolved') list = resolved;
+
+      const tbody = document.getElementById("reportsTableBody");
+
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center p-4">
+              <div class="empty-state">
+                <div class="empty-icon">✅</div>
+                <div class="empty-title">Không có báo cáo sự cố nào</div>
+                <div class="empty-desc">Cộng đồng đang vận hành an toàn và hòa thuận!</div>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = list.map(r => `
+        <tr>
+          <td>
+            <span style="font-size: 0.82rem; color: var(--text-muted);">
+              ${new Date(r.createdAt || Date.now()).toLocaleDateString('vi-VN')}<br>
+              ${new Date(r.createdAt || Date.now()).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </td>
+          <td>
+            <strong style="color: var(--text-main); font-size: 0.92rem;">${r.title}</strong><br>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">${(r.description || '').substring(0, 50)}...</span>
+          </td>
+          <td>${r.reporterName}</td>
+          <td><strong>${r.reportedUserName}</strong></td>
+          <td>
+            <span class="badge ${
+              r.type === 'delay' ? 'badge-warning' :
+              r.type === 'lost_item' ? 'badge-info' : 'badge-danger'
+            }">
+              ${
+                r.type === 'delay' ? 'Trễ hẹn' :
+                r.type === 'lost_item' ? 'Quên đồ' :
+                r.type === 'noshow' ? 'Bùng chuyến' : 'Thái độ'
+              }
+            </span>
+          </td>
+          <td>
+            <span class="badge ${
+              r.priority === 'high' ? 'badge-danger' :
+              r.priority === 'medium' ? 'badge-warning' : 'badge-primary'
+            }">
+              ${r.priority === 'high' ? 'Cao' : r.priority === 'medium' ? 'Trung bình' : 'Thấp'}
+            </span>
+          </td>
+          <td>
+            <span class="badge ${
+              r.status === 'resolved' ? 'badge-success' : 'badge-warning'
+            }">
+              ${r.status === 'resolved' ? 'Đã giải quyết' : 'Đang xử lý'}
+            </span>
+          </td>
+          <td>
+            <a href="coordinator-report-detail.html?id=${r.id}" class="btn btn-outline btn-sm">
+              Xử lý hòa giải →
+            </a>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function switchReportTab(filter, btn) {
+      reportFilter = filter;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderReportsTable();
+    }
+  </script>
+</body>
+</html>

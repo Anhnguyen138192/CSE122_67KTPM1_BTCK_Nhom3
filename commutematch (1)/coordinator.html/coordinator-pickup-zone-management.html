@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Điểm Đón An Toàn – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="coordinator-mobility-dashboard.html">Điều phối viên</a> / <span>Trạm đón</span>
+          </div>
+          <h1 class="page-title">🚏 Quản Lý Danh Mục Điểm Đón An Toàn (Pickup Zones)</h1>
+        </div>
+        <a href="coordinator-pickup-zone-editor.html" class="btn btn-primary btn-sm">
+          ➕ Thêm Điểm Đón Mới
+        </a>
+      </div>
+
+      <!-- Filter Controls -->
+      <div class="card mb-3">
+        <div class="card-body" style="padding: 1rem 1.25rem;">
+          <div class="d-flex items-center justify-between gap-3 flex-wrap">
+            <div class="d-flex items-center gap-2 flex-1" style="min-width: 260px;">
+              <input type="text" id="searchZoneInput" class="form-control" placeholder="Tìm theo tên trạm hoặc địa chỉ..." oninput="filterZones()">
+            </div>
+            <div class="d-flex gap-2">
+              <select id="filterAreaSelect" class="form-select" onchange="filterZones()">
+                <option value="all">Tất cả khu vực</option>
+                <option value="ĐHQG TP.HCM">ĐHQG TP.HCM</option>
+                <option value="Quận Bình Thạnh">Quận Bình Thạnh</option>
+                <option value="Khu Công Nghệ Cao Thủ Đức">Khu Công Nghệ Cao</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pickup Zones Table Card -->
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Tên trạm đón</th>
+                  <th>Khu vực & Địa chỉ</th>
+                  <th>Sức chứa</th>
+                  <th>Tiêu chí an toàn</th>
+                  <th>Điểm an toàn</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="zonesTableBody">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", renderZonesTable);
+
+    function renderZonesTable() {
+      const zones = window.Storage.get("pickupZones");
+      const tbody = document.getElementById("zonesTableBody");
+
+      if (zones.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center p-4">
+              <div class="empty-state">
+                <div class="empty-icon">🚏</div>
+                <div class="empty-title">Chưa có trạm đón nào</div>
+                <div class="empty-desc">Nhấn Thêm Điểm Đón Mới để thiết lập trạm an toàn đầu tiên.</div>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = zones.map(z => `
+        <tr>
+          <td>
+            <strong style="color: var(--text-main); font-size: 0.95rem;">${z.name}</strong><br>
+            <span style="font-size: 0.78rem; color: var(--text-light);">Tọa độ: ${z.coordinates}</span>
+          </td>
+          <td>
+            <strong>${z.area}</strong><br>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">${z.address}</span>
+          </td>
+          <td>${z.capacity || 15} người</td>
+          <td>
+            <div class="d-flex flex-wrap gap-1">
+              ${z.hasSidewalk ? '<span class="badge badge-success" style="font-size: 0.7rem;">Vỉa hè rộng</span>' : ''}
+              ${z.hasLighting ? '<span class="badge badge-info" style="font-size: 0.7rem;">Đèn LED</span>' : ''}
+              ${z.hasCCTV ? '<span class="badge badge-ai" style="font-size: 0.7rem;">Camera CCTV</span>' : ''}
+            </div>
+          </td>
+          <td>
+            <strong style="color: var(--primary); font-size: 1rem;">${z.safetyScore}/10</strong>
+          </td>
+          <td>
+            <span class="badge ${z.status === 'active' ? 'badge-success' : 'badge-warning'}">
+              ${z.status === 'active' ? 'Hoạt động' : 'Tạm đóng'}
+            </span>
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="coordinator-pickup-zone-editor.html?id=${z.id}" class="btn btn-outline btn-sm">Sửa</a>
+              <button class="btn btn-outline btn-sm" onclick="toggleZoneStatus('${z.id}')">
+                ${z.status === 'active' ? 'Tạm đóng' : 'Mở lại'}
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterZones() {
+      const q = document.getElementById("searchZoneInput").value.toLowerCase();
+      const area = document.getElementById("filterAreaSelect").value;
+      const rows = document.querySelectorAll("#zonesTableBody tr");
+
+      rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        const matchesQ = text.includes(q);
+        const matchesArea = area === "all" || text.includes(area.toLowerCase());
+        r.style.display = matchesQ && matchesArea ? "" : "none";
+      });
+    }
+
+    function toggleZoneStatus(id) {
+      const z = window.Storage.getById("pickupZones", id);
+      if (z) {
+        const nextStatus = z.status === 'active' ? 'maintenance' : 'active';
+        window.Storage.update("pickupZones", id, { status: nextStatus });
+        window.Toast.show(`Đã chuyển trạng thái trạm đón: ${nextStatus === 'active' ? 'Hoạt động' : 'Tạm đóng bảo trì'}`, "info");
+        renderZonesTable();
+      }
+    }
+  </script>
+</body>
+</html>

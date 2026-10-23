@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Điều Khiển Tài Xế – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="index.html">Trang chủ</a> / <span>Người chia sẻ xe</span>
+          </div>
+          <h1 class="page-title">🚗 Bảng Điều Khiển Tài Xế: <span id="dashDriverName">Trần Minh Quân</span></h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="driver-trip-recurring.html" class="btn btn-outline btn-sm">🔄 Lịch trình lặp lại</a>
+          <a href="driver-trip-create.html" class="btn btn-primary btn-sm">➕ Đăng Chuyến Mới</a>
+        </div>
+      </div>
+
+      <!-- Driver Stats Grid -->
+      <div class="d-grid grid-cols-4 gap-3 mb-4">
+        <div class="stat-card">
+          <div class="stat-icon primary">💰</div>
+          <div class="stat-content">
+            <div class="stat-value" id="statEarnings">1.850.000 đ</div>
+            <div class="stat-label">Bù đắp chi phí xăng</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon secondary">🛣️</div>
+          <div class="stat-content">
+            <div class="stat-value" id="statDriverTrips">68</div>
+            <div class="stat-label">Chuyến xe đã mở</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon warning">⭐</div>
+          <div class="stat-content">
+            <div class="stat-value">4.95 / 5.0</div>
+            <div class="stat-label">Đánh giá trung bình</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ai">👥</div>
+          <div class="stat-content">
+            <div class="stat-value">92%</div>
+            <div class="stat-label">Tỷ lệ lấp đầy ghế</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chuyến xe sắp chạy tiếp theo -->
+      <div class="card mb-4" style="border-left: 4px solid var(--secondary);">
+        <div class="card-header">
+          <div class="d-flex items-center gap-2">
+            <span class="badge badge-primary">CHUYẾN XE SẮP CHẠY</span>
+            <h3 class="card-title">KTX Khu B → ĐH Bách Khoa Cơ Sở 2</h3>
+          </div>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Khởi hành: <strong>07:15 sáng mai</strong></span>
+        </div>
+        <div class="card-body">
+          <div class="d-grid grid-cols-12 gap-3 items-center">
+            <div style="grid-column: span 7;">
+              <div style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                📍 Điểm hẹn đón khách: <strong>Trạm đón KTX Khu B - Cổng phụ Cây xăng Petrolimex</strong>
+              </div>
+              <div class="d-flex items-center gap-2 mb-2">
+                <span class="badge badge-success">Còn 1 chỗ trống</span>
+                <span class="badge badge-outline">Chia sẻ: 12.000 đ</span>
+                <span class="badge badge-info">1 yêu cầu đang chờ duyệt</span>
+              </div>
+            </div>
+
+            <div style="grid-column: span 5; border-left: 1px solid var(--border-color); padding-left: 1.5rem;">
+              <div class="d-flex gap-2">
+                <a href="driver-trip-execution.html" class="btn btn-secondary flex-1">
+                  🚦 Phòng Điều Hành Chuyến
+                </a>
+                <a href="driver-join-requests.html" class="btn btn-primary flex-1">
+                  👥 Duyệt Khách (1)
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bảng yêu cầu chờ duyệt & Lịch chạy tuần -->
+      <div class="d-grid grid-cols-2 gap-3">
+        <!-- Card 1: Yêu cầu ghép xe đang chờ -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Yêu Cầu Chờ Duyệt (Join Requests)</h3>
+            <a href="driver-join-requests.html" style="font-size: 0.85rem;">Xem tất cả →</a>
+          </div>
+          <div class="card-body p-0">
+            <div id="requestsSnippet">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Lịch trình chạy các ngày tới -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Lịch Trình Đã Đăng</h3>
+            <a href="driver-schedule.html" style="font-size: 0.85rem;">Quản lý lịch →</a>
+          </div>
+          <div class="card-body p-0">
+            <div id="scheduleSnippet">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      loadDriverDashboard();
+    });
+
+    function loadDriverDashboard() {
+      const u = window.Storage.getCurrentUser();
+      if (u) {
+        document.getElementById("dashDriverName").innerText = u.name;
+        document.getElementById("statEarnings").innerText = u.earnings || "1.850.000 đ";
+        document.getElementById("statDriverTrips").innerText = u.tripsCount || 68;
+      }
+
+      // Render requests snippet
+      const requests = window.Storage.get("joinRequests").filter(r => r.status === 'pending');
+      const reqBox = document.getElementById("requestsSnippet");
+
+      if (requests.length === 0) {
+        reqBox.innerHTML = `
+          <div class="empty-state" style="padding: 1.5rem;">
+            <div style="font-size: 0.88rem; color: var(--text-muted);">Không có yêu cầu nào đang chờ duyệt.</div>
+          </div>
+        `;
+      } else {
+        reqBox.innerHTML = requests.map(r => `
+          <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+            <div class="d-flex items-center gap-2">
+              <div class="avatar" style="width: 36px; height: 36px; background-color: #059669; color: white;">${r.riderAvatar || 'KH'}</div>
+              <div>
+                <div class="font-bold" style="font-size: 0.9rem;">${r.riderName}</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">Đón tại: ${r.pickupPoint}</div>
+              </div>
+            </div>
+            <div class="d-flex gap-1">
+              <a href="driver-join-requests.html" class="btn btn-primary btn-sm">Xem & Duyệt</a>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Render schedule snippet
+      const trips = window.Storage.get("trips").filter(t => t.status === 'scheduled');
+      const schedBox = document.getElementById("scheduleSnippet");
+
+      schedBox.innerHTML = trips.slice(0, 3).map(t => `
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div class="font-bold" style="font-size: 0.9rem;">${t.origin} → ${t.destination}</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">📅 ${t.departureDate} lúc <strong>${t.departureTime}</strong> • Còn ${t.availableSeats} chỗ</div>
+          </div>
+          <a href="driver-trip-detail.html?id=${t.id}" class="btn btn-outline btn-sm">Quản lý</a>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

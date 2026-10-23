@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cấp / Tước Quyền – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="index.html">CommuteMatch</a> / <span>Quản lý quyền</span>
+          </div>
+          <h1 class="page-title">🔐 Cấp / Tước Quyền Vai Trò</h1>
+          <p id="permissionGuidance" class="text-muted"></p>
+        </div>
+      </div>
+
+      <!-- Search & Filter Controls -->
+      <div class="card mb-3">
+        <div class="card-body" style="padding: 1rem 1.25rem;">
+          <div class="d-flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex-1" style="min-width: 260px;">
+              <input type="text" id="userSearchInput" class="form-control" placeholder="Tìm theo tên, email, tên đăng nhập..." oninput="filterUsersTable()">
+            </div>
+            <div class="d-flex gap-2">
+              <select id="roleFilterSelect" class="form-select" onchange="filterUsersTable()">
+                <option value="all">Tất cả vai trò</option>
+                <option value="rider">Hành khách (Rider)</option>
+                <option value="driver">Tài xế (Driver)</option>
+                <option value="coordinator">Điều phối viên</option>
+                <option value="admin">Quản trị viên</option>
+                <option value="superadmin">Super Admin</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Table Card -->
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Thành viên</th>
+                  <th>Đang sử dụng</th>
+                  <th>Cấp / tước quyền (bật / tắt)</th>
+                  <th>Tài khoản / thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    const roleOptions = {
+      rider: { label: "Hành khách", icon: "🧍" },
+      driver: { label: "Tài xế", icon: "🚗" },
+      coordinator: { label: "Điều phối viên", icon: "📍" },
+      admin: { label: "Admin", icon: "🛡️" },
+      superadmin: { label: "Super Admin", icon: "👑" }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const actor = window.Auth.getCurrentUser();
+      const allowedRoles = window.Auth.manageableRoles(actor);
+      if (!allowedRoles.length) {
+        window.location.href = "403.html";
+        return;
+      }
+      document.getElementById("permissionGuidance").innerText = actor.role === "superadmin"
+        ? "Super Admin có thể cấp hoặc tước vai trò Hành khách, Tài xế, Điều phối viên và Admin cho mọi tài khoản. Quyền Super Admin chỉ dành cho tài khoản gốc."
+        : actor.role === "admin"
+          ? "Admin có thể cấp hoặc tước vai trò Hành khách, Tài xế và Điều phối viên cho tài khoản không phải Admin / Super Admin."
+          : "Điều phối viên chỉ có thể cấp hoặc tước vai trò Hành khách và Tài xế cho tài khoản Hành khách / Tài xế.";
+      renderUsersTable();
+    });
+
+    function renderUsersTable() {
+      const users = window.Storage.get("users");
+      const tbody = document.getElementById("usersTableBody");
+
+      const actor = window.Auth.getCurrentUser();
+      const allowedRoles = window.Auth.manageableRoles(actor);
+      const displayRoles = ["rider", "driver", "coordinator", "admin", "superadmin"];
+      tbody.innerHTML = users.map(u => {
+        const roles = Array.isArray(u.roles) ? u.roles : [u.role || "rider"];
+        const roleButtons = displayRoles.map((role) => {
+          const checked = roles.includes(role);
+          const canManageTarget = window.Auth.canManageUserRoles(actor, u);
+          const disabled = !allowedRoles.includes(role) || role === "superadmin" ||
+            !canManageTarget || (role === "rider" && checked);
+          const tooltip = !canManageTarget
+            ? actor.id === u.id
+              ? "Không thể thay đổi vai trò của chính mình"
+              : actor.role === "admin"
+                ? "Admin không thể thay đổi vai trò của tài khoản Admin / Super Admin"
+                : actor.role === "coordinator"
+                  ? "Điều phối viên chỉ có thể thay đổi vai trò của tài khoản Hành khách / Tài xế"
+                  : "Không có quyền thay đổi vai trò tài khoản này"
+            : role === "rider" && checked
+              ? "Mọi tài khoản luôn giữ vai trò Hành khách, không thể tước"
+            : role === "superadmin"
+              ? "Quyền Super Admin chỉ dành cho tài khoản gốc"
+              : !allowedRoles.includes(role)
+                ? `Vai trò ${roleOptions[role].label} vượt quá quyền hạn của bạn`
+                : `Bấm để ${checked ? "tước" : "cấp"} quyền ${roleOptions[role].label}`;
+          return `
+            <button type="button"
+              class="permission-toggle ${checked ? "is-enabled" : ""} ${role === "superadmin" ? "is-superadmin" : ""}"
+              aria-pressed="${checked}"
+              ${disabled ? "disabled" : ""}
+              title="${tooltip}"
+              onclick="toggleRole('${u.id}', '${role}', ${!checked})">
+              <span>${roleOptions[role].icon}</span>
+              <span>${roleOptions[role].label}</span>
+              <strong>${checked ? "ĐANG CẤP" : "ĐÃ TẮT"}</strong>
+            </button>
+          `;
+        }).join("");
+        return `
+        <tr data-role-keys="${roles.join(",")}">
+          <td>
+            <div class="d-flex items-center gap-2">
+              <div class="avatar" style="width: 34px; height: 34px; font-size: 0.82rem; background-color: ${roles.includes("superadmin") ? "#4c1d95" : u.avatarColor || "#059669"}; color: white;">
+                ${escapeHtml(u.avatar || "U")}
+              </div>
+              <div>
+                <a href="profile-overview.html?userId=${encodeURIComponent(u.id)}" style="font-weight:700;font-size:.92rem;">${escapeHtml(u.name)}</a>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(u.email || u.username || "")}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="badge ${u.role === "superadmin" ? "badge-superadmin" : "badge-primary"}">
+              ${roleOptions[u.role] ? roleOptions[u.role].label : escapeHtml(u.roleLabel || "Hành khách")}
+            </span>
+          </td>
+          <td>
+            <div class="permission-matrix">${roleButtons}</div>
+          </td>
+          <td>
+            <span class="badge ${u.isSuspended ? "badge-danger" : "badge-success"}">${u.isSuspended ? "Đã khóa" : "Hoạt động"}</span>
+            ${canToggleAccountSuspension(actor, u) ? `
+              <button type="button"
+                class="btn ${u.isSuspended ? "btn-outline" : "btn-danger"} btn-sm"
+                style="margin-top: 0.4rem;"
+                title="${accountSuspensionTooltip(actor, u)}"
+                onclick="toggleSuspendUser('${u.id}')">
+                ${u.isSuspended ? "Mở khóa" : "Khóa tài khoản"}
+              </button>
+            ` : ""}
+          </td>
+        </tr>
+      `}).join("");
+    }
+
+    function filterUsersTable() {
+      const q = document.getElementById("userSearchInput").value.toLowerCase();
+      const role = document.getElementById("roleFilterSelect").value;
+
+      const rows = document.querySelectorAll("#usersTableBody tr");
+      rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        const matchesQ = text.includes(q);
+        const matchesRole = role === "all" || r.dataset.roleKeys.split(",").includes(role);
+        r.style.display = matchesQ && matchesRole ? "" : "none";
+      });
+    }
+
+    function toggleRole(userId, role, enabled) {
+      const result = window.Auth.setManagedRole(userId, role, enabled);
+      window.Toast.show(result.message, result.success ? "success" : "error");
+      renderUsersTable();
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[character]);
+    }
+
+    function toggleSuspendUser(id) {
+      const user = window.Storage.getById("users", id);
+      if (!user) return;
+      const result = window.Auth.setAccountSuspended(id, !user.isSuspended);
+      window.Toast.show(result.message, result.success ? "success" : "error");
+      if (result.success) renderUsersTable();
+    }
+
+    function canToggleAccountSuspension(actor, target) {
+      if (!actor || !["admin", "superadmin"].includes(actor.role) ||
+          actor.id === target.id ||
+          target.id === "u_longchieusigma" ||
+          target.username === "longchieusigma") {
+        return false;
+      }
+      const roles = Array.isArray(target.roles) ? target.roles : [target.role || "rider"];
+      return actor.role === "superadmin" || !roles.some((role) => ["admin", "superadmin"].includes(role));
+    }
+
+    function accountSuspensionTooltip(actor, target) {
+      if (actor && actor.id === target.id) return "Không thể khóa tài khoản đang sử dụng";
+      if (target.id === "u_longchieusigma" || target.username === "longchieusigma") {
+        return "Không thể khóa tài khoản Super Admin gốc";
+      }
+      const roles = Array.isArray(target.roles) ? target.roles : [target.role || "rider"];
+      if (actor && actor.role !== "superadmin" &&
+          roles.some((role) => ["admin", "superadmin"].includes(role))) {
+        return "Chỉ Super Admin mới có thể khóa tài khoản Admin";
+      }
+      if (!actor || !["admin", "superadmin"].includes(actor.role)) {
+        return "Chỉ Admin hoặc Super Admin mới có thể khóa tài khoản";
+      }
+      return target.isSuspended ? "Mở khóa tài khoản này" : "Khóa tài khoản này";
+    }
+  </script>
+</body>
+</html>

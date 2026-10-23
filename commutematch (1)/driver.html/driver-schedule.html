@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Lịch Trình Chuyến Xe – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="driver-dashboard.html">Tài xế</a> / <span>Lịch trình</span>
+          </div>
+          <h1 class="page-title">📅 Quản Lý Lịch Trình Chuyến Xe Của Tôi</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="driver-trip-create.html" class="btn btn-primary btn-sm">➕ Tạo Chuyến Mới</a>
+        </div>
+      </div>
+
+      <!-- Tabs Lọc Trạng Thái -->
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchFilter('scheduled', this)">
+          🚗 Sắp Chạy (<span id="countSched">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchFilter('completed', this)">
+          ✅ Đã Hoàn Thành (<span id="countComp">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchFilter('cancelled', this)">
+          ❌ Đã Hủy (<span id="countCanc">0</span>)
+        </button>
+      </div>
+
+      <!-- Schedule Trips List -->
+      <div id="scheduleContainer" class="d-flex flex-column gap-3">
+        <!-- Loaded dynamically -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Hủy Chuyến Tài Xế -->
+  <div class="modal-backdrop" id="driverCancelModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="card-title text-danger">Hủy Chuyến Đi Đã Đăng</h3>
+        <button class="btn btn-outline btn-sm" onclick="window.Modal.close('driverCancelModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.88rem;">
+          Nếu bạn hủy chuyến, hệ thống sẽ tự động gửi thông báo xin lỗi và hoàn trả lại trạng thái cho các hành khách đã đặt vé.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Lý do hủy chuyến:</label>
+          <select id="driverCancelReason" class="form-select">
+            <option value="Xe gặp sự cố kỹ thuật">Xe gặp sự cố kỹ thuật đột xuất</option>
+            <option value="Đột xuất bận việc học/cơ quan">Đột xuất bận việc học / cơ quan</option>
+            <option value="Thời tiết mưa bão xấu">Thời tiết xấu không an toàn</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="window.Modal.close('driverCancelModal')">Đóng</button>
+        <button type="button" class="btn btn-danger" onclick="confirmDriverCancel()">Xác Nhận Hủy Chuyến</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data/mock-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/modules/toast.js"></script>
+  <script src="js/modules/modal.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/ai-engine.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    let filterStatus = 'scheduled';
+    let cancelTripId = null;
+
+    document.addEventListener("DOMContentLoaded", renderSchedule);
+
+    function renderSchedule() {
+      const allTrips = window.Storage.get("trips");
+      const user = window.Storage.getCurrentUser();
+
+      // Lọc các chuyến xe của tài xế này
+      const myTrips = allTrips.filter(t => t.driverId === user.id || t.driverName === user.name);
+
+      const sched = myTrips.filter(t => t.status === 'scheduled');
+      const comp = myTrips.filter(t => t.status === 'completed');
+      const canc = myTrips.filter(t => t.status === 'cancelled');
+
+      document.getElementById("countSched").innerText = sched.length;
+      document.getElementById("countComp").innerText = comp.length;
+      document.getElementById("countCanc").innerText = canc.length;
+
+      let list = [];
+      if (filterStatus === 'scheduled') list = sched;
+      else if (filterStatus === 'completed') list = comp;
+      else if (filterStatus === 'cancelled') list = canc;
+
+      const container = document.getElementById("scheduleContainer");
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="card">
+            <div class="empty-state">
+              <div class="empty-icon">📅</div>
+              <div class="empty-title">Không có chuyến xe nào trong mục này</div>
+              <div class="empty-desc">Bạn chưa có lịch trình nào trong trạng thái này. Hãy đăng chuyến đi mới để kết nối bạn đồng hành!</div>
+              <a href="driver-trip-create.html" class="btn btn-primary btn-sm">➕ Đăng Chuyến Đi Mới</a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(t => `
+        <div class="card" style="border-left: 4px solid ${
+          t.status === 'scheduled' ? 'var(--primary)' :
+          t.status === 'completed' ? 'var(--success)' : 'var(--danger)'
+        };">
+          <div class="card-body">
+            <div class="d-flex justify-between items-start flex-wrap gap-2 mb-2">
+              <div>
+                <span class="badge ${
+                  t.status === 'scheduled' ? 'badge-primary' :
+                  t.status === 'completed' ? 'badge-success' : 'badge-danger'
+                } mb-1">
+                  ${t.status === 'scheduled' ? 'Sắp khởi hành' : t.status === 'completed' ? 'Đã hoàn thành' : 'Đã hủy'}
+                </span>
+                <h3 style="font-size: 1.15rem; margin: 0.2rem 0;">
+                  ${t.origin} → ${t.destination}
+                </h3>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">
+                  📅 Ngày đi: <strong>${t.departureDate}</strong> • Giờ xuất phát: <strong style="color: var(--primary);">${t.departureTime}</strong>
+                </div>
+              </div>
+
+              <div class="text-right">
+                <div class="font-bold" style="font-size: 1.25rem; color: var(--text-main);">
+                  ${(t.costSharing || 12000).toLocaleString('vi-VN')} đ
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Chia sẻ / người</div>
+              </div>
+            </div>
+
+            <div style="background-color: var(--bg-muted); padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.88rem; margin-bottom: 1rem;">
+              <div class="d-flex justify-between mb-1">
+                <span>🚏 Điểm đón: <strong>${t.pickupZoneName || 'Trạm đón KTX Khu B'}</strong></span>
+                <span>Chỗ trống: <strong>${t.availableSeats} / ${t.totalSeats} ghế</strong></span>
+              </div>
+              <div class="d-flex justify-between text-muted" style="font-size: 0.8rem;">
+                <span>Phương tiện: ${t.vehicleInfo}</span>
+                <span>Ghi chú: ${t.notes || 'Không có'}</span>
+              </div>
+            </div>
+
+            <div class="d-flex justify-end gap-2">
+              ${t.status === 'scheduled' ? `
+                <a href="driver-trip-execution.html?id=${t.id}" class="btn btn-secondary btn-sm">🚦 Điều Hành Chuyến Đi</a>
+                <a href="driver-trip-detail.html?id=${t.id}" class="btn btn-outline btn-sm">Chi Tiết & Khách</a>
+                <button class="btn btn-outline btn-sm text-danger" onclick="promptCancelTrip('${t.id}')">Hủy Chuyến</button>
+              ` : `
+                <a href="driver-trip-detail.html?id=${t.id}" class="btn btn-outline btn-sm">Xem Lại Lịch Sử</a>
+              `}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function switchFilter(st, btn) {
+      filterStatus = st;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderSchedule();
+    }
+
+    function promptCancelTrip(tripId) {
+      cancelTripId = tripId;
+      window.Modal.open("driverCancelModal");
+    }
+
+    function confirmDriverCancel() {
+      if (!cancelTripId) return;
+      const reason = document.getElementById("driverCancelReason").value;
+
+      window.Storage.update("trips", cancelTripId, {
+        status: "cancelled",
+        cancelReason: reason
+      });
+
+      window.Modal.close("driverCancelModal");
+      window.Toast.show("Đã hủy chuyến đi thành công.", "info");
+      renderSchedule();
+    }
+  </script>
+</body>
+</html>
