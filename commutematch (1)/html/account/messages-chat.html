@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <title>Tin Nhắn Trao Đổi Chuyến Đi – CommuteMatch</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main" style="padding-bottom: 1rem;">
+      <div class="page-header mb-2">
+        <div>
+          <div class="breadcrumbs">
+            <a href="index.html">Trang chủ</a> / <span>Tin nhắn</span>
+          </div>
+          <h1 class="page-title"><i class="fa-solid fa-comment-dots" aria-hidden="true"></i> Trao Đổi Chuyến Đi</h1>
+        </div>
+      </div>
+
+      <!-- Chat Container Grid -->
+      <div class="card" style="height: calc(100vh - 180px); min-height: 520px; display: flex; flex-direction: row; overflow: hidden;">
+        <!-- Cột trái: Danh sách hội thoại -->
+        <div style="width: 300px; min-width: 180px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; background-color: var(--bg-surface);">
+          <div style="padding: 1rem; border-bottom: 1px solid var(--border-color); font-weight: 700; font-size: 0.95rem;">Cuộc trò chuyện</div>
+          <div id="conversationList" style="flex: 1; overflow-y: auto;"></div>
+        </div>
+
+        <!-- Cột phải: Khung chat tin nhắn -->
+        <div style="flex: 1; display: flex; flex-direction: column; background-color: var(--bg-body);">
+          <!-- Chat Header -->
+          <div style="padding: 0.75rem 1.25rem; background-color: var(--bg-surface); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+            <div class="d-flex items-center gap-2">
+              <div class="avatar" id="chatAvatar" style="width: 38px; height: 38px; background-color: #0d9488; color: white;">?</div>
+              <div>
+                <a id="chatProfileLink" class="font-bold" style="font-size: 0.95rem;" href="#">Chọn người để nhắn tin</a>
+                <div id="chatRoleLabel" style="font-size: 0.75rem; color: var(--text-muted);"></div>
+              </div>
+            </div>
+            <div class="d-flex gap-1">
+              <a id="chatTargetProfile" href="#" class="btn btn-outline btn-sm" style="display: none;"><i class="fa-solid fa-user" aria-hidden="true"></i> Xem hồ sơ</a>
+            </div>
+          </div>
+
+          <!-- Quick Context Banner -->
+          <div id="chatContextBanner" style="display: none; background-color: var(--bg-muted); padding: 0.5rem 1.25rem; font-size: 0.8rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+            <span>Chuyến: <strong>KTX Khu B → ĐH Bách Khoa CS2</strong></span>
+            <span>Điểm đón: <strong>Cổng phụ Cây xăng Petrolimex</strong></span>
+          </div>
+
+          <!-- Messages Stream -->
+          <div id="messagesStream" style="flex: 1; padding: 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.85rem;">
+            <!-- Render dynamically -->
+          </div>
+
+          <!-- Quick replies chips -->
+          <div id="quickReplies" style="display: none; padding: 0.4rem 1.25rem; background-color: var(--bg-surface); border-top: 1px solid var(--border-color); gap: 0.5rem; overflow-x: auto;">
+            <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.78rem;" onclick="sendQuick('Em đã có mặt tại trạm đón rồi ạ!')"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Em đã có mặt tại trạm đón!</button>
+            <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.78rem;" onclick="sendQuick('Xe có sẵn điều hòa không anh?')"><i class="fa-solid fa-snowflake" aria-hidden="true"></i> Xe có điều hòa không?</button>
+            <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.78rem;" onclick="sendQuick('Em đang đi bộ ra, khoảng 2 phút nữa tới.')"><i class="fa-solid fa-person-running" aria-hidden="true"></i> Em tới trong 2 phút nữa</button>
+          </div>
+
+          <!-- Chat Input Footer -->
+          <form id="chatForm" onsubmit="handleSendMessage(event)" style="padding: 0.75rem 1.25rem; background-color: var(--bg-surface); border-top: 1px solid var(--border-color); display: flex; gap: 0.75rem; align-items: center;">
+            <input type="text" id="msgInput" class="form-control" placeholder="Chọn người để bắt đầu trò chuyện..." required autocomplete="off" disabled>
+            <button id="sendMessageButton" type="submit" class="btn btn-primary" disabled>Gửi</button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/pages/account/messages-chat.js"></script>
+</body>
+</html>

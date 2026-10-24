@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <title>Đăng Ký Tài Khoản – CommuteMatch</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body style="background-color: var(--bg-body);">
+  <div id="app-header"></div>
+
+  <main class="container mt-4 mb-4" style="flex: 1; max-width: 640px;">
+    <div class="card" style="box-shadow: var(--shadow-lg);">
+      <div class="card-header text-center" style="display: block; padding: 1.5rem 1.5rem 1rem;">
+        <h2 style="font-size: 1.45rem;">Đăng Ký Tham Gia Cộng Đồng</h2>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">
+          Tạo tài khoản CommuteMatch để bắt đầu hành trình của bạn
+        </p>
+      </div>
+
+      <div class="card-body">
+        <form id="registerForm" onsubmit="handleRegister(event)" novalidate>
+          <div class="ai-panel mb-3">
+            <strong>Vai trò ban đầu: Tài xế</strong>
+            <div style="font-size: 0.85rem;">Tài khoản mới có thể đăng chuyến, quản lý lịch chạy và duyệt yêu cầu ghép xe.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regName">Họ và tên đầy đủ <span class="required">*</span></label>
+            <input type="text" id="regName" class="form-control" placeholder="ví dụ: Trần Thị Mai" required>
+            <div class="form-feedback">Vui lòng nhập họ và tên.</div>
+          </div>
+
+          <div class="d-grid grid-cols-2 gap-2">
+            <div class="form-group">
+              <label class="form-label" for="regUsername">Tên đăng nhập <span class="required">*</span></label>
+              <input type="text" id="regUsername" class="form-control" placeholder="Tên đăng nhập" autocomplete="username" minlength="3" maxlength="30" required>
+              <div class="form-feedback">Tên đăng nhập cần có ít nhất 3 ký tự.</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="regEmail">Email <span class="required">*</span></label>
+              <input type="email" id="regEmail" class="form-control" placeholder="ban@example.com" autocomplete="email" required>
+              <div class="form-feedback">Vui lòng nhập email hợp lệ.</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regPhone">Số điện thoại <span class="required">*</span></label>
+            <input type="tel" id="regPhone" class="form-control" placeholder="Nhập số điện thoại" autocomplete="tel" required>
+            <div class="form-feedback">Vui lòng nhập số điện thoại.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regOccupation">Nghề nghiệp <span class="required">*</span></label>
+            <input type="text" id="regOccupation" class="form-control" placeholder="Ví dụ: Nhân viên văn phòng, Kinh doanh..." maxlength="100" required>
+            <div class="form-feedback">Vui lòng nhập nghề nghiệp.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regPassword">Mật khẩu đăng nhập <span class="required">*</span></label>
+            <input type="password" id="regPassword" class="form-control" placeholder="Tối thiểu 8 ký tự" autocomplete="new-password" minlength="8" required>
+            <div class="form-feedback">Vui lòng đặt mật khẩu tối thiểu 8 ký tự.</div>
+          </div>
+
+          <!-- Tải ảnh xác minh danh tính KYC -->
+          <div class="form-group">
+            <label class="form-label">Tải ảnh giấy tờ xác minh danh tính (không bắt buộc)</label>
+            <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; text-align: center; background-color: var(--bg-surface); cursor: pointer;" onclick="document.getElementById('kycFile').click()">
+              <div style="font-size: 1.8rem;"><i class="fa-solid fa-camera" aria-hidden="true"></i></div>
+              <div style="font-size: 0.88rem; font-weight: 600;" id="fileLabel">Nhấp để chọn ảnh giấy tờ xác minh</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">Định dạng PNG, JPG (tối đa 5MB)</div>
+              <input type="file" id="kycFile" style="display: none;" accept="image/*" onchange="previewFile(this)">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="d-flex items-start gap-1" style="font-size: 0.85rem; cursor: pointer;">
+              <input type="checkbox" id="agreeTerms" required checked style="margin-top: 0.2rem;">
+              <span>Tôi đồng ý với <a href="terms-and-privacy.html" target="_blank">Điều khoản dịch vụ</a> và cam kết chia sẻ chi phí xăng xe phi thương mại.</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg">Hoàn Tất Đăng Ký</button>
+        </form>
+      </div>
+      <div class="card-footer text-center" style="display: block;">
+        Đã có tài khoản? <a href="login.html" class="font-bold">Đăng nhập tại đây</a>
+      </div>
+    </div>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/pages/common/register.js"></script>
+</body>
+</html>
