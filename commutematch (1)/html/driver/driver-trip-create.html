@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <title>Đăng Tạo Chuyến Đi Mới – CommuteMatch</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="driver/driver-dashboard.html">Tài xế</a> / <span>Tạo chuyến</span>
+          </div>
+          <h1 class="page-title"><i class="fa-solid fa-plus" aria-hidden="true"></i> Đăng Tạo Chuyến Đi Chia Sẻ</h1>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 820px; margin: 0 auto;">
+        <div class="card-body" style="padding: 2rem;">
+          <form id="createTripForm" onsubmit="handleCreateTrip(event)">
+            <div id="tripWizardSteps" class="d-flex gap-2 mb-4" aria-label="Các bước tạo chuyến">
+              <span class="badge badge-primary" data-wizard-label="0">1. Lộ trình</span>
+              <span class="badge badge-info" data-wizard-label="1">2. Thời gian &amp; xe</span>
+              <span class="badge badge-info" data-wizard-label="2">3. Chi phí &amp; xác nhận</span>
+            </div>
+            <fieldset class="trip-wizard-panel" data-wizard-panel="0" style="border:0;min-width:0">
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+              1. Lộ Trình & Trạm Đón Dọc Tuyến
+            </h3>
+
+            <div class="d-grid grid-cols-2 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripOrigin">Điểm xuất phát <span class="required">*</span></label>
+                <input type="text" id="tripOrigin" class="form-control" placeholder="ví dụ: KTX Khu B ĐHQG..." required value="KTX Khu B ĐHQG (Cổng Sau)" onchange="triggerAiZoneRecommendation()">
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripDestination">Điểm đến <span class="required">*</span></label>
+                <input type="text" id="tripDestination" class="form-control" placeholder="ví dụ: ĐH Bách Khoa CS2..." required value="ĐH Bách Khoa Cơ Sở 2 (Dĩ An)" onchange="triggerAiZoneRecommendation()">
+              </div>
+            </div>
+
+            <!-- AI-2: Meeting Point Recommender for Driver -->
+            <div class="ai-panel mb-3" id="driverAiZoneBox">
+              <div class="d-flex items-center justify-between mb-1">
+                <span class="ai-badge">AI-2 GỢI Ý TRẠM ĐÓN TỐI ƯU</span>
+                <span class="badge badge-success">Không làm bạn đi vòng (0 phút đường vòng)</span>
+              </div>
+              <div class="font-bold" style="font-size: 1rem; color: var(--text-main); margin-bottom: 0.25rem;" id="aiRecZoneTitle">
+                Trạm đón KTX Khu B - Cổng phụ Cây Xăng Petrolimex
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;" id="aiRecZoneReason">
+                Điểm dừng thuận tiện trên trục đường xuất phát, vỉa hè rộng 4m giúp khách lên xe nhanh trong 30 giây mà không cản trở giao thông.
+              </p>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-primary btn-sm" onclick="window.Toast.show('Đã chốt trạm đón này cho lộ trình!', 'success')">
+                  <i class="fa-solid fa-check" aria-hidden="true"></i> Đồng ý đón tại trạm này
+                </button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('zoneSelectGroup').style.display='block'">
+                  Chọn trạm khác
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group" id="zoneSelectGroup" style="display: none;">
+              <label class="form-label">Chọn trạm đón an toàn từ danh mục:</label>
+              <select id="tripZoneSelect" class="form-select">
+                <!-- Dynamically loaded -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Các điểm trạm dừng chính trên đường (cách nhau bởi dấu phẩy):</label>
+              <input type="text" id="tripRoutePoints" class="form-control" value="KTX Khu B, Ngã 3 621, ĐH KHTN CS2, ĐH Bách Khoa CS2">
+            </div>
+
+            </fieldset>
+            <fieldset class="trip-wizard-panel" data-wizard-panel="1" style="border:0;min-width:0">
+
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin: 1.5rem 0 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+              2. Thời Gian & Phương Tiện
+            </h3>
+
+            <div class="d-grid grid-cols-3 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripDate">Ngày khởi hành <span class="required">*</span></label>
+                <input type="date" id="tripDate" class="form-control" required>
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripTime">Giờ xuất phát <span class="required">*</span></label>
+                <input type="time" id="tripTime" class="form-control" value="07:15" required>
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripSeats">Số chỗ trống <span class="required">*</span></label>
+                <input type="number" id="tripSeats" class="form-control" min="1" max="4" value="1" required>
+              </div>
+            </div>
+
+            <div class="d-grid grid-cols-2 gap-3">
+              <div class="form-group">
+                <label class="form-label" for="tripVehicleType">Loại ô tô</label>
+                <select id="tripVehicleType" class="form-select" required>
+                  <option value="electric">Ô tô điện</option>
+                  <option value="gasoline">Ô tô xăng</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tripVehicle">Mẫu xe và biển số</label>
+                <input type="text" id="tripVehicle" class="form-control" value="VinFast VF 8 (51H-888.99)" required>
+              </div>
+            </div>
+
+            </fieldset>
+            <fieldset class="trip-wizard-panel" data-wizard-panel="2" style="border:0;min-width:0">
+
+            <h3 style="font-size: 1.15rem; color: var(--primary); margin: 1.5rem 0 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+              3. Mức Đóng Góp Chi Phí Chuyến Đi
+            </h3>
+
+            <div class="d-grid grid-cols-2 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripFare">Đóng góp chi phí chuyến đi (VNĐ/người) <span class="required">*</span></label>
+                <input type="number" id="tripFare" class="form-control" value="12000" min="5000" max="35000" step="1000" required>
+                <div id="tripCostDescription" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
+                  Quy định mức trần: Tối đa 35.000 đ cho chặng đi học nội khu và liên quận.
+                </div>
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label" for="tripNotes">Ghi chú thêm cho hành khách</label>
+                <input type="text" id="tripNotes" class="form-control" placeholder="ví dụ: Có sẵn điều hòa sạch, balo vừa phải...">
+              </div>
+            </div>
+
+            <div class="d-flex justify-between items-center mt-4">
+              <button type="button" id="tripWizardBack" class="btn btn-outline">Quay lại</button>
+              <div class="d-flex gap-2">
+              <a href="driver/driver-dashboard.html" class="btn btn-outline">Hủy bỏ</a>
+              <button type="button" id="tripWizardNext" class="btn btn-primary btn-lg">Tiếp theo <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+              <button type="submit" id="tripWizardSubmit" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-rocket" aria-hidden="true"></i> Đăng Chuyến Xe Lên Nền Tảng
+              </button>
+              </div>
+            </div>
+            </fieldset>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/modules/driver-trip-utils.js"></script>
+  <script src="../js/modules/driver-api.js"></script>
+  <script src="driver/js/driver-trip-create.js"></script>
+</body>
+</html>

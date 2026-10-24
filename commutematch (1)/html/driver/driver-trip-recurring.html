@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <title>Thiết Lập Chuyến Đi Lặp Lại – CommuteMatch</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="driver/driver-dashboard.html">Tài xế</a> / <span>Lịch trình lặp lại</span>
+          </div>
+          <h1 class="page-title"><i class="fa-solid fa-rotate" aria-hidden="true"></i> Thiết Lập Lịch Đi Học / Đi Làm Cố Định Hàng Tuần</h1>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 820px; margin: 0 auto;">
+        <div class="card-body" style="padding: 2rem;">
+          <form id="recurringForm" onsubmit="saveRecurring(event)">
+            <!-- Toggle Active Status -->
+            <div class="ai-panel mb-4" style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <div class="font-bold" style="font-size: 1.05rem;">Tự động đăng chuyến theo tuần</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">
+                  Hệ thống sẽ tự động mở chuyến xe cố định mỗi tuần mà không cần tạo thủ công mỗi ngày.
+                </div>
+              </div>
+              <label class="d-flex items-center gap-1" style="cursor: pointer;">
+                <input type="checkbox" id="toggleRecurring" checked style="width: 20px; height: 20px;">
+                <span class="font-bold text-success" id="toggleStatusLabel">Đang kích hoạt</span>
+              </label>
+            </div>
+
+            <!-- Ngày lặp lại trong tuần -->
+            <div class="form-group mb-4">
+              <label class="form-label">Chọn các ngày trong tuần bạn di chuyển:</label>
+              <div class="d-flex gap-2 flex-wrap" id="daysSelector">
+                <button type="button" class="btn btn-primary btn-sm" data-day="1" aria-pressed="true">Thứ 2</button>
+                <button type="button" class="btn btn-primary btn-sm" data-day="2" aria-pressed="true">Thứ 3</button>
+                <button type="button" class="btn btn-primary btn-sm" data-day="3" aria-pressed="true">Thứ 4</button>
+                <button type="button" class="btn btn-primary btn-sm" data-day="4" aria-pressed="true">Thứ 5</button>
+                <button type="button" class="btn btn-primary btn-sm" data-day="5" aria-pressed="true">Thứ 6</button>
+                <button type="button" class="btn btn-outline btn-sm" data-day="6" aria-pressed="false">Thứ 7</button>
+                <button type="button" class="btn btn-outline btn-sm" data-day="7" aria-pressed="false">Chủ Nhật</button>
+              </div>
+            </div>
+
+            <div class="d-grid grid-cols-2 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label">Chặng đi buổi sáng</label>
+                <input type="text" id="recurringOutboundRoute" class="form-control" value="KTX Khu B → ĐH Bách Khoa CS2" required>
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label">Giờ xuất phát sáng</label>
+                <input type="time" id="recurringOutboundTime" class="form-control" value="07:15" required>
+              </div>
+            </div>
+
+            <div class="d-grid grid-cols-2 gap-3 mb-4">
+              <div class="form-group mb-0">
+                <label class="form-label">Chặng về buổi chiều (Tùy chọn)</label>
+                <input type="text" id="recurringReturnRoute" class="form-control" value="ĐH Bách Khoa CS2 → KTX Khu B">
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label">Giờ xuất phát chiều</label>
+                <input type="time" id="recurringReturnTime" class="form-control" value="17:15">
+              </div>
+            </div>
+
+            <div class="d-grid grid-cols-3 gap-3 mb-4">
+              <div class="form-group mb-0"><label class="form-label" for="recurringVehicleType">Loại ô tô</label><select id="recurringVehicleType" class="form-select"><option value="electric">Ô tô điện</option><option value="gasoline">Ô tô xăng</option></select></div>
+              <div class="form-group mb-0"><label class="form-label" for="recurringVehicle">Mẫu xe</label><input id="recurringVehicle" class="form-control" value="VinFast VF 8" required></div>
+              <div class="form-group mb-0"><label class="form-label" for="recurringSeats">Số ghế trống</label><input id="recurringSeats" class="form-control" type="number" min="1" max="4" value="3" required></div>
+            </div>
+            <div class="form-group"><label class="form-label" for="recurringFare">Mức chia sẻ chi phí (đ/người)</label><input id="recurringFare" class="form-control" type="number" min="5000" max="35000" step="1000" value="12000" required></div>
+
+            <!-- Ước tính tác động -->
+            <div style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md); font-size: 0.88rem; margin-bottom: 1.5rem;">
+              <div class="font-bold mb-1"><i class="fa-solid fa-leaf" aria-hidden="true"></i> Dự báo tác động mỗi tháng khi mở chuyến định kỳ:</div>
+              <div class="d-flex justify-between flex-wrap gap-2 text-muted">
+                <span id="recurringForecast">Chuyến trong 14 ngày tới: <strong>0</strong></span>
+                <span>Mức chia sẻ: <strong id="recurringFareSummary">12.000 đ/người</strong></span>
+                <span id="recurringCostSummary">Loại xe: ô tô điện</span>
+              </div>
+            </div>
+
+            <div class="d-flex justify-between items-center">
+              <a href="driver/driver-dashboard.html" class="btn btn-outline">Quay lại</a>
+              <button type="submit" class="btn btn-primary btn-lg"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Lưu Cấu Hình Lịch Trình</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/modules/driver-trip-utils.js"></script>
+  <script src="../js/modules/driver-api.js"></script>
+  <script src="driver/js/driver-trip-recurring.js"></script>
+</body>
+</html>

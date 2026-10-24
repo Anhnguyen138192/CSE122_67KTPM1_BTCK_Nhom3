@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <title>Điều Hành Chuyến Đi Trực Tiếp – CommuteMatch</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="driver/driver-schedule.html">Lịch trình</a> / <span>Điều hành chuyến đi</span>
+          </div>
+          <h1 class="page-title"><i class="fa-solid fa-traffic-light" aria-hidden="true"></i> Phòng Điều Hành Chuyến Đi (Driver Cockpit)</h1>
+        </div>
+        <span class="badge badge-primary" id="cockpitBadge">ĐANG CHỜ KHỞI HÀNH</span>
+      </div>
+
+      <div class="d-grid grid-cols-12 gap-3">
+        <!-- Cột trái: Trạng thái & Nút điều khiển -->
+        <div style="grid-column: span 7;" class="col-12 col-md-7">
+          <div class="card mb-3">
+            <div class="card-header">
+            <h3 class="card-title" id="executionRouteTitle">Điều hành chuyến xe</h3>
+            </div>
+            <div class="card-body">
+              <!-- Stepper -->
+              <div class="ai-panel text-center mb-4" style="padding: 1.5rem;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;" id="execIcon"><i class="fa-solid fa-car-side" aria-hidden="true"></i></div>
+                <h3 style="font-size: 1.3rem; margin-bottom: 0.25rem;" id="execTitle">
+                  Chuẩn bị xuất phát đến điểm đón
+                </h3>
+                <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;" id="execSub">
+                  Điểm hẹn: <strong>Trạm đón KTX Khu B - Cổng phụ Cây Xăng</strong> (Hành khách đã sẵn sàng).
+                </p>
+
+                <div class="d-flex justify-center gap-2">
+                  <button type="button" class="btn btn-primary btn-lg" id="btnMainAction" onclick="handleExecAction()">
+                    <i class="fa-solid fa-rocket" aria-hidden="true"></i> Bắt Đầu Đi Đón Khách
+                  </button>
+                </div>
+              </div>
+
+              <!-- An toàn & Kiểm tra trước khi nổ máy -->
+              <div style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md); font-size: 0.88rem;">
+                <div class="font-bold mb-2"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i> Danh sách kiểm tra an toàn (Safety Checklist):</div>
+                <label class="d-flex items-center gap-2 mb-1" style="cursor: pointer;">
+                  <input type="checkbox" id="chkSeatbelt"> Đã kiểm tra dây an toàn cho hành khách
+                </label>
+                <label class="d-flex items-center gap-2 mb-1" style="cursor: pointer;">
+                  <input type="checkbox" id="chkGas"> Xe đủ nhiên liệu hoặc pin cho toàn tuyến
+                </label>
+                <label class="d-flex items-center gap-2" style="cursor: pointer;">
+                  <input type="checkbox" id="chkBrakes"> Gương chiếu hậu và phanh xe hoạt động tốt
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Danh sách hành khách cần đón -->
+        <div style="grid-column: span 5;" class="col-12 col-md-5">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Hành Khách Đi Cùng</h3>
+            </div>
+            <div class="card-body">
+              <div id="executionPassengers" class="d-flex flex-column gap-2"></div>
+
+              <!-- Thống kê đóng góp chi phí của chuyến này -->
+              <div class="d-flex justify-between items-center" style="background-color: var(--primary-light); padding: 0.75rem 1rem; border-radius: var(--radius-md);">
+                <span class="font-bold" style="color: var(--primary); font-size: 0.9rem;" id="executionCostLabel">Đóng góp chi phí chuyến đi:</span>
+                <strong style="font-size: 1.15rem; color: var(--primary);" id="executionCostValue">—</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/modules/driver-trip-utils.js"></script>
+  <script src="../js/modules/driver-api.js"></script>
+  <script src="driver/js/driver-trip-execution.js"></script>
+</body>
+</html>
