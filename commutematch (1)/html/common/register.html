@@ -25,7 +25,7 @@
       </div>
 
       <div class="card-body">
-        <form id="registerForm" onsubmit="handleRegister(event)" novalidate>
+        <form id="registerForm" data-cm-submit="register" novalidate>
           <div class="ai-panel mb-3">
             <strong>Vai trò ban đầu: Tài xế</strong>
             <div style="font-size: 0.85rem;">Tài khoản mới có thể đăng chuyến, quản lý lịch chạy và duyệt yêu cầu ghép xe.</div>
@@ -71,11 +71,11 @@
           <!-- Tải ảnh xác minh danh tính KYC -->
           <div class="form-group">
             <label class="form-label">Tải ảnh giấy tờ xác minh danh tính (không bắt buộc)</label>
-            <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; text-align: center; background-color: var(--bg-surface); cursor: pointer;" onclick="document.getElementById('kycFile').click()">
+            <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; text-align: center; background-color: var(--bg-surface); cursor: pointer;" data-cm-action="open-kyc-file" role="button" tabindex="0" aria-label="Tải ảnh thẻ sinh viên hoặc nhân viên lên">
               <div style="font-size: 1.8rem;"><i class="fa-solid fa-camera" aria-hidden="true"></i></div>
               <div style="font-size: 0.88rem; font-weight: 600;" id="fileLabel">Nhấp để chọn ảnh giấy tờ xác minh</div>
               <div style="font-size: 0.78rem; color: var(--text-muted);">Định dạng PNG, JPG (tối đa 5MB)</div>
-              <input type="file" id="kycFile" style="display: none;" accept="image/*" onchange="previewFile(this)">
+              <input type="file" id="kycFile" style="display: none;" accept="image/*" data-cm-change-action="preview-file">
             </div>
           </div>
 
@@ -106,6 +106,7 @@
   <script src="../js/main.js"></script>
 
   <script src="../js/pages/common/register.js"></script>
+  <script src="../js/modules/page-actions.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 </body>
 </html>

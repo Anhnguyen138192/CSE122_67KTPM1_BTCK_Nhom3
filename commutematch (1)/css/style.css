@@ -5,34 +5,40 @@
 
 :root {
   /* Brand Colors - Eco Transit Palette */
-  --primary: #059669;
-  --primary-hover: #047857;
+  --primary: #047857;
+  --primary-hover: #065f46;
+  --primary-button-bg: #047857;
+  --primary-button-hover: #065f46;
   --primary-light: #d1fae5;
-  --primary-rgb: 5, 150, 105;
+  --primary-rgb: 4, 120, 87;
 
-  --secondary: #0d9488;
-  --secondary-hover: #0f766e;
+  --secondary: #0f766e;
+  --secondary-hover: #115e59;
+  --secondary-button-bg: #0f766e;
+  --secondary-button-hover: #115e59;
   --secondary-light: #ccfbf1;
 
-  --accent: #2563eb;
+  --accent: #1d4ed8;
   --accent-light: #dbeafe;
 
-  --warning: #d97706;
+  --warning: #92400e;
   --warning-light: #fef3c7;
 
-  --danger: #dc2626;
+  --danger: #b91c1c;
+  --danger-button-bg: #b91c1c;
+  --danger-button-hover: #991b1b;
   --danger-light: #fee2e2;
 
-  --success: #16a34a;
+  --success: #166534;
   --success-light: #dcfce7;
 
-  --info: #0284c7;
+  --info: #075985;
   --info-light: #e0f2fe;
 
   /* AI Theme Tokens */
-  --ai-purple: #7c3aed;
+  --ai-purple: #6b21a8;
   --ai-purple-light: #f3e8ff;
-  --ai-gradient: linear-gradient(135deg, #059669 0%, #2563eb 50%, #7c3aed 100%);
+  --ai-gradient: linear-gradient(135deg, #047857 0%, #1d4ed8 50%, #6b21a8 100%);
 
   /* Neutrals & Surfaces (Light Mode) */
   --bg-body: #f8fafc;
@@ -47,7 +53,7 @@
   --text-inverse: #ffffff;
 
   --border-color: #e2e8f0;
-  --border-focus: #059669;
+  --border-focus: #047857;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -67,6 +73,23 @@
 
 /* Dark Mode Tokens */
 [data-theme="dark"] {
+  --primary: #34d399;
+  --primary-hover: #6ee7b7;
+  --primary-button-bg: #047857;
+  --primary-button-hover: #065f46;
+  --secondary: #5eead4;
+  --secondary-hover: #99f6e4;
+  --secondary-button-bg: #0f766e;
+  --secondary-button-hover: #115e59;
+  --warning: #fcd34d;
+  --danger: #fca5a5;
+  --success: #86efac;
+  --info: #7dd3fc;
+  --ai-purple: #c4b5fd;
+  --danger-button-bg: #b91c1c;
+  --danger-button-hover: #991b1b;
+  --text-light: #a8b4c7;
+
   --bg-body: #0b1329;
   --bg-surface: #131f3d;
   --bg-surface-elevated: #1a294f;
@@ -96,6 +119,8 @@
 [data-role="superadmin"] {
   --primary: #4c1d95;
   --primary-hover: #3b0764;
+  --primary-button-bg: #4c1d95;
+  --primary-button-hover: #3b0764;
   --primary-light: #ede9fe;
   --primary-rgb: 76, 29, 149;
   --border-focus: #7c3aed;

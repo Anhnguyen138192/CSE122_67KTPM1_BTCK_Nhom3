@@ -65,13 +65,13 @@
 
           <!-- Quick replies chips -->
           <div id="quickReplies" style="display: none; padding: 0.4rem 1.25rem; background-color: var(--bg-surface); border-top: 1px solid var(--border-color); gap: 0.5rem; overflow-x: auto;">
-            <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.78rem;" onclick="sendQuick('Em đã có mặt tại trạm đón rồi ạ!')"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Em đã có mặt tại trạm đón!</button>
-            <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.78rem;" onclick="sendQuick('Xe có sẵn điều hòa không anh?')"><i class="fa-solid fa-snowflake" aria-hidden="true"></i> Xe có điều hòa không?</button>
-            <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.78rem;" onclick="sendQuick('Em đang đi bộ ra, khoảng 2 phút nữa tới.')"><i class="fa-solid fa-person-running" aria-hidden="true"></i> Em tới trong 2 phút nữa</button>
+            <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.78rem;" data-cm-action="send-quick" data-cm-message="Em đã có mặt tại trạm đón rồi ạ!"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Em đã có mặt tại trạm đón!</button>
+            <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.78rem;" data-cm-action="send-quick" data-cm-message="Xe có sẵn điều hòa không anh?"><i class="fa-solid fa-snowflake" aria-hidden="true"></i> Xe có điều hòa không?</button>
+            <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.78rem;" data-cm-action="send-quick" data-cm-message="Em đang đi bộ ra, khoảng 2 phút nữa tới."><i class="fa-solid fa-person-running" aria-hidden="true"></i> Em tới trong 2 phút nữa</button>
           </div>
 
           <!-- Chat Input Footer -->
-          <form id="chatForm" onsubmit="handleSendMessage(event)" style="padding: 0.75rem 1.25rem; background-color: var(--bg-surface); border-top: 1px solid var(--border-color); display: flex; gap: 0.75rem; align-items: center;">
+          <form id="chatForm" data-cm-submit="send-message" style="padding: 0.75rem 1.25rem; background-color: var(--bg-surface); border-top: 1px solid var(--border-color); display: flex; gap: 0.75rem; align-items: center;">
             <input aria-label="Nhập tin nhắn" type="text" id="msgInput" class="form-control" placeholder="Chọn người để bắt đầu trò chuyện..." required autocomplete="off" disabled>
             <button id="sendMessageButton" type="submit" class="btn btn-primary" disabled>Gửi</button>
           </form>
@@ -91,6 +91,7 @@
   <script src="../js/main.js"></script>
 
   <script src="../js/pages/account/messages-chat.js"></script>
+  <script src="../js/modules/page-actions.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 </body>
 </html>

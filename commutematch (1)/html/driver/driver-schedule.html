@@ -33,13 +33,13 @@
 
       <!-- Tabs Lọc Trạng Thái -->
       <div class="tabs-header driver-schedule-tabs" role="group" aria-label="Lọc lịch trình theo trạng thái">
-        <button type="button" class="tab-btn active" aria-pressed="true" aria-controls="scheduleContainer" onclick="switchFilter('scheduled', this)">
+        <button type="button" class="tab-btn active" aria-pressed="true" aria-controls="scheduleContainer" data-cm-action="filter-schedule" data-filter="scheduled">
           <i class="fa-solid fa-car" aria-hidden="true"></i> Sắp Chạy (<span id="countSched">0</span>)
         </button>
-        <button type="button" class="tab-btn" aria-pressed="false" aria-controls="scheduleContainer" onclick="switchFilter('completed', this)">
+        <button type="button" class="tab-btn" aria-pressed="false" aria-controls="scheduleContainer" data-cm-action="filter-schedule" data-filter="completed">
           <i class="fa-solid fa-circle-check" aria-hidden="true"></i> Đã Hoàn Thành (<span id="countComp">0</span>)
         </button>
-        <button type="button" class="tab-btn" aria-pressed="false" aria-controls="scheduleContainer" onclick="switchFilter('cancelled', this)">
+        <button type="button" class="tab-btn" aria-pressed="false" aria-controls="scheduleContainer" data-cm-action="filter-schedule" data-filter="cancelled">
           <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i> Đã Hủy (<span id="countCanc">0</span>)
         </button>
       </div>
@@ -56,7 +56,7 @@
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="driverCancelTitle" aria-describedby="driverCancelDescription" tabindex="-1">
       <div class="modal-header">
         <h3 class="card-title text-danger" id="driverCancelTitle">Hủy Chuyến Đi Đã Đăng</h3>
-        <button type="button" class="btn btn-outline btn-sm" aria-label="Đóng hộp thoại hủy chuyến" onclick="window.Modal.close('driverCancelModal')">&times;</button>
+        <button type="button" class="btn btn-outline btn-sm" aria-label="Đóng hộp thoại hủy chuyến" data-cm-action="close-modal" data-modal-id="driverCancelModal">&times;</button>
       </div>
       <div class="modal-body">
         <p id="driverCancelDescription" style="font-size: 0.88rem;">
@@ -72,8 +72,8 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline" onclick="window.Modal.close('driverCancelModal')">Đóng</button>
-        <button type="button" class="btn btn-danger" onclick="confirmDriverCancel()">Xác Nhận Hủy Chuyến</button>
+        <button type="button" class="btn btn-outline" data-cm-action="close-modal" data-modal-id="driverCancelModal">Đóng</button>
+        <button type="button" class="btn btn-danger" data-cm-action="confirm-driver-cancel">Xác Nhận Hủy Chuyến</button>
       </div>
     </div>
   </div>
@@ -91,6 +91,7 @@
   <script src="../js/modules/driver-trip-utils.js"></script>
   <script src="../js/modules/driver-api.js"></script>
   <script src="driver/js/driver-schedule.js"></script>
+  <script src="../js/modules/page-actions.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 </body>
 </html>
