@@ -113,19 +113,24 @@ window.AIEngine = {
 
     // Chọn trạm tối ưu nhất dựa trên chỉ số an toàn và vỉa hè
     const bestZone = zones.reduce((best, curr) => (curr.safetyScore > best.safetyScore ? curr : best), zones[0]);
+    const hasDestination = Boolean(String(driverRoute || "").trim());
 
     return {
       success: true,
       zone: bestZone,
       walkingDistanceMeters: 180,
       walkingMinutes: 3,
-      detourMinutesForDriver: 0,
-      confidence: 94,
+      detourMinutesForDriver: hasDestination ? 0 : null,
+      confidence: hasDestination ? 94 : 62,
       aiExplanation: [
-        `Khoảng cách đi bộ chỉ 180m (~3 phút) từ ${riderLocation || "vị trí của bạn"}.`,
-        `Tài xế KHÔNG cần đi vòng (0 phút đường vòng) vì điểm đón nằm ngay trên trục lộ trình chính.`,
-        `Khu vực an toàn cao: Có vỉa hè rộng ${bestZone.hasSidewalk ? "đạt chuẩn" : "vừa phải"}, đèn chiếu sáng cao áp và camera an ninh 24/7.`,
-        `Tránh kẹt xe giờ cao điểm: Tiết kiệm ước tính 6-8 phút so với việc đón trước cổng trường.`
+        `Khoảng cách đi bộ ước tính 180m (~3 phút) từ ${riderLocation || "vị trí của bạn"}.`,
+        hasDestination
+          ? "Tài xế không cần đi vòng vì điểm đón nằm trên trục lộ trình chính."
+          : "Chưa có điểm đến nên AI chưa thể xác định điểm đón có nằm trên lộ trình hay không.",
+        `Khu vực an toàn: vỉa hè ${bestZone.hasSidewalk ? "đạt chuẩn" : "chưa được xác nhận đạt chuẩn"}; hãy kiểm tra thông tin trạm trước khi đăng chuyến.`,
+        hasDestination
+          ? "Ước tính điểm hẹn dựa trên điểm đi, điểm đến và dữ liệu trạm mẫu."
+          : "Bổ sung điểm đến để AI đánh giá độ phù hợp với toàn tuyến."
       ]
     };
   },

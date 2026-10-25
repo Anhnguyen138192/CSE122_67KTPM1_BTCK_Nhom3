@@ -66,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const reasons = document.getElementById("aiRecZoneReasons");
       const confidenceBadge = document.getElementById("driverAiConfidence");
       const applyButton = box.querySelector('[data-cm-action="apply-ai-zone"]');
+      const supplementButton = box.querySelector('[data-cm-action="focus-trip-destination"]');
       const zoneSelectGroup = document.getElementById("zoneSelectGroup");
       const zoneSelect = document.getElementById("tripZoneSelect");
       pendingAiZoneRecommendation = null;
@@ -97,11 +98,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         pendingAiZoneRecommendation = recommendation.zone;
-        const confidence = destination ? (Number(recommendation.confidence) || 0) : Math.min(Number(recommendation.confidence) || 0, 65);
+        const confidence = Number(recommendation.confidence) || 0;
+        supplementButton.hidden = Boolean(destination);
         confidenceBadge.textContent = `Độ tin cậy ${confidence}%`;
         title.textContent = recommendation.zone.name;
         reason.textContent = confidence < 70
-          ? "AI chưa đủ chắc chắn với dữ liệu hiện tại. Bạn có thể nhập rõ điểm đi hoặc tự chọn trạm."
+          ? "Chưa có điểm đến nên AI chưa thể đánh giá toàn tuyến. Hãy bổ sung điểm đến, thử lại hoặc tự chọn trạm."
           : `Gợi ý cho lộ trình: ${origin} → ${destination || "chưa nhập điểm đến"}.`;
         reasons.replaceChildren();
         (Array.isArray(recommendation.aiExplanation) ? recommendation.aiExplanation : []).forEach((item) => {
@@ -114,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
           status.textContent = "Đã có gợi ý. Hãy xem lý do rồi chọn “Áp dụng gợi ý” hoặc tự chọn trạm.";
           applyButton.disabled = false;
         } else {
-          status.textContent = "Độ tin cậy thấp; gợi ý chưa được áp dụng. Hãy bổ sung thông tin hoặc chọn trạm thủ công.";
+          status.textContent = "Độ tin cậy thấp; gợi ý chưa được áp dụng. Bổ sung điểm đến, thử lại hoặc tự chọn trạm.";
           zoneSelectGroup.hidden = false;
         }
       } catch (error) {

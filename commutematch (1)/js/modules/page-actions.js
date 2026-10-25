@@ -17,6 +17,7 @@
     "close-modal": (el) => window.Modal?.close(el.dataset.modalId),
     "send-quick": (el) => invoke("sendQuick", el.dataset.cmMessage || ""),
     "recommend-meeting-point": () => invoke("triggerAiZoneRecommendation"),
+    "focus-trip-destination": () => document.getElementById("tripDestination")?.focus(),
     "apply-ai-zone": () => invoke("applyAiZoneRecommendation"),
     "show-zone-options": () => {
       const group = document.getElementById("zoneSelectGroup");
