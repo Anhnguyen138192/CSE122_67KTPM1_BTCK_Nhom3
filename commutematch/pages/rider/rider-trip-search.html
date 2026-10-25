@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tìm Kiếm Chuyến Đi Nâng Cao – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider-dashboard.html">Hành khách</a> / <span>Tìm chuyến</span>
+          </div>
+          <h1 class="page-title"><i class='fas fa-search fa-ui-icon' aria-hidden='true'></i> Tìm Kiếm Chuyến Đi Cùng Hướng</h1>
+        </div>
+      </div>
+
+      <!-- Search Form Card -->
+      <div class="card mb-4" style="max-width: 840px;">
+        <div class="card-body">
+          <form id="searchForm" onsubmit="handleSearch(event)">
+            <div class="d-grid grid-cols-2 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchOrigin">
+                  <i class='fas fa-map-marker-alt fa-ui-icon' aria-hidden='true'></i> Điểm đón / Nơi khởi hành <span class="required">*</span>
+                </label>
+                <input type="text" id="searchOrigin" class="form-control" placeholder="Nhập điểm xuất phát..." required>
+                <div class="form-feedback">Vui lòng nhập điểm đón.</div>
+              </div>
+
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchDestination">
+                  <i class='fas fa-flag-checkered fa-ui-icon' aria-hidden='true'></i> Điểm đến <span class="required">*</span>
+                </label>
+                <input type="text" id="searchDestination" class="form-control" placeholder="Nhập điểm đến..." required>
+                <div class="form-feedback">Vui lòng nhập điểm đến.</div>
+              </div>
+            </div>
+
+            <div class="d-grid grid-cols-3 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchDate">Ngày đi <span class="required">*</span></label>
+                <input type="date" id="searchDate" class="form-control" required>
+              </div>
+
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchTime">Giờ muốn đi (Khoảng) <span class="required">*</span></label>
+                <input type="time" id="searchTime" class="form-control" required>
+              </div>
+
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchSeats">Số hành khách cần ghép</label>
+                <input id="searchSeats" type="number" class="form-control" min="1" max="44" value="1" required>
+              </div>
+            </div>
+
+            <div style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+              <div class="font-bold mb-1" style="font-size: 0.88rem;">Xe ghép bằng ô tô nhiều chỗ</div>
+              <div class="text-muted" style="font-size: 0.82rem;">Kết quả lấy từ lịch do điều phối viên lập; số hành khách được đối chiếu với ghế còn trống trên ô tô.</div>
+            </div>
+
+            <div class="d-flex justify-between items-center">
+              <span style="font-size: 0.85rem; color: var(--text-muted);">
+                <i class='fas fa-magic fa-ui-icon' aria-hidden='true'></i> Thuật toán AI Matching sẽ tự động tính toán điểm tương thích ngay khi tìm kiếm.
+              </span>
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class='fas fa-rocket fa-ui-icon' aria-hidden='true'></i> Tìm Kiếm & Chấm Điểm AI
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Đặt ngày mặc định là hôm nay hoặc ngày mai
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById("searchDate").value = tomorrow.toISOString().split("T")[0];
+    });
+
+    function handleSearch(e) {
+      e.preventDefault();
+      const origin = document.getElementById("searchOrigin").value.trim();
+      const destination = document.getElementById("searchDestination").value.trim();
+      const date = document.getElementById("searchDate").value;
+      const time = document.getElementById("searchTime").value;
+      const seats = Number(document.getElementById("searchSeats").value);
+
+      if (!origin || !destination) {
+        window.Toast.show("Vui lòng nhập cả điểm đón và điểm đến!", "error");
+        return;
+      }
+      if (!Number.isInteger(seats) || seats < 1 || seats > 44) {
+        window.Toast.show("Số hành khách cần ghép phải từ 1 đến 44.", "error");
+        return;
+      }
+
+      // Lưu tiêu chí tìm kiếm vào sessionStorage để trang Match Results xử lý
+      sessionStorage.setItem("commute_search_criteria", JSON.stringify({
+        origin, destination, date, time, seats
+      }));
+
+      window.location.href = "rider-match-results.html";
+    }
+  </script>
+</body>
+</html>

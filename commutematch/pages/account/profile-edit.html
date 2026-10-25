@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chỉnh Sửa Hồ Sơ & KYC – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="profile-overview.html">Hồ sơ</a> / <span>Chỉnh sửa</span>
+          </div>
+          <h1 class="page-title">Cập Nhật Thông Tin Cá Nhân & KYC</h1>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 720px;">
+        <div class="card-body">
+          <form id="editProfileForm" onsubmit="saveProfile(event)">
+            <div class="form-group">
+              <label class="form-label" for="editName">Họ và tên</label>
+              <input type="text" id="editName" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="editAvatar">Ảnh đại diện</label>
+              <input type="file" id="editAvatar" class="form-control" accept="image/*" onchange="previewAvatar(this)">
+              <small class="text-muted">Chọn ảnh mới nếu muốn thay đổi (PNG/JPG, tối đa 5 MB).</small>
+              <div class="mt-2">
+                <img id="avatarPreview" alt="Ảnh đại diện hiện tại" style="width:96px; height:96px; object-fit:cover; border-radius:50%;">
+                <span id="avatarFallback" class="avatar" style="display:none; width:96px; height:96px; font-size:1.5rem;"></span>
+              </div>
+            </div>
+
+            <div class="d-grid grid-cols-2 gap-2">
+              <div class="form-group">
+                <label class="form-label" for="editEmail">Email trường (Cố định để xác minh)</label>
+                <input type="email" id="editEmail" class="form-control" disabled style="background-color: var(--bg-muted);">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editPhone">Số điện thoại liên lạc Zalo <span class="required">*</span></label>
+                <input type="tel" id="editPhone" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="d-grid grid-cols-2 gap-2">
+              <div class="form-group">
+                <label class="form-label" for="editUniv">Trường / Đơn vị</label>
+                <input type="text" id="editUniv" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editId">MSSV / Mã nhân viên</label>
+                <input type="text" id="editId" class="form-control" disabled style="background-color: var(--bg-muted);">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="editBio">Giới thiệu ngắn (Bio)</label>
+              <textarea id="editBio" class="form-control" rows="3" placeholder="Chia sẻ lịch học, lộ trình quen thuộc hoặc lưu ý khi đi cùng..."></textarea>
+            </div>
+
+            <!-- KYC Document Status Box -->
+            <div class="ai-panel mb-3">
+              <div class="font-bold mb-1" style="color: var(--primary);"><i class='fas fa-file-alt fa-ui-icon' aria-hidden='true'></i> Giấy tờ xác thực định danh (KYC)</div>
+              <p style="font-size: 0.85rem; margin-bottom: 0.75rem;">
+                Chọn ảnh giấy tờ nếu muốn gửi hồ sơ định danh để quản trị viên thẩm định.
+              </p>
+              <div class="d-flex items-center gap-2">
+                <input type="file" id="newKycDoc" class="form-control" style="font-size: 0.85rem;" accept="image/*">
+              </div>
+              <div id="kycUploadStatus" class="text-muted mt-1" style="font-size:.8rem;"></div>
+            </div>
+
+            <div class="d-flex justify-end gap-2 mt-4">
+              <a href="profile-overview.html" class="btn btn-outline">Hủy bỏ</a>
+              <button type="submit" class="btn btn-primary"><i class='fas fa-save fa-ui-icon' aria-hidden='true'></i> Lưu Thay Đổi</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const u = window.Storage.getCurrentUser();
+      if (!u) return;
+
+      document.getElementById("editName").value = u.name || "";
+      const avatarPreview = document.getElementById("avatarPreview");
+      const avatarFallback = document.getElementById("avatarFallback");
+      if (u.avatarImage) {
+        avatarPreview.src = u.avatarImage;
+      } else {
+        avatarPreview.style.display = "none";
+        avatarFallback.textContent = u.avatar || "U";
+        avatarFallback.style.backgroundColor = u.avatarColor || "var(--primary)";
+        avatarFallback.style.color = "white";
+        avatarFallback.style.display = "inline-flex";
+      }
+      document.getElementById("editEmail").value = u.email || "";
+      document.getElementById("editPhone").value = u.phone || "";
+      document.getElementById("editUniv").value = u.university || u.department || "";
+      document.getElementById("editId").value = u.studentId || "";
+      document.getElementById("editBio").value = u.bio || "";
+      document.getElementById("kycUploadStatus").innerText = u.kycPhoto
+        ? `Đã gửi: ${u.kycPhoto.fileName || "tài liệu định danh"}`
+        : "Chưa gửi tài liệu định danh.";
+    });
+
+    async function saveProfile(e) {
+      e.preventDefault();
+      const u = window.Storage.getCurrentUser();
+
+      const updated = {
+        name: document.getElementById("editName").value.trim(),
+        phone: document.getElementById("editPhone").value.trim(),
+        university: document.getElementById("editUniv").value.trim(),
+        bio: document.getElementById("editBio").value.trim()
+      };
+
+      const avatarFile = document.getElementById("editAvatar").files[0];
+      if (avatarFile) {
+        try {
+          updated.avatarImage = await readProfileImage(avatarFile);
+        } catch (error) {
+          window.Toast.show(error.message, "error");
+          return;
+        }
+      }
+
+      const file = document.getElementById("newKycDoc").files[0];
+      if (file) {
+        try {
+          updated.kycPhoto = await readKycImage(file);
+          updated.kycStatus = "pending";
+        } catch (error) {
+          window.Toast.show(error.message, "error");
+          return;
+        }
+      }
+
+      try {
+        window.Storage.update("users", u.id, updated);
+      } catch (error) {
+        console.error("Không thể lưu thay đổi hồ sơ:", error);
+        const message = error.name === "QuotaExceededError"
+          ? "Không đủ dung lượng lưu ảnh. Hãy chọn ảnh nhỏ hơn rồi thử lại."
+          : "Không thể lưu thay đổi hồ sơ. Vui lòng thử lại.";
+        window.Toast.show(message, "error");
+        return;
+      }
+      window.Toast.show("Đã cập nhật thông tin hồ sơ thành công!", "success");
+
+      setTimeout(() => {
+        window.location.href = "profile-overview.html";
+      }, 700);
+    }
+
+    function readKycImage(file) {
+      if (!file.type.startsWith("image/")) {
+        return Promise.reject(new Error("Chỉ chấp nhận tệp ảnh xác minh."));
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        return Promise.reject(new Error("Ảnh xác minh phải nhỏ hơn 5 MB."));
+      }
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Không thể đọc ảnh xác minh."));
+        reader.onload = () => {
+          const image = new Image();
+          image.onerror = () => reject(new Error("Tệp ảnh xác minh không hợp lệ."));
+          image.onload = () => {
+            const scale = Math.min(1, 1200 / Math.max(image.width, image.height));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.round(image.width * scale);
+            canvas.height = Math.round(image.height * scale);
+            const context = canvas.getContext("2d");
+            if (!context) {
+              reject(new Error("Trình duyệt không thể xử lý ảnh xác minh."));
+              return;
+            }
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => {
+              if (!blob) {
+                reject(new Error("Không thể nén ảnh xác minh."));
+                return;
+              }
+              const compressedReader = new FileReader();
+              compressedReader.onerror = () => reject(new Error("Không thể lưu ảnh xác minh đã xử lý."));
+              compressedReader.onload = () => resolve({
+                dataUrl: compressedReader.result,
+                fileName: file.name
+              });
+              compressedReader.readAsDataURL(blob);
+            }, "image/jpeg", 0.78);
+          };
+          image.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function previewAvatar(input) {
+      if (!input.files || !input.files[0]) return;
+      const preview = document.getElementById("avatarPreview");
+      preview.src = URL.createObjectURL(input.files[0]);
+      preview.style.display = "inline-block";
+      document.getElementById("avatarFallback").style.display = "none";
+    }
+
+    function readProfileImage(file) {
+      if (!file.type.startsWith("image/")) {
+        return Promise.reject(new Error("Chỉ chấp nhận tệp ảnh đại diện."));
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        return Promise.reject(new Error("Ảnh đại diện phải nhỏ hơn 5 MB."));
+      }
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Không thể đọc ảnh đại diện."));
+        reader.onload = () => {
+          const image = new Image();
+          image.onerror = () => reject(new Error("Tệp ảnh đại diện không hợp lệ."));
+          image.onload = () => {
+            const scale = Math.min(1, 512 / Math.max(image.width, image.height));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.round(image.width * scale);
+            canvas.height = Math.round(image.height * scale);
+            const context = canvas.getContext("2d");
+            if (!context) {
+              reject(new Error("Trình duyệt không thể xử lý ảnh đại diện."));
+              return;
+            }
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => {
+              if (!blob) {
+                reject(new Error("Không thể nén ảnh đại diện."));
+                return;
+              }
+              const compressedReader = new FileReader();
+              compressedReader.onerror = () => reject(new Error("Không thể lưu ảnh đại diện đã xử lý."));
+              compressedReader.onload = () => resolve(compressedReader.result);
+              compressedReader.readAsDataURL(blob);
+            }, "image/jpeg", 0.8);
+          };
+          image.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  </script>
+</body>
+</html>

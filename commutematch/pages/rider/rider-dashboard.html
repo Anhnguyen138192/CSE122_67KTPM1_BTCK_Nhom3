@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Điều Khiển Hành Khách – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="../../index.html">Trang chủ</a> / <span>Hành khách</span>
+          </div>
+          <h1 class="page-title"><i class='fas fa-hand-paper fa-ui-icon' aria-hidden='true'></i> Xin chào, <span id="dashRiderName"></span>!</h1>
+        </div>
+        <a href="rider-trip-search.html" class="btn btn-primary">
+          <i class='fas fa-search fa-ui-icon' aria-hidden='true'></i> Tìm Chuyến Đi Mới
+        </a>
+      </div>
+
+      <!-- Quick Stats Row -->
+      <div class="d-grid grid-cols-4 gap-3 mb-4">
+        <div class="stat-card">
+          <div class="stat-icon primary"><i class='fas fa-ticket-alt fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="statRiderTrips">0</div>
+            <div class="stat-label">Yêu cầu ghép chuyến</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon secondary"><i class='fas fa-leaf fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="statRiderCo2">0</div>
+            <div class="stat-label">Yêu cầu đã được chấp nhận</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon warning"><i class='fas fa-money-bill-wave fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="statRiderMoney">0</div>
+            <div class="stat-label">Chuyến sắp khởi hành</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ai"><i class='fas fa-star fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="statRiderTrust">—</div>
+            <div class="stat-label">Tình trạng tài khoản</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chuyến đi sắp khởi hành (Active Trip Card) -->
+      <div class="card mb-4" id="nextRiderTrip"></div>
+
+      <!-- Quick AI Matching Banner -->
+      <div class="ai-panel mb-4">
+        <div class="d-flex justify-between items-center flex-wrap gap-2">
+          <div>
+            <div class="d-flex items-center gap-2 mb-1">
+              <span class="ai-badge">AI MATCHING</span>
+              <h3 style="margin: 0; font-size: 1.1rem;">Bạn có chuyến đi học/làm việc định kỳ mỗi sáng?</h3>
+            </div>
+            <p style="font-size: 0.88rem; margin: 0;">
+              Điền lộ trình và thời gian mong muốn để tìm các chuyến đã được điều phối.
+            </p>
+          </div>
+          <a href="rider-trip-search.html" class="btn btn-ai btn-sm">Tìm chuyến theo lịch →</a>
+        </div>
+      </div>
+
+      <!-- Danh sách chuyến đi gần đây -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Lịch Sử Chuyến Đi Gần Nhất</h3>
+          <a href="rider-my-trips.html" style="font-size: 0.85rem;">Xem tất cả →</a>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Tuyến đường</th>
+                  <th>Thời gian</th>
+                  <th>Tài xế</th>
+                  <th>Phương tiện</th>
+                  <th>Chi phí</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="recentTripsTableBody">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      loadDashboard();
+    });
+
+    function loadDashboard() {
+      const u = window.Storage.getCurrentUser();
+      const requests = window.Storage.get("joinRequests").filter((request) => request.riderId === u.id);
+      const requestTrips = requests.map((request) => ({
+        request,
+        trip: window.Storage.getById("trips", request.tripId)
+      })).filter((entry) => entry.trip);
+      document.getElementById("dashRiderName").innerText = u.name;
+      document.getElementById("statRiderTrips").innerText = requests.length;
+      document.getElementById("statRiderCo2").innerText = requests.filter((request) =>
+        ["accepted", "completed"].includes(request.status)
+      ).length;
+      const upcoming = requestTrips.find((entry) =>
+        entry.request.status === "accepted" && entry.trip.status === "scheduled"
+      );
+      document.getElementById("statRiderMoney").innerText = requestTrips.filter((entry) =>
+        entry.request.status === "accepted" && entry.trip.status === "scheduled"
+      ).length;
+      document.getElementById("statRiderTrust").innerText = u.isSuspended ? "Tạm khóa" : "Hoạt động";
+      document.getElementById("nextRiderTrip").innerHTML = upcoming ? `
+        <div class="card-header"><span class="badge badge-success">SẮP KHỞI HÀNH</span><strong>${upcoming.trip.departureDate} ${upcoming.trip.departureTime}</strong></div>
+        <div class="card-body">
+          <h3 class="card-title">${upcoming.trip.origin} → ${upcoming.trip.destination}</h3>
+          <p class="text-muted">Điểm đón: ${upcoming.trip.pickupZoneName || "Chưa có trạm đón"}</p>
+          <a href="../account/messages-chat.html?userId=${encodeURIComponent(upcoming.trip.driverId)}" class="btn btn-outline btn-sm">Nhắn tài xế cùng chuyến</a>
+        </div>
+      ` : '<div class="card-body"><div class="empty-state"><div class="empty-title">Chưa có chuyến sắp khởi hành</div><div class="empty-desc">Các chuyến được điều phối và yêu cầu đã ghép sẽ hiển thị tại đây.</div></div></div>';
+
+      const tbody = document.getElementById("recentTripsTableBody");
+
+      tbody.innerHTML = requestTrips.slice(0, 4).map(({ request, trip: t }) => `
+        <tr>
+          <td>
+            <strong>${t.origin}</strong><br>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">đến ${t.destination}</span>
+          </td>
+          <td>${t.departureDate} <br><strong>${t.departureTime}</strong></td>
+          <td>${t.driverName}</td>
+          <td>${t.vehicleInfo}</td>
+          <td><strong style="color: var(--primary);">${Number(t.costSharing || 0).toLocaleString('vi-VN')} đ</strong></td>
+          <td>
+            <span class="badge ${request.status === 'completed' ? 'badge-success' : request.status === 'accepted' ? 'badge-primary' : 'badge-warning'}">
+              ${request.status === 'completed' ? 'Đã hoàn thành' : request.status === 'accepted' ? 'Đã xác nhận' : 'Chờ duyệt'}
+            </span>
+          </td>
+          <td>
+            <a href="rider-trip-detail.html?id=${t.id}" class="btn btn-outline btn-sm">Chi tiết</a>
+          </td>
+        </tr>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

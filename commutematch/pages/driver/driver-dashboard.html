@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Điều Khiển Tài Xế – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="../../index.html">Trang chủ</a> / <span>Người chia sẻ xe</span>
+          </div>
+          <h1 class="page-title"><i class='fas fa-car fa-ui-icon' aria-hidden='true'></i> Bảng Điều Khiển Tài Xế: <span id="dashDriverName"></span></h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="driver-schedule.html" class="btn btn-primary btn-sm"><i class='fas fa-calendar-alt fa-ui-icon' aria-hidden='true'></i> Xem chuyến được phân công</a>
+        </div>
+      </div>
+
+      <!-- Driver Stats Grid -->
+      <div class="d-grid grid-cols-4 gap-3 mb-4">
+        <div class="stat-card">
+          <div class="stat-icon primary"><i class='fas fa-money-bill-wave fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="statEarnings">—</div>
+            <div class="stat-label">Bù đắp chi phí xăng</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon secondary"><i class='fas fa-road fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="statDriverTrips">0</div>
+            <div class="stat-label">Chuyến được phân công</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon warning"><i class='fas fa-star fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="statDriverRating">—</div>
+            <div class="stat-label">Đánh giá hiện có</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ai"><i class='fas fa-users fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="statAssignedToday">0</div>
+            <div class="stat-label">Chuyến sắp chạy</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chuyến xe sắp chạy tiếp theo -->
+      <div class="card mb-4" id="upcomingAssignedTrip"></div>
+
+      <!-- Bảng yêu cầu chờ duyệt & Lịch chạy tuần -->
+      <div class="d-grid grid-cols-2 gap-3">
+        <!-- Card 1: Yêu cầu ghép xe đang chờ -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Yêu Cầu Chờ Duyệt (Join Requests)</h3>
+            <a href="driver-join-requests.html" style="font-size: 0.85rem;">Xem tất cả →</a>
+          </div>
+          <div class="card-body p-0">
+            <div id="requestsSnippet">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Lịch trình chạy các ngày tới -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Lịch Trình Đã Đăng</h3>
+            <a href="driver-schedule.html" style="font-size: 0.85rem;">Quản lý lịch →</a>
+          </div>
+          <div class="card-body p-0">
+            <div id="scheduleSnippet">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      loadDriverDashboard();
+    });
+
+    function loadDriverDashboard() {
+      const u = window.Storage.getCurrentUser();
+      const assignedTrips = window.Storage.get("trips").filter((trip) => trip.driverId === u.id);
+      const assignedRequests = window.Storage.get("joinRequests").filter((request) =>
+        assignedTrips.some((trip) => trip.id === request.tripId) && request.status === "pending"
+      );
+      if (u) {
+        document.getElementById("dashDriverName").innerText = u.name;
+        document.getElementById("statEarnings").innerText = u.earnings || "—";
+        document.getElementById("statDriverTrips").innerText = assignedTrips.length;
+        const ratings = window.Storage.get("ratings").filter((rating) => rating.toUserId === u.id);
+        document.getElementById("statDriverRating").innerText = ratings.length
+          ? `${(ratings.reduce((sum, rating) => sum + Number(rating.stars || 0), 0) / ratings.length).toFixed(1)} / 5`
+          : "Chưa có";
+        document.getElementById("statAssignedToday").innerText = assignedTrips.filter((trip) =>
+          trip.status === "scheduled"
+        ).length;
+      }
+
+      const nextTrip = assignedTrips.find((trip) => trip.status === "scheduled");
+      document.getElementById("upcomingAssignedTrip").innerHTML = nextTrip ? `
+        <div class="card-header"><span class="badge badge-primary">CHUYẾN ĐƯỢC PHÂN CÔNG</span><strong>${nextTrip.departureDate} ${nextTrip.departureTime}</strong></div>
+        <div class="card-body">
+          <h3 class="card-title">${nextTrip.origin} → ${nextTrip.destination}</h3>
+          <p class="text-muted">Điểm đón: ${nextTrip.pickupZoneName || "Chưa có trạm đón"}</p>
+          <a href="driver-trip-detail.html?id=${encodeURIComponent(nextTrip.id)}" class="btn btn-primary btn-sm">Xem chuyến</a>
+        </div>
+      ` : '<div class="card-body"><div class="empty-state"><div class="empty-title">Chưa có chuyến được phân công</div><div class="empty-desc">Lịch chạy và điểm đón sẽ hiển thị sau khi điều phối viên phân công.</div></div></div>';
+
+      // Render requests snippet
+      const requests = assignedRequests;
+      const reqBox = document.getElementById("requestsSnippet");
+
+      if (requests.length === 0) {
+        reqBox.innerHTML = `
+          <div class="empty-state" style="padding: 1.5rem;">
+            <div style="font-size: 0.88rem; color: var(--text-muted);">Không có yêu cầu nào đang chờ duyệt.</div>
+          </div>
+        `;
+      } else {
+        reqBox.innerHTML = requests.map(r => `
+          <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+            <div class="d-flex items-center gap-2">
+              <div class="avatar" style="width: 36px; height: 36px; background-color: #059669; color: white;">${r.riderAvatar || 'KH'}</div>
+              <div>
+                <div class="font-bold" style="font-size: 0.9rem;">${window.Storage.escapeHtml(r.riderName)}</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">Đón tại: ${window.Storage.escapeHtml(r.pickupPoint)}</div>
+              </div>
+            </div>
+            <div class="d-flex gap-1">
+              <a href="driver-join-requests.html" class="btn btn-primary btn-sm">Xem & Duyệt</a>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Render schedule snippet
+      const trips = assignedTrips.filter(t => t.status === 'scheduled');
+      const schedBox = document.getElementById("scheduleSnippet");
+
+      schedBox.innerHTML = trips.slice(0, 3).map(t => `
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div class="font-bold" style="font-size: 0.9rem;">${window.Storage.escapeHtml(t.origin)} → ${window.Storage.escapeHtml(t.destination)}</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);"><i class='fas fa-calendar-alt fa-ui-icon' aria-hidden='true'></i> ${window.Storage.escapeHtml(t.departureDate)} lúc <strong>${window.Storage.escapeHtml(t.departureTime)}</strong> • Còn ${Number(t.availableSeats)} chỗ</div>
+          </div>
+          <a href="driver-trip-detail.html?id=${encodeURIComponent(t.id)}" class="btn btn-outline btn-sm">Quản lý</a>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

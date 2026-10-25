@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kiểm Định Ô Tô – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="coordinator-mobility-dashboard.html">Điều phối viên</a> / <span>Kiểm định ô tô</span>
+          </div>
+          <h1 class="page-title"><i class='fas fa-car-side fa-ui-icon' aria-hidden='true'></i> Kiểm định ô tô</h1>
+          <p class="text-muted">Chỉ ô tô được điều phối viên kiểm định đạt mới có thể được phân công chuyến.</p>
+        </div>
+      </div>
+      <section class="card">
+        <div class="card-body">
+          <div id="vehicleInspectionList"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", renderVehicleInspections);
+
+    function renderVehicleInspections() {
+      const entries = [];
+      window.Storage.get("users").forEach((user) => {
+        const vehicles = user.vehiclesList || (user.vehicle ? [user.vehicle] : []);
+        vehicles.forEach((vehicle, index) => {
+          if (vehicle.inspectionStatus !== "approved") entries.push({ user, vehicle, index });
+        });
+      });
+
+      const host = document.getElementById("vehicleInspectionList");
+      if (!entries.length) {
+        host.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class='fas fa-car-side fa-ui-icon' aria-hidden='true'></i></div><div class="empty-title">Không có ô tô chờ kiểm định</div><div class="empty-desc">Xe mới khai báo sẽ xuất hiện tại đây để điều phối viên xem xét.</div></div>';
+        return;
+      }
+
+      host.innerHTML = entries.map(({ user, vehicle, index }) => {
+        const status = vehicle.inspectionStatus || "pending";
+        const application = window.Storage.get("roleApplications").find((item) =>
+          item.userId === user.id && item.role === "driver" &&
+          item.status === "approved" &&
+          item.details && item.details.vehiclePlate === vehicle.plate
+        );
+        const licensePhoto = vehicle.driverLicensePhoto ||
+          (application && application.details.driverLicensePhoto);
+        const citizenPhoto = vehicle.citizenIdPhoto ||
+          (application && application.details.citizenIdPhoto);
+        const photo = vehicle.vehiclePhoto ||
+          (application && application.details.vehiclePhoto);
+        return `
+          <article class="card mb-3">
+            <div class="card-body">
+              <div class="d-flex justify-between items-center flex-wrap gap-2">
+                <div>
+                  <h2>${escapeHtml(user.name)} · ${escapeHtml(user.id)}</h2>
+                  <p class="text-muted">${escapeHtml(user.email || "")}</p>
+                </div>
+                <span class="badge ${status === "rejected" ? "badge-danger" : "badge-warning"}">
+                  ${status === "rejected" ? "Kiểm định chưa đạt" : "Chờ kiểm định"}
+                </span>
+              </div>
+              <dl class="mt-2">
+                <div class="mb-1"><dt style="font-weight:700;">Ô tô</dt><dd>${escapeHtml(vehicle.type || vehicle.model || "Ô tô")}</dd></div>
+                <div class="mb-1"><dt style="font-weight:700;">Biển số</dt><dd>${escapeHtml(vehicle.plate || "Chưa cung cấp")}</dd></div>
+                <div class="mb-1"><dt style="font-weight:700;">Tổng số ghế (kể cả tài xế)</dt><dd>${Number(vehicle.seatsTotal || vehicle.seats || 0)}</dd></div>
+                ${vehicle.inspectionNote ? `<div class="mb-1"><dt style="font-weight:700;">Ghi chú kiểm định</dt><dd>${escapeHtml(vehicle.inspectionNote)}</dd></div>` : ""}
+              </dl>
+              <div class="d-grid grid-cols-3 gap-2 mt-2">
+                ${renderEvidenceImage("Ảnh ô tô", photo)}
+                ${renderEvidenceImage("Ảnh GPLX", licensePhoto)}
+                ${renderEvidenceImage("Ảnh CCCD", citizenPhoto)}
+              </div>
+              <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-primary" onclick="reviewVehicle('${escapeHtml(user.id)}', ${index}, true)">Duyệt kiểm định</button>
+                <button class="btn btn-outline text-danger" onclick="reviewVehicle('${escapeHtml(user.id)}', ${index}, false)">Từ chối</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderEvidenceImage(label, image) {
+      if (!image || !/^data:image\/jpeg;base64,/.test(image.dataUrl || "")) {
+        return `<div><strong>${label}</strong><p class="text-muted">Chưa có ảnh</p></div>`;
+      }
+      return `<div><strong>${label}</strong><img src="${escapeHtml(image.dataUrl)}" alt="${label}" loading="lazy" style="display:block;width:100%;max-height:240px;object-fit:contain;margin-top:.4rem;border:1px solid var(--border-color);border-radius:var(--radius-md);"><small>${escapeHtml(image.fileName || "Ảnh đã tải lên")}</small></div>`;
+    }
+
+    function reviewVehicle(userId, vehicleIndex, approved) {
+      const user = window.Storage.getById("users", userId);
+      if (!user) {
+        window.Toast.show("Không tìm thấy tài khoản chủ xe.", "error");
+        return;
+      }
+
+      const vehicles = user.vehiclesList || (user.vehicle ? [user.vehicle] : []);
+      const vehicle = vehicles[vehicleIndex];
+      if (!vehicle) {
+        window.Toast.show("Không tìm thấy phương tiện cần kiểm định.", "error");
+        return;
+      }
+
+      let inspectionNote = "";
+      if (!approved) {
+        inspectionNote = window.prompt("Nhập lý do từ chối kiểm định để chủ xe biết nội dung cần khắc phục:") || "";
+        if (!inspectionNote.trim()) {
+          window.Toast.show("Vui lòng ghi rõ lý do từ chối kiểm định.", "warning");
+          return;
+        }
+      }
+
+      const updatedVehicle = {
+        ...vehicle,
+        inspectionStatus: approved ? "approved" : "rejected",
+        inspectionNote: inspectionNote.trim(),
+        inspectedBy: window.Storage.getCurrentUser().id,
+        inspectedAt: new Date().toISOString()
+      };
+      const nextVehicles = vehicles.map((item, index) => index === vehicleIndex ? updatedVehicle : item);
+      const currentVehicle = user.vehicle &&
+        user.vehicle.plate === vehicle.plate && user.vehicle.type === vehicle.type
+        ? updatedVehicle
+        : user.vehicle || nextVehicles[0] || null;
+
+      try {
+        window.Storage.update("users", user.id, {
+          vehiclesList: nextVehicles,
+          vehicle: currentVehicle
+        });
+        window.Storage.insert("notifications", {
+          userId: user.id,
+          title: approved ? "Ô tô đã được kiểm định" : "Ô tô chưa đạt kiểm định",
+          message: approved
+            ? `Điều phối viên đã duyệt ô tô ${vehicle.plate || ""}. Xe đủ điều kiện để được phân công chuyến.`
+            : `Điều phối viên chưa duyệt ô tô ${vehicle.plate || ""}. Lý do: ${inspectionNote.trim()}`,
+          time: "Vừa xong",
+          type: "vehicle_inspection",
+          unread: true,
+          link: "../account/profile-vehicles.html"
+        });
+      } catch (error) {
+        console.error("Không thể lưu kết quả kiểm định ô tô:", error);
+        window.Toast.show("Không thể lưu kết quả kiểm định. Vui lòng thử lại.", "error");
+        return;
+      }
+
+      window.Toast.show(approved ? "Đã duyệt kiểm định ô tô." : "Đã từ chối kiểm định ô tô.", approved ? "success" : "info");
+      renderVehicleInspections();
+    }
+
+    function escapeHtml(value) {
+      return window.Storage.escapeHtml(value);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thông Tin Chuyến Đi – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs"><a href="rider-my-trips.html">Chuyến đi</a> / <span>Thông tin chuyến</span></div>
+          <h1 class="page-title"><i class='fas fa-map-marker-alt fa-ui-icon' aria-hidden='true'></i> Thông Tin Chuyến Đi</h1>
+        </div>
+      </div>
+      <div id="tripTrackingDetails"></div>
+    </main>
+  </div>
+  <div id="app-footer"></div>
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", renderTrackingDetails);
+
+    function renderTrackingDetails() {
+      const tripId = new URLSearchParams(window.location.search).get("tripId");
+      const user = window.Storage.getCurrentUser();
+      const trip = tripId && window.Storage.getById("trips", tripId);
+      const request = window.Storage.get("joinRequests").find((item) =>
+        item.tripId === tripId && item.riderId === user.id
+      );
+      const host = document.getElementById("tripTrackingDetails");
+      if (!trip || !request) {
+        host.innerHTML = '<div class="card"><div class="card-body empty-state">Không tìm thấy chuyến hoặc yêu cầu ghép của tài khoản này.</div></div>';
+        return;
+      }
+
+      const stageLabels = {
+        at_pickup: "Tài xế đã cập nhật có mặt tại trạm đón",
+        in_transit: "Tài xế đã cập nhật đang di chuyển",
+        completed: "Chuyến đi đã hoàn thành",
+        cancelled: "Chuyến đi đã bị hủy"
+      };
+      const zone = window.Storage.getById("pickupZones", trip.pickupZoneId);
+      const driver = window.Storage.getById("users", trip.driverId);
+      host.innerHTML = `
+        <div class="card">
+          <div class="card-header"><h2 class="card-title">${escapeHtml(trip.origin)} → ${escapeHtml(trip.destination)}</h2></div>
+          <div class="card-body">
+            <p><strong>Trạng thái:</strong> ${escapeHtml(stageLabels[trip.executionStage] || (request.status === "accepted" ? "Đã xác nhận theo lịch" : "Đang chờ tài xế xác nhận"))}</p>
+            <p><strong>Thời gian:</strong> ${escapeHtml(trip.departureDate)} · ${escapeHtml(trip.departureTime)}</p>
+            <p><strong>Điểm đón:</strong> ${escapeHtml(request.pickupPoint || zone?.name || "Chưa cập nhật")}</p>
+            <p><strong>Địa chỉ trạm:</strong> ${escapeHtml(zone?.address || "Chưa có địa chỉ")}</p>
+            <p><strong>Điểm xuống đã chọn:</strong> ${escapeHtml(request.dropoffPoint || "Chưa chọn")}</p>
+            <p><strong>Tài xế:</strong> ${escapeHtml(trip.driverName || "Chưa phân công")}</p>
+            <p class="text-muted">Không có dữ liệu GPS trực tiếp trong ứng dụng hiện tại.</p>
+            <div class="d-flex gap-2">
+              <a class="btn btn-outline" href="../account/messages-chat.html?userId=${encodeURIComponent(trip.driverId)}">Nhắn tin tài xế</a>
+              ${driver && driver.phone ? `<a class="btn btn-outline" href="tel:${encodeURIComponent(driver.phone)}">Gọi tài xế</a>` : ""}
+              ${request.status === "completed" ? `<a class="btn btn-primary" href="rider-trip-review.html?tripId=${encodeURIComponent(trip.id)}&driverId=${encodeURIComponent(trip.driverId)}">Đánh giá chuyến</a>` : ""}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[character]);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đánh Giá & Phản Hồi Chuyến Đi – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider-my-trips.html">Chuyến đi</a> / <span>Đánh giá</span>
+          </div>
+          <h1 class="page-title"><i class='fas fa-star fa-ui-icon' aria-hidden='true'></i> Đánh Giá & Góp Ý Chuyến Đi</h1>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 680px; margin: 0 auto; box-shadow: var(--shadow-md);">
+        <div class="card-body" style="padding: 2rem;">
+          <div class="text-center mb-4">
+            <div class="avatar" id="revAvatar" style="width: 64px; height: 64px; font-size: 1.6rem; margin: 0 auto 0.75rem; background-color: #0d9488; color: white;">
+              ?
+            </div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.2rem;" id="revDriverName"></h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+              Chuyến đi: <strong id="reviewRoute"></strong>
+            </p>
+          </div>
+
+          <form id="reviewForm" onsubmit="submitReview(event)">
+            <!-- Star Rating Interactive Selector -->
+            <div class="form-group text-center mb-4">
+              <label class="form-label" style="font-size: 1rem; margin-bottom: 0.5rem;">Trải nghiệm của bạn thế nào?</label>
+              <div id="starContainer" style="font-size: 2.5rem; cursor: pointer; color: #cbd5e1; display: inline-flex; gap: 0.5rem;">
+                <span onclick="setStars(1)"><i class='fas fa-star fa-ui-icon' aria-hidden='true'></i></span>
+                <span onclick="setStars(2)"><i class='fas fa-star fa-ui-icon' aria-hidden='true'></i></span>
+                <span onclick="setStars(3)"><i class='fas fa-star fa-ui-icon' aria-hidden='true'></i></span>
+                <span onclick="setStars(4)"><i class='fas fa-star fa-ui-icon' aria-hidden='true'></i></span>
+                <span onclick="setStars(5)"><i class='fas fa-star fa-ui-icon' aria-hidden='true'></i></span>
+              </div>
+              <div id="starLabel" style="font-size: 0.9rem; font-weight: 700; color: var(--primary); margin-top: 0.25rem;">Chọn số sao</div>
+            </div>
+
+            <!-- Compliment Tags -->
+            <div class="form-group mb-4">
+              <label class="form-label">Chọn điểm nổi bật của bạn đồng hành:</label>
+              <div class="d-flex flex-wrap gap-2" id="tagList">
+                <button type="button" class="btn btn-outline btn-sm" onclick="toggleTag(this)"><i class='fas fa-clock fa-ui-icon' aria-hidden='true'></i> Đúng giờ</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="toggleTag(this)"><i class='fas fa-shield-alt fa-ui-icon' aria-hidden='true'></i> Lái xe cẩn thận, an toàn</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="toggleTag(this)"><i class='fas fa-shield-alt fa-ui-icon' aria-hidden='true'></i> Phương tiện sạch sẽ</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="toggleTag(this)"><i class='fas fa-smile fa-ui-icon' aria-hidden='true'></i> Thân thiện, hòa đồng</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="toggleTag(this)"><i class='fas fa-map-marker-alt fa-ui-icon' aria-hidden='true'></i> Đón đúng trạm quy ước</button>
+              </div>
+            </div>
+
+            <!-- Comment Box -->
+            <div class="form-group mb-4">
+              <label class="form-label" for="reviewComment">Nhận xét chi tiết (được hiển thị ẩn danh trên hồ sơ):</label>
+              <textarea id="reviewComment" class="form-control" rows="3" placeholder="Chia sẻ cảm nhận của bạn để giúp cộng đồng sinh viên chọn bạn đồng hành tin cậy..."></textarea>
+            </div>
+
+            <div class="d-flex justify-between items-center">
+              <a href="rider-my-trips.html" class="btn btn-outline">Bỏ qua lúc này</a>
+              <button type="submit" class="btn btn-primary btn-lg" id="submitReviewButton" disabled>
+                Gửi Đánh Giá & Hoàn Tất
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <style>
+    .active-tag {
+      background-color: var(--primary-light) !important;
+      border-color: var(--primary) !important;
+      color: var(--primary) !important;
+      font-weight: 600;
+    }
+  </style>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+
+  <script>
+    let currentStars = 0;
+    let reviewTrip = null;
+    let reviewRequest = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = window.Storage.getCurrentUser();
+      const params = new URLSearchParams(window.location.search);
+      const tripId = params.get("tripId");
+      reviewTrip = tripId && window.Storage.getById("trips", tripId);
+      reviewRequest = window.Storage.get("joinRequests").find((request) =>
+        request.tripId === tripId && request.riderId === user.id && request.status === "completed"
+      );
+      const existingReview = window.Storage.get("ratings").some((rating) =>
+        rating.tripId === tripId && rating.fromUserId === user.id
+      );
+      if (!reviewTrip || !reviewRequest || existingReview) {
+        document.getElementById("reviewForm").style.display = "none";
+        document.getElementById("revDriverName").innerText = existingReview
+          ? "Bạn đã đánh giá chuyến này"
+          : "Chưa có chuyến hoàn thành để đánh giá";
+        return;
+      }
+      const driver = window.Storage.getById("users", reviewTrip.driverId);
+      document.getElementById("revDriverName").innerText = driver ? driver.name : reviewTrip.driverName;
+      document.getElementById("revAvatar").innerText = driver ? driver.avatar || "TX" : "TX";
+      document.getElementById("reviewRoute").innerText = `${reviewTrip.origin} → ${reviewTrip.destination}`;
+    });
+
+    function setStars(val) {
+      currentStars = val;
+      const spans = document.querySelectorAll("#starContainer span");
+      const labels = [
+        "", "Cần cải thiện (1 sao)", "Bình thường (2 sao)",
+        "Tốt (3 sao)", "Rất tốt (4 sao)", "Tuyệt vời (5 sao)"
+      ];
+
+      spans.forEach((s, idx) => {
+        s.style.color = idx < val ? "var(--warning)" : "#cbd5e1";
+      });
+
+      document.getElementById("starLabel").innerText = labels[val];
+      document.getElementById("submitReviewButton").disabled = val < 1;
+    }
+
+    function toggleTag(btn) {
+      btn.classList.toggle("active-tag");
+    }
+
+    function submitReview(e) {
+      e.preventDefault();
+      const user = window.Storage.getCurrentUser();
+      const comment = document.getElementById("reviewComment").value.trim();
+      if (!reviewTrip || !reviewRequest || currentStars < 1) {
+        window.Toast.show("Chọn số sao cho chuyến đã hoàn thành trước khi gửi đánh giá.", "error");
+        return;
+      }
+
+      const selectedTags = Array.from(document.querySelectorAll("#tagList .active-tag")).map(b => b.innerText);
+      const driver = window.Storage.getById("users", reviewTrip.driverId);
+
+      const newRating = {
+        id: "rate_" + Date.now(),
+        tripId: reviewTrip.id,
+        fromUserId: user.id,
+        fromUserName: user.name,
+        toUserId: reviewTrip.driverId,
+        toUserName: driver ? driver.name : reviewTrip.driverName,
+        stars: currentStars,
+        tags: selectedTags,
+        comment: comment,
+        date: new Date().toLocaleDateString("vi-VN")
+      };
+
+      window.Storage.insert("ratings", newRating);
+      window.Toast.show("Đã gửi đánh giá cho chuyến đi.", "success");
+
+      setTimeout(() => {
+        window.location.href = "rider-my-trips.html";
+      }, 800);
+    }
+  </script>
+</body>
+</html>

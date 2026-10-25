@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giới thiệu Dự án & Sứ mệnh – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main class="container mt-4 mb-4" style="flex: 1; max-width: 900px;">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumbs">
+          <a href="../../index.html">Trang chủ</a> / <span>Giới thiệu</span>
+        </div>
+        <h1 class="page-title">Sứ Mệnh & Giá Trị Cốt Lõi</h1>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <h2 style="font-size: 1.4rem; color: var(--primary); margin-bottom: 0.75rem;">1. Bối cảnh ra đời</h2>
+        <p>
+          Tại các khu đô thị đại học tập trung như Đại học Quốc gia TP.HCM hay các khu công nghệ cao, nhu cầu di chuyển hàng ngày của sinh viên và cán bộ nhân viên là rất lớn. CommuteMatch tập trung ghép nhiều hành khách trên các ô tô nhiều chỗ, theo tuyến và điểm đón được điều phối, nhằm giảm số xe lưu thông riêng lẻ trên các trục đường huyết mạch.
+        </p>
+        <p>
+          Các nhóm tìm người đi chung trên Zalo, Facebook trước đây mang tính tự phát, thông tin trôi nhanh, không có cơ chế xác minh danh tính và thiếu trạm đón quy ước an toàn.
+        </p>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <h2 style="font-size: 1.4rem; color: var(--secondary); margin-bottom: 0.75rem;">2. Mô hình Kinh tế Chia sẻ Phi Thương mại</h2>
+        <p>
+          CommuteMatch được định vị là <strong>nền tảng ghép chuyến đi chung cộng đồng (Carpooling)</strong>, không phải dịch vụ taxi hay xe ôm công nghệ vì lợi nhuận. Mức chi phí chia sẻ được thiết lập có mức trần nghiêm ngặt, chỉ nhằm bù đắp một phần chi phí tiêu hao nhiên liệu thực tế theo nguyên tắc tương trợ lẫn nhau giữa sinh viên và đồng nghiệp.
+        </p>
+        <div class="d-grid grid-cols-3 gap-2 mt-3 text-center">
+          <div style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md);">
+            <div style="font-size: 1.8rem; margin-bottom: 0.25rem;"><i class='fas fa-money-bill-wave fa-ui-icon' aria-hidden='true'></i></div>
+            <div class="font-bold">Tiết kiệm 50%</div>
+            <div class="text-muted" style="font-size: 0.8rem;">Chi phí đi lại mỗi tháng</div>
+          </div>
+          <div style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md);">
+            <div style="font-size: 1.8rem; margin-bottom: 0.25rem;"><i class='fas fa-shield-alt fa-ui-icon' aria-hidden='true'></i></div>
+            <div class="font-bold">Định danh 100%</div>
+            <div class="text-muted" style="font-size: 0.8rem;">Qua Email trường & Thẻ SV</div>
+          </div>
+          <div style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md);">
+            <div style="font-size: 1.8rem; margin-bottom: 0.25rem;"><i class='fas fa-tree fa-ui-icon' aria-hidden='true'></i></div>
+            <div class="font-bold">Giảm phát thải</div>
+            <div class="text-muted" style="font-size: 0.8rem;">Hơn 3 tấn CO2 mỗi kỳ học</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <h2 style="font-size: 1.4rem; color: var(--ai-purple); margin-bottom: 0.75rem;">3. Cam kết ứng dụng AI có trách nhiệm</h2>
+        <p>
+          Nền tảng tích hợp các mô-đun AI hỗ trợ ghép chuyến (Matching), gợi ý điểm hẹn (Meeting Point) và phân tích lưu lượng (Demand Heatmap) theo tiêu chuẩn <strong>Explainable AI (XAI)</strong>. Mọi gợi ý từ thuật toán đều có phân tích minh bạch các yếu tố cấu thành điểm số và người dùng luôn có quyền chỉnh sửa, từ chối hoặc chọn thủ công theo mong muốn.
+        </p>
+        <div class="mt-3">
+          <a href="safety-guidelines.html" class="btn btn-primary">Xem Cẩm Nang An Toàn →</a>
+          <a href="../rider/rider-trip-search.html" class="btn btn-outline">Tìm chuyến đi thử nghiệm</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+</body>
+</html>

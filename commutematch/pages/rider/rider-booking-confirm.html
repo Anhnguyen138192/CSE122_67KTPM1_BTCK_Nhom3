@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xác Nhận Đặt Chỗ & Gợi Ý Điểm Đón AI – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider-trip-detail.html">Chi tiết chuyến</a> / <span>Xác nhận đặt chỗ</span>
+          </div>
+          <h1 class="page-title"><i class='fas fa-edit fa-ui-icon' aria-hidden='true'></i> Yêu Cầu Ghép Chuyến Được Điều Phối</h1>
+        </div>
+      </div>
+
+      <div class="d-grid grid-cols-12 gap-3" style="max-width: 980px;">
+        <!-- Cột trái: Form đặt chỗ & Chọn trạm đón -->
+        <div style="grid-column: span 7;" class="col-12 col-md-7">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Thiết Lập Điểm Hẹn & Ghi Chú</h3>
+            </div>
+            <div class="card-body">
+              <form id="bookingForm" onsubmit="submitBooking(event)">
+                <!-- AI-2: Meeting Point Recommendation Card -->
+                <div class="ai-panel mb-3" id="aiMeetingPointPanel">
+                  <div class="d-flex items-center justify-between mb-2">
+                    <span class="ai-badge">AI-2 GỢI Ý ĐIỂM HẸN TỐI ƯU</span>
+                    <span class="badge badge-primary">Theo lịch điều phối</span>
+                  </div>
+                  <h4 style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.35rem;" id="aiZoneName">
+                  </h4>
+                  <p id="pickupZoneAddress" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  </p>
+
+                  <div style="background-color: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 0.75rem;">
+                    <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: var(--primary); margin-bottom: 0.25rem;">
+                      Điểm đón do điều phối viên quy định
+                    </div>
+                    <p class="text-muted" style="margin:0;">Điểm đón của chuyến không thể tự thay đổi tại bước đặt chỗ.</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="pickupPoint">Trạm đón được phân công</label>
+                  <input id="pickupPoint" class="form-control" readonly>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="dropoffInput">Điểm xuống xe mong muốn <span class="required">*</span></label>
+                  <select id="dropoffInput" class="form-select" required></select>
+                </div>
+
+                <!-- Ghi chú cho tài xế -->
+                <div class="form-group">
+                  <label class="form-label" for="riderNotes">Ghi chú cho tài xế (nhận diện, balo...)</label>
+                  <textarea id="riderNotes" class="form-control" rows="2" placeholder="Ví dụ: Em mang balo đen, mặc áo khoác xanh, đứng trước cửa hàng Circle K ạ..."></textarea>
+                </div>
+
+                <!-- Cam kết chi phí xăng xe -->
+                <div class="form-group">
+                  <label class="d-flex items-start gap-1" style="font-size: 0.85rem; cursor: pointer;">
+                    <input type="checkbox" id="agreeFare" checked required style="margin-top: 0.2rem;">
+                    <span>Tôi xác nhận mức chia sẻ chi phí đã được điều phối công bố (<strong id="confirmCost"></strong>) và có mặt tại trạm đón trước 5 phút.</span>
+                  </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                  <i class='fas fa-rocket fa-ui-icon' aria-hidden='true'></i> Xác Nhận Gửi Yêu Cầu Ghép Chuyến
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Tóm tắt chuyến đi & Tài xế -->
+        <div style="grid-column: span 5;" class="col-12 col-md-5">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Tóm Tắt Chuyến Đi</h3>
+            </div>
+            <div class="card-body">
+              <div class="d-flex items-center gap-2 mb-3">
+                <div class="avatar" id="summaryAvatar" style="width: 44px; height: 44px; background-color: var(--primary); color: white;">?</div>
+                <div>
+                <div class="font-bold" id="summaryDriverName"></div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);" id="summaryVehicle"></div>
+                </div>
+              </div>
+
+              <div style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md); font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+                <div class="d-flex justify-between">
+                  <span class="text-muted">Ngày đi:</span>
+                  <strong id="summaryDate"></strong>
+                </div>
+                <div class="d-flex justify-between">
+                  <span class="text-muted">Giờ xuất phát:</span>
+                  <strong style="color: var(--primary);" id="summaryTime"></strong>
+                </div>
+                <div class="d-flex justify-between">
+                  <span class="text-muted">Dự kiến đến nơi:</span>
+                  <strong id="summaryArrivalTime"></strong>
+                </div>
+                <div class="d-flex justify-between">
+                  <span class="text-muted">Khoảng cách dự kiến:</span>
+                  <strong id="summaryDistance"></strong>
+                </div>
+                <div class="d-flex justify-between">
+                  <span class="text-muted">Tuyến đường:</span>
+                  <strong id="summaryRoute"></strong>
+                </div>
+                <div class="d-flex justify-between" style="border-top: 1px dashed var(--border-color); padding-top: 0.5rem;">
+                  <span class="text-muted">Chi phí chia sẻ:</span>
+                  <strong style="font-size: 1.1rem; color: var(--text-main);" id="summaryFare"></strong>
+                </div>
+              </div>
+
+              <div style="font-size: 0.78rem; color: var(--text-muted);">
+                <i class='fas fa-lightbulb fa-ui-icon' aria-hidden='true'></i> Yêu cầu của bạn sẽ được gửi trực tiếp tới tài xế. Bạn sẽ nhận được thông báo ngay khi tài xế nhấn Duyệt.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+
+  <script>
+    let activeTrip = null;
+    let selectedZone = null;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tripId = urlParams.get("tripId");
+
+      activeTrip = tripId && window.Storage.getById("trips", tripId);
+      const form = document.getElementById("bookingForm");
+      if (!activeTrip || activeTrip.status !== "scheduled") {
+        form.querySelectorAll("input, select, textarea, button[type='submit']").forEach((field) => { field.disabled = true; });
+        document.getElementById("aiZoneName").innerText = "Chuyến không còn khả dụng";
+        return;
+      }
+
+      document.getElementById("summaryAvatar").innerText = activeTrip.driverAvatar || "TX";
+      document.getElementById("summaryDriverName").innerText = activeTrip.driverName;
+      document.getElementById("summaryVehicle").innerText = activeTrip.vehicleInfo;
+      document.getElementById("summaryDate").innerText = activeTrip.departureDate;
+      document.getElementById("summaryTime").innerText = activeTrip.departureTime;
+      document.getElementById("summaryArrivalTime").innerText = activeTrip.estimatedArrivalTime || "Chưa cập nhật";
+      document.getElementById("summaryDistance").innerText = Number(activeTrip.estimatedDistanceKm) > 0
+        ? `${Number(activeTrip.estimatedDistanceKm).toLocaleString("vi-VN")} km`
+        : "Chưa cập nhật";
+      document.getElementById("summaryRoute").innerText = `${activeTrip.origin} → ${activeTrip.destination}`;
+      document.getElementById("summaryFare").innerText = `${Number(activeTrip.costSharing || 0).toLocaleString('vi-VN')} đ`;
+      document.getElementById("confirmCost").innerText = `${Number(activeTrip.costSharing || 0).toLocaleString('vi-VN')} đ`;
+
+      selectedZone = window.Storage.getById("pickupZones", activeTrip.pickupZoneId);
+      if (!selectedZone) {
+        form.querySelectorAll("input, select, textarea, button[type='submit']").forEach((field) => { field.disabled = true; });
+        document.getElementById("aiZoneName").innerText = "Chuyến chưa có trạm đón hợp lệ";
+        return;
+      }
+      document.getElementById("aiZoneName").innerText = selectedZone.name;
+      document.getElementById("pickupZoneAddress").innerText = selectedZone.address || selectedZone.area || "";
+      document.getElementById("pickupPoint").value = selectedZone.name;
+      const dropoffs = (activeTrip.routePoints || [activeTrip.origin, activeTrip.destination]).slice(1).filter(Boolean);
+      document.getElementById("dropoffInput").innerHTML = dropoffs.map((point) =>
+        `<option value="${escapeHtml(point)}">${escapeHtml(point)}</option>`
+      ).join("");
+    });
+
+    function submitBooking(e) {
+      e.preventDefault();
+      const currentUser = window.Storage.getCurrentUser();
+      const notes = document.getElementById("riderNotes").value.trim();
+      const dropoff = document.getElementById("dropoffInput").value.trim();
+      const currentTrip = activeTrip && window.Storage.getById("trips", activeTrip.id);
+      if (!currentTrip || currentTrip.status !== "scheduled") {
+        window.Toast.show("Chuyến này không còn trong lịch điều phối.", "error");
+        return;
+      }
+      if (currentTrip.availableSeats < 1) {
+        window.Toast.show("Chuyến này đã hết chỗ.", "error");
+        return;
+      }
+      if (currentTrip.driverId === currentUser.id) {
+        window.Toast.show("Tài xế không thể gửi yêu cầu ghép chuyến của chính mình.", "error");
+        return;
+      }
+      const currentZone = window.Storage.getById("pickupZones", currentTrip.pickupZoneId);
+      const routeStops = (currentTrip.routePoints || [currentTrip.origin, currentTrip.destination]).slice(1);
+      if (!selectedZone || !currentZone || currentZone.status !== "active" || selectedZone.id !== currentZone.id) {
+        window.Toast.show("Trạm đón của chuyến không còn hoạt động.", "error");
+        return;
+      }
+      if (!routeStops.includes(dropoff)) {
+        window.Toast.show("Chỉ được chọn điểm xuống nằm trong các điểm dừng của chuyến.", "error");
+        return;
+      }
+      const existingRequest = window.Storage.get("joinRequests").some((request) =>
+        request.tripId === currentTrip.id && request.riderId === currentUser.id &&
+        ["pending", "accepted"].includes(request.status)
+      );
+      if (existingRequest) {
+        window.Toast.show("Bạn đã có yêu cầu đang chờ hoặc được chấp nhận cho chuyến này.", "warning");
+        return;
+      }
+
+      const newRequest = {
+        id: "req_" + Date.now(),
+        tripId: activeTrip.id,
+        riderId: currentUser.id,
+        riderName: currentUser.name,
+        riderPhone: currentUser.phone,
+        riderAvatar: currentUser.avatar || "U",
+        seatsRequested: 1,
+        pickupZoneId: currentZone.id,
+        pickupPoint: currentZone.name,
+        dropoffPoint: dropoff,
+        status: "pending",
+        note: notes || "Không có ghi chú thêm.",
+        requestTime: new Date().toISOString(),
+        cost: Number(activeTrip.costSharing || 0)
+      };
+
+      window.Storage.insert("joinRequests", newRequest);
+
+      window.Storage.insert("notifications", {
+        userId: activeTrip.driverId,
+        title: "Có yêu cầu ghép chuyến mới! <i class='fas fa-car fa-ui-icon' aria-hidden='true'></i>",
+        message: `${currentUser.name} vừa gửi yêu cầu tham gia chuyến được phân công.`,
+        time: "Vừa xong",
+        type: "join_request",
+        unread: true,
+        link: "../driver/driver-join-requests.html"
+      });
+
+      window.Toast.show("Đã gửi yêu cầu ghép chuyến thành công!", "success");
+
+      setTimeout(() => {
+        window.location.href = "rider-my-trips.html";
+      }, 700);
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[character]);
+    }
+  </script>
+</body>
+</html>

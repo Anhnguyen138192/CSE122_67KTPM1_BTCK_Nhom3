@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kết Quả Ghép Chuyến & AI Matching – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider-trip-search.html">Tìm chuyến</a> / <span>Kết quả AI Matching</span>
+          </div>
+          <h1 class="page-title"><i class='fas fa-magic fa-ui-icon' aria-hidden='true'></i> Kết Quả Phù Hợp (AI-1 Trip Matching)</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="rider-trip-search.html" class="btn btn-outline btn-sm"><i class='fas fa-edit fa-ui-icon' aria-hidden='true'></i> Chỉnh sửa tìm kiếm</a>
+          <button class="btn btn-ai btn-sm" onclick="runMatching()"><i class='fas fa-sync-alt fa-ui-icon' aria-hidden='true'></i> Tính toán lại AI</button>
+        </div>
+      </div>
+
+      <!-- Current Search Criteria Banner -->
+      <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.75rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: gap-2;">
+        <div class="d-flex items-center gap-2 flex-wrap" style="font-size: 0.88rem;">
+          <span>Lộ trình: <strong id="lblRoute"></strong></span>
+          <span>•</span>
+          <span>Giờ hẹn: <strong id="lblTime"></strong></span>
+          <span>•</span>
+          <span>Số chỗ: <strong id="lblSeats">1 người</strong></span>
+        </div>
+        <span class="badge badge-ai" id="lblAiStatus">AI Đang Phân Tích</span>
+      </div>
+
+      <!-- AI Loading State (Skeleton) -->
+      <div id="aiLoadingState" style="display: none;">
+        <div class="ai-panel mb-3 text-center" style="padding: 2.5rem 1.5rem;">
+          <div class="spinner mb-2" style="font-size: 2rem; animation: spin 1s linear infinite; display: inline-block;"><i class='fas fa-cogs fa-ui-icon' aria-hidden='true'></i></div>
+          <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">AI đang tính toán độ tương thích hành trình...</h3>
+          <p style="font-size: 0.88rem; max-width: 500px; margin: 0 auto;">
+            Đang phân tích độ lệch lộ trình, thời gian xuất phát, điểm uy tín tài xế và tối ưu hóa lượng CO2 cắt giảm.
+          </p>
+          <div class="skeleton mt-3" style="height: 12px; width: 60%; margin: 1rem auto 0;"></div>
+        </div>
+      </div>
+
+      <!-- AI Empty / Fallback State -->
+      <div id="aiEmptyState" style="display: none;">
+        <div class="card">
+          <div class="empty-state">
+            <div class="empty-icon"><i class='fas fa-robot fa-ui-icon' aria-hidden='true'></i><i class='fas fa-exclamation-triangle fa-ui-icon' aria-hidden='true'></i></div>
+            <div class="empty-title">AI chưa tìm thấy chuyến đi tương thích cao</div>
+            <div class="empty-desc">
+              Không có chuyến được điều phối nào phù hợp với tuyến, ngày, giờ và số chỗ đã chọn.
+            </div>
+            <div class="d-flex justify-center gap-2">
+              <a href="rider-trip-search.html" class="btn btn-outline btn-sm">Đổi lộ trình khác</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Match Results List -->
+      <div id="aiResultsContainer" style="display: none;">
+        <div class="ai-panel mb-4">
+          <div class="d-flex items-center gap-2 mb-1">
+            <span class="ai-badge">BÁO CÁO PHÂN TÍCH AI-1</span>
+            <span id="aiSummaryText" style="font-size: 0.88rem; font-weight: 600;"></span>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Điểm gợi ý dựa trên mức độ phù hợp tuyến và thời gian; đánh giá chỉ được tính khi có dữ liệu thực.
+          </div>
+        </div>
+
+        <div id="tripsList" class="d-flex flex-column gap-3">
+          <!-- Render trips dynamically -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+
+  <script>
+    let currentCriteria = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const stored = sessionStorage.getItem("commute_search_criteria");
+      if (stored) {
+        currentCriteria = JSON.parse(stored);
+      } else {
+        window.location.replace("rider-trip-search.html");
+        return;
+      }
+
+      document.getElementById("lblRoute").innerText = `${currentCriteria.origin} → ${currentCriteria.destination}`;
+      document.getElementById("lblTime").innerText = currentCriteria.time;
+      document.getElementById("lblSeats").innerText = `${currentCriteria.seats} người`;
+
+      runMatching();
+    });
+
+    async function runMatching() {
+      // 1. Hiển thị Loading State
+      document.getElementById("aiLoadingState").style.display = "block";
+      document.getElementById("aiResultsContainer").style.display = "none";
+      document.getElementById("aiEmptyState").style.display = "none";
+      document.getElementById("lblAiStatus").innerText = "AI Đang Tính Toán...";
+
+      // 2. Chạy hàm AI Engine
+      const res = await window.AIEngine.matchTrips(currentCriteria);
+
+      document.getElementById("aiLoadingState").style.display = "none";
+
+      if (res.status === "empty" || res.trips.length === 0) {
+        document.getElementById("aiEmptyState").style.display = "block";
+        document.getElementById("lblAiStatus").innerText = "Không Có Kết Quả";
+        return;
+      }
+
+      // 3. Hiển thị kết quả AI
+      document.getElementById("aiResultsContainer").style.display = "block";
+      document.getElementById("lblAiStatus").innerText = `Tìm thấy ${res.trips.length} chuyến xe`;
+      document.getElementById("aiSummaryText").innerText = res.aiSummary;
+
+      renderTripCards(res.trips);
+    }
+
+    function renderTripCards(trips) {
+      const container = document.getElementById("tripsList");
+      container.innerHTML = trips.map(t => `
+        <div class="card" style="border-left: 5px solid ${t.matchScore >= 85 ? 'var(--primary)' : 'var(--secondary)'};">
+          <div class="card-body">
+            <div class="d-grid grid-cols-12 gap-3 items-center">
+              <!-- Cột 1: Thông tin lộ trình & Tài xế -->
+              <div style="grid-column: span 7;" class="col-12 col-md-7">
+                <div class="d-flex items-center gap-2 mb-2">
+                  <span class="badge badge-info">
+                    <i class='fas fa-car-side fa-ui-icon' aria-hidden='true'></i> ${window.Storage.escapeHtml(t.vehicleInfo || "Ô tô nhiều chỗ")}
+                  </span>
+                  <span style="font-size: 0.82rem; color: var(--text-muted);">Khởi hành: <strong>${window.Storage.escapeHtml(t.departureTime)}</strong> (${window.Storage.escapeHtml(t.departureDate)})</span>
+                  <span style="font-size: 0.82rem; color: var(--text-muted);">Dự kiến đến: <strong>${window.Storage.escapeHtml(t.estimatedArrivalTime || "Chưa cập nhật")}</strong></span>
+                </div>
+
+                <div class="font-bold mb-1" style="font-size: 1.15rem; color: var(--text-main);">
+                  ${window.Storage.escapeHtml(t.origin)} <span style="color: var(--primary);">→</span> ${window.Storage.escapeHtml(t.destination)}
+                </div>
+
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  <i class='fas fa-map-signs fa-ui-icon' aria-hidden='true'></i> Điểm đón an toàn: <strong>${window.Storage.escapeHtml(t.pickupZoneName)}</strong>
+                </div>
+
+                <!-- Driver snippet -->
+                <div class="d-flex items-center gap-2">
+                  <div class="avatar" style="width: 32px; height: 32px; background-color: #0d9488; color: white; font-size: 0.8rem;">
+                    ${window.Storage.escapeHtml(t.driverAvatar || 'TX')}
+                  </div>
+                  <div style="font-size: 0.88rem;">
+                    <a href="../account/profile-overview.html?userId=${encodeURIComponent(t.driverId || "")}" style="font-weight:700;">${window.Storage.escapeHtml(t.driverName)}</a>
+                    <span style="color: var(--warning); font-size: 0.8rem;">${t.driverRating ? `<i class='fas fa-star fa-ui-icon' aria-hidden='true'></i> ${window.Storage.escapeHtml(t.driverRating)}` : "Chưa có đánh giá"}</span>
+                  </div>
+                  <a href="../account/messages-chat.html?userId=${encodeURIComponent(t.driverId || "")}&tripId=${encodeURIComponent(t.id)}" class="btn btn-outline btn-sm"><i class='fas fa-comment-dots fa-ui-icon' aria-hidden='true'></i> Nhắn tin</a>
+                  <span class="text-muted" style="font-size: 0.8rem;">• Còn ${t.availableSeats} chỗ trống</span>
+                </div>
+              </div>
+
+              <!-- Cột 2: Explainable AI Score & Breakdown -->
+              <div style="grid-column: span 5; border-left: 1px solid var(--border-color); padding-left: 1.5rem;" class="col-12 col-md-5">
+                <div class="ai-score-box mb-2">
+                  <div class="ai-score-number">${t.matchScore}%</div>
+                  <div>
+                    <div class="font-bold" style="font-size: 0.95rem; color: var(--primary);">${t.matchCategory}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Độ tương thích AI</div>
+                  </div>
+                  <div style="margin-left: auto; text-align: right;">
+                    <div class="font-bold" style="font-size: 1.25rem; color: var(--text-main);">
+                      ${Number(t.costSharing || 0).toLocaleString('vi-VN')} đ
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">${Number(t.estimatedDistanceKm) > 0
+                      ? `${Number(t.estimatedDistanceKm).toLocaleString("vi-VN")} km · bù tiền xăng/người`
+                      : "Bù tiền xăng/người"}</div>
+                  </div>
+                </div>
+
+                <!-- Explainability Details Panel -->
+                <div style="background-color: var(--bg-muted); border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; margin-bottom: 0.75rem;">
+                  <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.3rem;">
+                    <i class='fas fa-lightbulb fa-ui-icon' aria-hidden='true'></i> Vì sao có điểm số này?
+                  </div>
+                  <ul class="ai-reasons-list" style="margin-top: 0; gap: 0.25rem;">
+                    ${t.aiReasons.map(r => `
+                      <li class="ai-reason-item" style="font-size: 0.78rem;">
+                        <span class="icon">${r.icon}</span>
+                        <span>${window.Storage.escapeHtml(r.text)}</span>
+                      </li>
+                    `).join('')}
+                  </ul>
+                </div>
+
+                <!-- Actions: User in the loop -->
+                <div class="d-flex gap-2">
+                  <a href="rider-trip-detail.html?id=${encodeURIComponent(t.id)}" class="btn btn-outline btn-sm flex-1">Xem Chi Tiết</a>
+                  <a href="rider-booking-confirm.html?tripId=${encodeURIComponent(t.id)}" class="btn btn-primary btn-sm flex-1">
+                    <i class='fas fa-check fa-ui-icon' aria-hidden='true'></i> Đặt Chỗ Ngay
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+  </script>
+</body>
+</html>

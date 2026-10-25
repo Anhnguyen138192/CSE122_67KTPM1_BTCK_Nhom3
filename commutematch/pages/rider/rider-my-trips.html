@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chuyến Đi Của Tôi – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider-dashboard.html">Hành khách</a> / <span>Chuyến đi của tôi</span>
+          </div>
+          <h1 class="page-title"><i class='fas fa-ticket-alt fa-ui-icon' aria-hidden='true'></i> Quản Lý Chuyến Đi Của Tôi</h1>
+        </div>
+        <a href="rider-trip-search.html" class="btn btn-primary btn-sm">
+          <i class='fas fa-plus fa-ui-icon' aria-hidden='true'></i> Tìm & Đặt Chuyến Mới
+        </a>
+      </div>
+
+      <!-- 4 Tabs Trạng thái Nghiệp vụ -->
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTripTab('pending', this)">
+          ⏳ Đang Chờ Duyệt (<span id="countPending">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchTripTab('accepted', this)">
+          <i class='fas fa-car fa-ui-icon' aria-hidden='true'></i> Sắp Khởi Hành (<span id="countAccepted">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchTripTab('completed', this)">
+          <i class='fas fa-check-circle fa-ui-icon' aria-hidden='true'></i> Đã Hoàn Thành (<span id="countCompleted">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchTripTab('cancelled', this)">
+          <i class='fas fa-times-circle fa-ui-icon' aria-hidden='true'></i> Đã Hủy (<span id="countCancelled">0</span>)
+        </button>
+      </div>
+
+      <!-- Container Danh sách Chuyến đi -->
+      <div id="myTripsList" class="d-flex flex-column gap-3">
+        <!-- Rendered dynamically -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Xác Nhận Hủy Chuyến -->
+  <div class="modal-backdrop" id="cancelModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="card-title text-danger">Xác Nhận Hủy Ghép Chuyến</h3>
+        <button class="btn btn-outline btn-sm" onclick="window.Modal.close('cancelModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.9rem;">
+          Bạn có chắc chắn muốn hủy yêu cầu chuyến đi này không? Việc hủy chuyến quá sát giờ hẹn có thể ảnh hưởng đến Điểm Uy Tín (Trust Score) của bạn.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Lý do hủy chuyến:</label>
+          <select id="cancelReason" class="form-select">
+            <option value="Đổi lịch học/làm việc đột xuất">Đổi lịch học / làm việc đột xuất</option>
+            <option value="Tìm được phương tiện khác">Đã tìm được phương tiện khác</option>
+            <option value="Lý do cá nhân khác">Lý do cá nhân khác</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="window.Modal.close('cancelModal')">Giữ lại vé</button>
+        <button type="button" class="btn btn-danger" onclick="confirmCancelTrip()">Đồng ý Hủy Vé</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+
+  <script>
+    let activeTab = 'pending';
+    let targetCancelRequestId = null;
+
+    document.addEventListener("DOMContentLoaded", renderMyTrips);
+
+    function renderMyTrips() {
+      const allRequests = window.Storage.get("joinRequests");
+      const currentUser = window.Storage.getCurrentUser();
+
+      // Lọc các request của user này
+      const userRequests = allRequests.filter(r => r.riderId === currentUser.id);
+
+      const pending = userRequests.filter(r => r.status === 'pending');
+      const accepted = userRequests.filter(r => r.status === 'accepted');
+      const completed = userRequests.filter(r => r.status === 'completed');
+      const cancelled = userRequests.filter(r => r.status === 'cancelled' || r.status === 'rejected');
+
+      document.getElementById("countPending").innerText = pending.length;
+      document.getElementById("countAccepted").innerText = accepted.length;
+      document.getElementById("countCompleted").innerText = completed.length;
+      document.getElementById("countCancelled").innerText = cancelled.length;
+
+      let currentList = [];
+      if (activeTab === 'pending') currentList = pending;
+      else if (activeTab === 'accepted') currentList = accepted;
+      else if (activeTab === 'completed') currentList = completed;
+      else if (activeTab === 'cancelled') currentList = cancelled;
+
+      const container = document.getElementById("myTripsList");
+
+      if (currentList.length === 0) {
+        container.innerHTML = `
+          <div class="card">
+            <div class="empty-state">
+              <div class="empty-icon"><i class='fas fa-ticket-alt fa-ui-icon' aria-hidden='true'></i></div>
+              <div class="empty-title">Không có chuyến đi nào trong mục này</div>
+              <div class="empty-desc">Chưa có yêu cầu nào ở trạng thái này. Các chuyến có sẵn do điều phối viên lập.</div>
+              <a href="rider-trip-search.html" class="btn btn-primary btn-sm"><i class='fas fa-search fa-ui-icon' aria-hidden='true'></i> Tìm Chuyến Đi Ngay</a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const allTrips = window.Storage.get("trips");
+
+      container.innerHTML = currentList.map(req => {
+        const trip = allTrips.find(t => t.id === req.tripId);
+        if (!trip) {
+          return '<div class="card"><div class="card-body">Chuyến liên kết không còn trong lịch điều phối.</div></div>';
+        }
+
+        return `
+          <div class="card" style="border-left: 4px solid ${
+            req.status === 'accepted' ? 'var(--primary)' :
+            req.status === 'completed' ? 'var(--success)' :
+            req.status === 'cancelled' ? 'var(--danger)' : 'var(--warning)'
+          };">
+            <div class="card-body">
+              <div class="d-flex justify-between items-start flex-wrap gap-2 mb-2">
+                <div>
+                  <span class="badge ${
+                    req.status === 'accepted' ? 'badge-primary' :
+                    req.status === 'completed' ? 'badge-success' :
+                    req.status === 'cancelled' ? 'badge-danger' : 'badge-warning'
+                  } mb-1">
+                    ${
+                      req.status === 'accepted' ? 'Đã duyệt • Sắp khởi hành' :
+                      req.status === 'completed' ? 'Đã hoàn thành' :
+                      req.status === 'cancelled' ? 'Đã hủy' : 'Đang chờ tài xế duyệt'
+                    }
+                  </span>
+                  <h3 style="font-size: 1.15rem; margin: 0.2rem 0;">
+                    ${window.Storage.escapeHtml(trip.origin)} → ${window.Storage.escapeHtml(trip.destination)}
+                  </h3>
+                  <div style="font-size: 0.85rem; color: var(--text-muted);">
+                    Khởi hành: <strong>${window.Storage.escapeHtml(trip.departureTime)}</strong> (${window.Storage.escapeHtml(trip.departureDate)})
+                    · Quãng đường: <strong>${Number(trip.estimatedDistanceKm) > 0 ? `${Number(trip.estimatedDistanceKm).toLocaleString("vi-VN")} km` : "Chưa cập nhật"}</strong>
+                  </div>
+                </div>
+
+                <div class="text-right">
+                  <div class="font-bold" style="font-size: 1.2rem; color: var(--text-main);">
+                    ${Number(req.cost || trip.costSharing || 0).toLocaleString('vi-VN')} đ
+                  </div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Chia sẻ chi phí xăng</div>
+                </div>
+              </div>
+
+              <!-- Pickup info -->
+              <div style="background-color: var(--bg-muted); padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.88rem; margin-bottom: 1rem;">
+                <div class="d-flex justify-between mb-1">
+                  <span><i class='fas fa-map-marker-alt fa-ui-icon' aria-hidden='true'></i> Trạm đón: <strong>${window.Storage.escapeHtml(req.pickupPoint || trip.pickupZoneName || 'Chưa cập nhật')}</strong></span>
+                  <span>Tài xế: <strong>${window.Storage.escapeHtml(trip.driverName)}</strong></span>
+                </div>
+                <div class="d-flex justify-between text-muted" style="font-size: 0.8rem;">
+                  <span>Phương tiện: ${window.Storage.escapeHtml(trip.vehicleInfo)}</span>
+                  <span>Ghi chú: ${window.Storage.escapeHtml(req.note || 'Không có')}</span>
+                </div>
+              </div>
+
+              <!-- Actions based on Status -->
+              <div class="d-flex justify-end gap-2">
+                ${req.status === 'accepted' ? `
+                  <a href="rider-trip-tracking.html?tripId=${encodeURIComponent(trip.id)}" class="btn btn-primary btn-sm"><i class='fas fa-map-marker-alt fa-ui-icon' aria-hidden='true'></i> Theo Dõi Trực Tiếp</a>
+                  <a href="../account/messages-chat.html?userId=${encodeURIComponent(trip.driverId)}" class="btn btn-outline btn-sm"><i class='fas fa-comment-dots fa-ui-icon' aria-hidden='true'></i> Nhắn Tin</a>
+                  <button class="btn btn-outline btn-sm text-danger" onclick="promptCancelTrip('${req.id}')">Hủy Chuyến</button>
+                ` : req.status === 'pending' ? `
+                  <button class="btn btn-outline btn-sm text-danger" onclick="promptCancelTrip('${req.id}')">Rút Yêu Cầu</button>
+                  <a href="../account/messages-chat.html?userId=${encodeURIComponent(trip.driverId)}" class="btn btn-outline btn-sm"><i class='fas fa-comment-dots fa-ui-icon' aria-hidden='true'></i> Nhắc Tài Xế</a>
+                ` : req.status === 'completed' ? `
+                  <a href="rider-trip-review.html?tripId=${encodeURIComponent(trip.id)}&driverId=${encodeURIComponent(trip.driverId)}" class="btn btn-primary btn-sm"><i class='fas fa-star fa-ui-icon' aria-hidden='true'></i> Đánh Giá Chuyến Đi</a>
+                  <a href="rider-trip-detail.html?id=${encodeURIComponent(trip.id)}" class="btn btn-outline btn-sm">Xem Lại Lộ Trình</a>
+                ` : `
+                  <a href="rider-trip-search.html" class="btn btn-outline btn-sm">Tìm Chuyến Khác</a>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function switchTripTab(tab, btn) {
+      activeTab = tab;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderMyTrips();
+    }
+
+    function promptCancelTrip(requestId) {
+      targetCancelRequestId = requestId;
+      window.Modal.open("cancelModal");
+    }
+
+    function confirmCancelTrip() {
+      if (!targetCancelRequestId) return;
+      const reason = document.getElementById("cancelReason").value;
+      const request = window.Storage.getById("joinRequests", targetCancelRequestId);
+      const currentUser = window.Storage.getCurrentUser();
+      if (!request || request.riderId !== currentUser.id ||
+          !["pending", "accepted"].includes(request.status)) {
+        window.Toast.show("Chỉ có thể hủy yêu cầu đang chờ hoặc đã được xác nhận của bạn.", "error");
+        return;
+      }
+
+      window.Storage.update("joinRequests", targetCancelRequestId, {
+        status: "cancelled",
+        cancelReason: reason
+      });
+      if (request.status === "accepted") {
+        const trip = window.Storage.getById("trips", request.tripId);
+        if (trip && trip.status === "scheduled") {
+          window.Storage.update("trips", trip.id, {
+            availableSeats: Math.min(trip.totalSeats, trip.availableSeats + Number(request.seatsRequested || 1))
+          });
+        }
+      }
+
+      window.Modal.close("cancelModal");
+      window.Toast.show("Đã hủy yêu cầu ghép chuyến.", "info");
+      renderMyTrips();
+    }
+  </script>
+</body>
+</html>

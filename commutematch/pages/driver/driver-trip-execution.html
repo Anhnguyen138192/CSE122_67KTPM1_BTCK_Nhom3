@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Điều Hành Chuyến Đi – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs"><a href="driver-schedule.html">Lịch trình</a> / <span>Điều hành chuyến</span></div>
+          <h1 class="page-title"><i class='fas fa-traffic-light fa-ui-icon' aria-hidden='true'></i> Điều Hành Chuyến Được Phân Công</h1>
+        </div>
+        <span class="badge badge-primary" id="tripStatus">Đang lên lịch</span>
+      </div>
+      <div id="tripExecutionContent" class="d-grid grid-cols-2 gap-3"></div>
+    </main>
+  </div>
+  <div id="app-footer"></div>
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    let activeTrip = null;
+    let execPhase = 1;
+
+    document.addEventListener("DOMContentLoaded", initializeExecution);
+
+    function initializeExecution() {
+      const tripId = new URLSearchParams(window.location.search).get("id");
+      const user = window.Storage.getCurrentUser();
+      activeTrip = tripId && window.Storage.getById("trips", tripId);
+      const host = document.getElementById("tripExecutionContent");
+      if (!activeTrip || activeTrip.driverId !== user.id) {
+        host.innerHTML = '<div class="card"><div class="card-body empty-state">Không tìm thấy chuyến được phân công cho tài khoản này.</div></div>';
+        return;
+      }
+      if (activeTrip.status === "completed") execPhase = 4;
+      document.getElementById("tripStatus").innerText = activeTrip.status === "completed"
+        ? "Đã hoàn thành" : "Đang lên lịch";
+      const requests = window.Storage.get("joinRequests").filter((request) =>
+        request.tripId === activeTrip.id && ["accepted", "completed"].includes(request.status)
+      );
+      host.innerHTML = `
+        <div class="card">
+          <div class="card-header"><h2 class="card-title">${escapeHtml(activeTrip.origin)} → ${escapeHtml(activeTrip.destination)}</h2></div>
+          <div class="card-body">
+            <p><i class='fas fa-calendar-alt fa-ui-icon' aria-hidden='true'></i> ${escapeHtml(activeTrip.departureDate)} · ${escapeHtml(activeTrip.departureTime)}</p>
+            <p><i class='fas fa-clock fa-ui-icon' aria-hidden='true'></i> Dự kiến đến nơi: <strong>${escapeHtml(activeTrip.estimatedArrivalTime || "Chưa cập nhật")}</strong></p>
+            <p><i class='fas fa-ruler fa-ui-icon' aria-hidden='true'></i> Khoảng cách dự kiến: <strong>${Number(activeTrip.estimatedDistanceKm) > 0 ? `${Number(activeTrip.estimatedDistanceKm).toLocaleString("vi-VN")} km` : "Chưa cập nhật"}</strong></p>
+            <p><i class='fas fa-map-signs fa-ui-icon' aria-hidden='true'></i> Điểm đón: <strong>${escapeHtml(activeTrip.pickupZoneName || "Chưa thiết lập")}</strong></p>
+            <p><i class='fas fa-map-marker-alt fa-ui-icon' aria-hidden='true'></i> Các điểm dừng: ${escapeHtml((activeTrip.routePoints || []).join(" → "))}</p>
+            <div class="ai-panel text-center mt-3">
+              <div class="empty-icon" id="execIcon"><i class='fas fa-car fa-ui-icon' aria-hidden='true'></i></div>
+              <h3 id="execTitle">${execPhase === 4 ? "Chuyến đã hoàn thành" : "Thực hiện theo tuyến đã phân công"}</h3>
+              <p class="text-muted" id="execSub">Kiểm tra phương tiện và đón khách tại trạm đã được điều phối.</p>
+              <button type="button" class="btn btn-primary" id="btnMainAction" onclick="handleExecAction()" ${execPhase === 4 ? "disabled" : ""}>
+                Bắt đầu chuyến
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2 class="card-title">Hành khách đã xác nhận (${requests.length})</h2></div>
+          <div class="card-body">
+            ${requests.length ? requests.map((request) => `
+              <div style="padding:.75rem 0;border-bottom:1px solid var(--border-color);">
+                <strong>${escapeHtml(request.riderName || "Hành khách")}</strong>
+                <p class="text-muted">Đón: ${escapeHtml(request.pickupPoint || activeTrip.pickupZoneName || "")} · Xuống: ${escapeHtml(request.dropoffPoint || "")}</p>
+                <a class="btn btn-outline btn-sm" href="../account/messages-chat.html?userId=${encodeURIComponent(request.riderId)}">Nhắn tin</a>
+              </div>
+            `).join("") : '<div class="empty-state">Chưa có hành khách xác nhận chuyến.</div>'}
+          </div>
+        </div>
+      `;
+    }
+
+    function handleExecAction() {
+      const button = document.getElementById("btnMainAction");
+      const title = document.getElementById("execTitle");
+      const subtitle = document.getElementById("execSub");
+      const badge = document.getElementById("tripStatus");
+      if (!activeTrip || activeTrip.driverId !== window.Storage.getCurrentUser().id) return;
+      if (execPhase === 1) {
+        execPhase = 2;
+        window.Storage.update("trips", activeTrip.id, { executionStage: "at_pickup" });
+        badge.innerText = "Đã đến trạm đón";
+        title.innerText = "Đã đến trạm đón";
+        subtitle.innerText = `Đón khách tại ${activeTrip.pickupZoneName || "trạm đã phân công"}.`;
+        button.innerText = "Khách đã lên xe — bắt đầu chạy";
+      } else if (execPhase === 2) {
+        execPhase = 3;
+        window.Storage.update("trips", activeTrip.id, { executionStage: "in_transit" });
+        badge.innerText = "Đang di chuyển";
+        title.innerText = "Đang di chuyển theo lộ trình";
+        subtitle.innerText = `Điểm đến: ${activeTrip.destination}`;
+        button.innerText = "Kết thúc chuyến";
+      } else if (execPhase === 3) {
+        execPhase = 4;
+        window.Storage.update("trips", activeTrip.id, { status: "completed", executionStage: "completed" });
+        window.Storage.get("joinRequests")
+          .filter((request) => request.tripId === activeTrip.id && request.status === "accepted")
+          .forEach((request) => window.Storage.update("joinRequests", request.id, { status: "completed" }));
+        badge.innerText = "Đã hoàn thành";
+        title.innerText = "Chuyến đã hoàn thành";
+        subtitle.innerText = "Lịch sử chuyến đã được cập nhật.";
+        button.disabled = true;
+        button.innerText = "Hoàn tất";
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[character]);
+    }
+  </script>
+</body>
+</html>

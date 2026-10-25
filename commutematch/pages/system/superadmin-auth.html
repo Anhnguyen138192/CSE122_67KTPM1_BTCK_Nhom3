@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xác Thực Super Admin – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body style="background-color: var(--bg-body); display: flex; flex-direction: column; min-height: 100vh;">
+  <div id="app-header"></div>
+
+  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 2.5rem 1rem;">
+    <section class="card" style="max-width: 460px; width: 100%; box-shadow: var(--shadow-lg); border-top: 4px solid #4c1d95;">
+      <div class="card-body" style="padding: 2.2rem;">
+        <div class="text-center mb-3">
+          <div class="brand-icon" style="margin: 0 auto 0.75rem; width: 52px; height: 52px; font-size: 1.6rem; background: #4c1d95;"><i class='fas fa-lock fa-ui-icon' aria-hidden='true'></i></div>
+          <span class="badge badge-superadmin mb-2">SUPER ADMIN</span>
+          <h1 style="font-size: 1.5rem;">Xác thực lại danh tính</h1>
+          <p style="font-size: 0.9rem; color: var(--text-muted);">
+            Nhập lại thông tin tài khoản gốc để tiếp tục vào khu vực Super Admin.
+          </p>
+        </div>
+
+        <div id="authError" class="ai-panel mb-3 text-center" style="display: none; border-color: rgba(220, 38, 38, 0.4); background: rgba(220, 38, 38, 0.06); padding: 0.75rem;">
+          <span style="color: var(--danger); font-size: 0.88rem; font-weight: 600;" id="authErrorMessage"></span>
+        </div>
+
+        <form onsubmit="verifySuperAdmin(event)">
+          <div class="form-group">
+            <label class="form-label" for="rootUsername">Tên đăng nhập</label>
+            <input class="form-control" id="rootUsername" autocomplete="username" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="rootPassword">Nhập lại mật khẩu</label>
+            <input class="form-control" type="password" id="rootPassword" autocomplete="current-password" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="securityAnswer">Ai là người đẹp zai số 1 thế giới?</label>
+            <input class="form-control" type="text" id="securityAnswer" autocomplete="off" required>
+          </div>
+          <button class="btn btn-block btn-lg" style="background: #4c1d95; color: white;" type="submit">
+            Xác thực và tiếp tục
+          </button>
+        </form>
+
+        <div class="text-center mt-3">
+          <button type="button" class="btn btn-outline btn-sm" onclick="returnToAdmin()">Quay lại vai trò Admin</button>
+        </div>
+        <p class="text-center mt-3" style="font-size: 0.76rem; color: var(--text-muted);">
+          Bản BTL HTML/CSS/JS chỉ mô phỏng xác thực lại trên trình duyệt. Không dùng làm bảo mật thật.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = window.Auth.getCurrentUser();
+      if (!user) {
+        window.location.href = "../common/login.html";
+        return;
+      }
+      if (user.id !== "u_longchieusigma" || user.role !== "superadmin") {
+        window.location.href = window.CommuteMatchRoutes.page(window.Auth.ROLE_DASHBOARDS[user.role] || "../../index.html");
+      }
+      document.getElementById("rootUsername").value = user.username || "";
+    });
+
+    function verifySuperAdmin(event) {
+      event.preventDefault();
+      const result = window.Auth.verifySuperAdmin(
+        document.getElementById("rootUsername").value,
+        document.getElementById("rootPassword").value,
+        document.getElementById("securityAnswer").value
+      );
+      if (!result.success) {
+        document.getElementById("authErrorMessage").innerText = result.message;
+        document.getElementById("authError").style.display = "block";
+        document.getElementById("rootPassword").value = "";
+        document.getElementById("securityAnswer").value = "";
+        return;
+      }
+
+      const requestedPage = new URLSearchParams(window.location.search).get("redirect");
+      const safePage = requestedPage && /^[a-z0-9-]+\.html$/i.test(requestedPage) &&
+        requestedPage !== "superadmin-auth.html" && requestedPage !== "../common/login.html";
+      window.location.href = window.CommuteMatchRoutes.page(safePage ? requestedPage : "admin-dashboard.html");
+    }
+
+    function returnToAdmin() {
+      window.Auth.switchRole("admin");
+    }
+  </script>
+</body>
+</html>

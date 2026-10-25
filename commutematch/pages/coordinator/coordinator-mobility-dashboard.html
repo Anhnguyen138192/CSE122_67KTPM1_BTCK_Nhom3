@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Điều Phối Lưu Lượng – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="../../index.html">Trang chủ</a> / <span>Điều phối viên</span>
+          </div>
+          <h1 class="page-title"><i class='fas fa-chart-line fa-ui-icon' aria-hidden='true'></i> Trung Tâm Điều Phối Di Chuyển Cộng Đồng</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="coordinator-demand-heatmap.html" class="btn btn-ai btn-sm"><i class='fas fa-fire fa-ui-icon' aria-hidden='true'></i> Bản Đồ Nhiệt AI-3</a>
+          <a href="coordinator-pickup-zone-editor.html" class="btn btn-primary btn-sm"><i class='fas fa-plus fa-ui-icon' aria-hidden='true'></i> Thêm Trạm Đón</a>
+          <a href="coordinator-trip-management.html" class="btn btn-secondary btn-sm"><i class='fas fa-map-marked-alt fa-ui-icon' aria-hidden='true'></i> Lập chuyến</a>
+        </div>
+      </div>
+
+      <!-- Key Mobility KPIs -->
+      <div class="d-grid grid-cols-4 gap-3 mb-4">
+        <div class="stat-card">
+          <div class="stat-icon primary"><i class='fas fa-users fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="scheduledTripsCount">0</div>
+            <div class="stat-label">Chuyến đã điều phối</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon secondary"><i class='fas fa-car fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="joinRequestsCount">0</div>
+            <div class="stat-label">Yêu cầu ghép chuyến</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon warning"><i class='fas fa-exclamation-triangle fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="countPendingReports">2</div>
+            <div class="stat-label">Báo cáo sự cố cần xử lý</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ai"><i class='fas fa-map-signs fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="activeZonesCount">0</div>
+            <div class="stat-label">Trạm đón hoạt động</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Congestion Alert Banner -->
+      <div class="ai-panel mb-4">
+        <div class="d-flex justify-between items-center flex-wrap gap-2">
+          <div>
+            <div class="d-flex items-center gap-2 mb-1">
+              <span class="ai-badge">AI-3 CẢNH BÁO QUÁ TẢI GIỜ CAO ĐIỂM</span>
+              <span class="badge badge-primary">Lịch điều phối</span>
+            </div>
+            <p style="font-size: 0.88rem; margin: 0;">
+              Điều phối viên thiết lập tuyến, điểm dừng, trạm đón và tài xế trước khi chuyến xuất hiện trong lịch.
+            </p>
+          </div>
+          <a href="coordinator-trip-management.html" class="btn btn-primary btn-sm">Quản lý chuyến →</a>
+        </div>
+      </div>
+
+      <!-- Mobility Trends & Trạm đón giám sát -->
+      <div class="d-grid grid-cols-12 gap-3 mb-4">
+        <!-- Biểu đồ lưu lượng mô phỏng theo khung giờ -->
+        <div style="grid-column: span 7;" class="col-12 col-lg-7">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Tổng Quan Lịch Điều Phối</h3>
+            </div>
+            <div class="card-body">
+              <div id="coordinatorScheduleSummary" class="empty-state">
+                <div class="empty-title">Chưa có dữ liệu chuyến</div>
+                <div class="empty-desc">Chuyến được phân công sẽ hiển thị tại đây.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bảng trạng thái trạm đón an toàn -->
+        <div style="grid-column: span 5;" class="col-12 col-lg-5">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Tình Trạng Trạm Đón An Toàn</h3>
+              <a href="coordinator-pickup-zone-management.html" style="font-size: 0.85rem;">Quản lý →</a>
+            </div>
+            <div class="card-body p-0">
+              <div id="dashboardZonesList">
+                <!-- Loaded dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const zones = window.Storage.get("pickupZones");
+      const reports = window.Storage.get("reports").filter(r => r.status === 'investigating' || r.status === 'pending');
+      document.getElementById("countPendingReports").innerText = reports.length;
+      const trips = window.Storage.get("trips");
+      const requests = window.Storage.get("joinRequests");
+      document.getElementById("scheduledTripsCount").innerText = trips.filter((trip) => trip.status === "scheduled").length;
+      document.getElementById("joinRequestsCount").innerText = requests.length;
+      document.getElementById("activeZonesCount").innerText = zones.filter((zone) => zone.status === "active").length;
+      document.getElementById("coordinatorScheduleSummary").innerHTML = trips.length
+        ? `<div class="font-bold">${trips.length} chuyến được điều phối</div><div class="text-muted">${trips.filter((trip) => trip.status === "scheduled").length} chuyến đang lên lịch</div><a href="coordinator-trip-management.html" class="btn btn-outline btn-sm mt-2">Xem lịch →</a>`
+        : '<div class="empty-title">Chưa có dữ liệu chuyến</div><div class="empty-desc">Tạo trạm đón rồi lập tuyến và phân công tài xế để bắt đầu.</div><a href="coordinator-trip-management.html" class="btn btn-primary btn-sm mt-2">Lập chuyến</a>';
+
+      const container = document.getElementById("dashboardZonesList");
+      container.innerHTML = zones.slice(0, 4).map(z => `
+        <div style="padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div class="font-bold" style="font-size: 0.88rem;">${z.name}</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">${z.area} • Chỉ số an toàn: ${z.safetyScore}/10</div>
+          </div>
+          <span class="badge ${z.status === 'active' ? 'badge-success' : 'badge-warning'}">
+            ${z.status === 'active' ? 'Đang hoạt động' : 'Tạm đóng'}
+          </span>
+        </div>
+      `).join('');
+    });
+
+  </script>
+</body>
+</html>

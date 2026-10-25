@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Điều Phối Chuyến Xe – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="coordinator-mobility-dashboard.html">Điều phối viên</a> / <span>Lịch chuyến</span>
+          </div>
+          <h1 class="page-title"><i class='fas fa-map-marked-alt fa-ui-icon' aria-hidden='true'></i> Lập & Phân Công Chuyến Xe</h1>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body" style="padding: 1.5rem;">
+          <p class="text-muted mb-3">Chỉ tài xế có hồ sơ ô tô từ 7 chỗ trở lên mới xuất hiện trong danh sách. Số ghế phân bổ là ghế dành cho hành khách, không tính ghế tài xế.</p>
+          <form id="tripPlanForm" onsubmit="createPlannedTrip(event)">
+            <div class="d-grid grid-cols-2 gap-3">
+              <div class="form-group">
+                <label class="form-label" for="tripOrigin">Điểm xuất phát <span class="required">*</span></label>
+                <input id="tripOrigin" class="form-control" required maxlength="120">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tripDestination">Điểm đến <span class="required">*</span></label>
+                <input id="tripDestination" class="form-control" required maxlength="120">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tripStops">Các điểm dừng theo thứ tự</label>
+                <input id="tripStops" class="form-control" maxlength="500" placeholder="Phân cách các điểm bằng dấu phẩy">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tripZone">Trạm đón đã được duyệt <span class="required">*</span></label>
+                <select id="tripZone" class="form-select" required></select>
+                <small id="pickupZoneHelp" class="text-muted" aria-live="polite"></small>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="driverSearch">Tìm tài xế theo tên hoặc ID</label>
+                <input id="driverSearch" class="form-control mb-2" type="search" autocomplete="off" placeholder="Nhập tên hoặc ID tài xế" oninput="filterDriverOptions()">
+                <label class="form-label" for="tripDriverId">Tài xế được phân công <span class="required">*</span></label>
+                <select id="tripDriverId" class="form-select" required onchange="showDriverIdentity()"></select>
+                <small id="driverIdentity" class="text-muted" aria-live="polite">Chọn tài xế; danh sách hiển thị tên và ID tài khoản.</small>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tripDate">Ngày khởi hành <span class="required">*</span></label>
+                <input id="tripDate" type="date" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tripTime">Giờ khởi hành <span class="required">*</span></label>
+                <input id="tripTime" type="time" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tripArrivalTime">Giờ dự kiến đến nơi <span class="required">*</span></label>
+                <input id="tripArrivalTime" type="time" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tripDistance">Khoảng cách dự kiến (km) <span class="required">*</span></label>
+                <input id="tripDistance" type="number" class="form-control" min="0.1" step="0.1" placeholder="Ví dụ: 120" required oninput="updateFareEstimate()">
+                <small id="fareEstimate" class="text-muted" aria-live="polite">Nhập khoảng cách và đơn giá/km để xem mức chia sẻ mỗi người.</small>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tripSeats">Số ghế hành khách phân bổ <span class="required">*</span></label>
+                <input id="tripSeats" type="number" class="form-control" min="1" max="44" value="6" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tripFarePerKm">Đơn giá chia sẻ (VNĐ/km/người) <span class="required">*</span></label>
+                <input id="tripFarePerKm" type="number" class="form-control" min="0" step="100" value="0" required oninput="updateFareEstimate()">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="tripFare">Giá dự kiến/người (VNĐ)</label>
+                <input id="tripFare" type="number" class="form-control" value="0" readonly aria-describedby="fareEstimate">
+              </div>
+            </div>
+            <div class="d-flex justify-end mt-3">
+              <button id="cancelTripEditButton" type="button" class="btn btn-outline" style="display:none;" onclick="cancelTripEdit()">Hủy sửa</button>
+              <button id="createTripButton" type="submit" class="btn btn-primary">Lưu & phân công chuyến</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Các chuyến đã điều phối</h2></div>
+        <div id="plannedTripsList" class="card-body"></div>
+      </div>
+    </main>
+  </div>
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    let editingTripId = null;
+    let availableDrivers = [];
+
+    document.addEventListener("DOMContentLoaded", initializeTripPlanner);
+
+    function initializeTripPlanner() {
+      const zones = window.Storage.get("pickupZones").filter(isPickupZoneAvailable);
+      availableDrivers = window.Storage.get("users").filter(isEligibleCarDriver);
+      document.getElementById("tripZone").innerHTML = zones.length
+        ? `<option value="">Chọn trạm đón đã duyệt</option>${zones.map((zone) => `<option value="${escapeHtml(zone.id)}">${escapeHtml(zone.name)} — ${escapeHtml(zone.area)}</option>`).join("")}`
+        : '<option value="">Chưa có trạm đón hoạt động/đã duyệt</option>';
+      document.getElementById("pickupZoneHelp").textContent = zones.length
+        ? `${zones.length} trạm đón khả dụng. Nếu thiếu trạm, hãy kiểm tra trạng thái trong Quản lý trạm đón.`
+        : "Chưa có trạm khả dụng. Hãy thêm trạm hoặc mở lại trạm đang tạm đóng trong Quản lý trạm đón.";
+      document.getElementById("pickupZoneHelp").classList.toggle("text-danger", !zones.length);
+      renderDriverOptions();
+      document.getElementById("createTripButton").disabled = !zones.length || !availableDrivers.length;
+      document.getElementById("tripDate").min = new Date().toISOString().slice(0, 10);
+      updatePassengerCapacity();
+      updateFareEstimate();
+      renderPlannedTrips();
+    }
+
+    function isPickupZoneAvailable(zone) {
+      const status = String(zone && zone.status || "").trim().toLocaleLowerCase();
+      return ["active", "approved", "đã duyệt", "hoạt động"].includes(status);
+    }
+
+    function getDriverVehicle(driver) {
+      if (!driver) return null;
+      const vehicles = driver.vehiclesList || (driver.vehicle ? [driver.vehicle] : []);
+      return vehicles.find((vehicle) => vehicle.inspectionStatus === "approved") || driver.vehicle || vehicles[0] || null;
+    }
+
+    function isEligibleCarDriver(driver) {
+      if (!driver || driver.isSuspended) return false;
+      const roles = Array.isArray(driver.roles) ? driver.roles : [driver.role || "rider"];
+      const vehicle = getDriverVehicle(driver);
+      const vehicleType = String(vehicle && (vehicle.vehicleType || vehicle.type) || "");
+      const totalSeats = Number(vehicle && (vehicle.seatsTotal || vehicle.seats));
+      return roles.includes("driver") && vehicle && vehicle.inspectionStatus === "approved" &&
+        /\bcar\b|ô\s*tô|suv|mpv|minibus|xe khách/i.test(vehicleType) &&
+        Number.isInteger(totalSeats) && totalSeats >= 7 && totalSeats <= 45;
+    }
+
+    function updatePassengerCapacity() {
+      const driver = getEligibleDriver(document.getElementById("tripDriverId").value);
+      const seatsInput = document.getElementById("tripSeats");
+      const maxSeats = driver ? Number(getDriverVehicle(driver).seatsTotal || getDriverVehicle(driver).seats) - 1 : 44;
+      seatsInput.max = String(maxSeats);
+      if (driver) {
+        seatsInput.placeholder = `Tối đa ${maxSeats} ghế hành khách (đã trừ ghế tài xế)`;
+        if (Number(seatsInput.value) > maxSeats) seatsInput.value = String(maxSeats);
+      }
+    }
+
+    function renderDriverOptions(search = "") {
+      const select = document.getElementById("tripDriverId");
+      const currentDriverId = select.value;
+      const query = search.trim().toLocaleLowerCase();
+      const matchingDrivers = availableDrivers.filter((driver) =>
+        `${driver.name} ${driver.id}`.toLocaleLowerCase().includes(query)
+      );
+      select.innerHTML = [
+        '<option value="">Chọn tài xế (tên · ID)</option>',
+        ...(matchingDrivers.length
+          ? matchingDrivers.map((driver) =>
+            `<option value="${escapeHtml(driver.id)}">${escapeHtml(driver.name)} · ${escapeHtml(driver.id)}</option>`
+          )
+          : ['<option value="" disabled>Không tìm thấy tài xế phù hợp</option>'])
+      ].join("");
+      if (matchingDrivers.some((driver) => driver.id === currentDriverId)) {
+        select.value = currentDriverId;
+      }
+    }
+
+    function filterDriverOptions() {
+      renderDriverOptions(document.getElementById("driverSearch").value);
+      showDriverIdentity();
+    }
+
+    function createPlannedTrip(event) {
+      event.preventDefault();
+      const coordinator = window.Storage.getCurrentUser();
+      const driverId = document.getElementById("tripDriverId").value.trim();
+      const driver = getEligibleDriver(driverId);
+      const zone = window.Storage.getById("pickupZones", document.getElementById("tripZone").value);
+      if (!coordinator || !driver || !zone || !isPickupZoneAvailable(zone)) {
+        window.Toast.show("ID tài xế không hợp lệ/không có quyền tài xế, hoặc trạm đón không hoạt động.", "error");
+        return;
+      }
+
+      const origin = document.getElementById("tripOrigin").value.trim();
+      const destination = document.getElementById("tripDestination").value.trim();
+      const estimatedDistanceKm = Number(document.getElementById("tripDistance").value);
+      const farePerKm = Number(document.getElementById("tripFarePerKm").value);
+      const costSharing = Math.round(estimatedDistanceKm * farePerKm);
+      const maxFarePerKm = Number(window.Storage.getSettings().maxFareCarPerKm || 0);
+      if (!Number.isFinite(estimatedDistanceKm) || estimatedDistanceKm <= 0) {
+        window.Toast.show("Khoảng cách dự kiến phải lớn hơn 0 km.", "error");
+        return;
+      }
+      if (!Number.isFinite(farePerKm) || farePerKm < 0 || !Number.isFinite(costSharing)) {
+        window.Toast.show("Đơn giá chia sẻ/km không hợp lệ.", "error");
+        return;
+      }
+      if (maxFarePerKm > 0 && farePerKm > maxFarePerKm) {
+        window.Toast.show(`Đơn giá không được vượt quá ${maxFarePerKm.toLocaleString("vi-VN")} đ/km/người. Với quãng đường này, giá tối đa là ${Math.floor(estimatedDistanceKm * maxFarePerKm).toLocaleString("vi-VN")} đ/người.`, "error");
+        return;
+      }
+      const routeStops = document.getElementById("tripStops").value
+        .split(",").map((point) => point.trim()).filter(Boolean);
+      const tripData = {
+        createdBy: coordinator.id,
+        coordinatorId: coordinator.id,
+        driverId: driver.id,
+        driverName: driver.name,
+        driverAvatar: driver.avatar || "TX",
+        driverRating: driver.rating || null,
+        driverPhone: driver.phone || "",
+        vehicleInfo: [
+          getDriverVehicle(driver).type || "Ô tô",
+          getDriverVehicle(driver).plate,
+          `${Number(getDriverVehicle(driver).seatsTotal || getDriverVehicle(driver).seats)} chỗ toàn xe`
+        ].filter(Boolean).join(" — "),
+        vehiclePlate: getDriverVehicle(driver).plate || "",
+        vehicleType: "car",
+        origin,
+        destination,
+        departureDate: document.getElementById("tripDate").value,
+        departureTime: document.getElementById("tripTime").value,
+        estimatedArrivalTime: document.getElementById("tripArrivalTime").value,
+        estimatedDistanceKm,
+        farePerKm,
+        totalSeats: Number(document.getElementById("tripSeats").value),
+        availableSeats: Number(document.getElementById("tripSeats").value),
+        costSharing,
+        status: "scheduled",
+        pickupZoneId: zone.id,
+        pickupZoneName: zone.name,
+        routePoints: [origin, ...routeStops, destination],
+        notes: ""
+      };
+      const driverCapacity = Number(getDriverVehicle(driver).seatsTotal || getDriverVehicle(driver).seats) - 1;
+      if (tripData.totalSeats < 1 || tripData.totalSeats > driverCapacity) {
+        window.Toast.show(`Số ghế hành khách phải từ 1 đến ${driverCapacity}; đã trừ ghế tài xế.`, "error");
+        return;
+      }
+      if (editingTripId) {
+        const existingTrip = window.Storage.getById("trips", editingTripId);
+        if (!existingTrip || existingTrip.status !== "scheduled") {
+          window.Toast.show("Chỉ có thể sửa chuyến đang được lên lịch.", "error");
+          return;
+        }
+        const occupiedSeats = Number(existingTrip.totalSeats) - Number(existingTrip.availableSeats);
+        if (tripData.totalSeats < occupiedSeats) {
+          window.Toast.show(`Số chỗ mới không thể ít hơn ${occupiedSeats} chỗ đã được đặt.`, "error");
+          return;
+        }
+        tripData.availableSeats = tripData.totalSeats - occupiedSeats;
+        tripData.createdBy = existingTrip.createdBy || coordinator.id;
+        tripData.coordinatorId = existingTrip.coordinatorId || coordinator.id;
+        window.Storage.update("trips", editingTripId, tripData);
+        if (existingTrip.driverId !== driver.id) {
+          notifyDriverAssignment(driver, tripData);
+        }
+        window.Toast.show("Đã cập nhật chuyến. Thay đổi được lưu trên trình duyệt.", "success");
+      } else {
+        window.Storage.insert("trips", tripData);
+        notifyDriverAssignment(driver, tripData);
+        window.Toast.show("Đã lập chuyến và phân công tài xế.", "success");
+      }
+      cancelTripEdit();
+      initializeTripPlanner();
+    }
+
+    function getEligibleDriver(driverId) {
+      const driver = window.Storage.getById("users", driverId);
+      return isEligibleCarDriver(driver) ? driver : null;
+    }
+
+    function showDriverIdentity() {
+      const driverId = document.getElementById("tripDriverId").value.trim();
+      const driver = getEligibleDriver(driverId);
+      const message = document.getElementById("driverIdentity");
+      message.textContent = driver
+        ? `Đã chọn: ${driver.name} · ID ${driver.id} · Tài xế`
+        : driverId
+          ? "ID đã chọn không hợp lệ hoặc tài khoản chưa được cấp vai trò tài xế."
+          : "Chọn tài xế; danh sách hiển thị tên và ID tài khoản.";
+      message.classList.toggle("text-danger", Boolean(driverId && !driver));
+      message.classList.toggle("text-success", Boolean(driver));
+      updatePassengerCapacity();
+    }
+
+    function updateFareEstimate() {
+      const distanceKm = Number(document.getElementById("tripDistance").value);
+      const farePerKm = Number(document.getElementById("tripFarePerKm").value);
+      const maxFarePerKm = Number(window.Storage.getSettings().maxFareCarPerKm || 0);
+      const output = document.getElementById("fareEstimate");
+      if (!Number.isFinite(distanceKm) || distanceKm <= 0 || !Number.isFinite(farePerKm) || farePerKm < 0) {
+        document.getElementById("tripFare").value = "0";
+        output.textContent = "Nhập khoảng cách và đơn giá/km để xem mức chia sẻ mỗi người.";
+        output.classList.remove("text-danger", "text-success");
+        return;
+      }
+      const costSharing = Math.round(distanceKm * farePerKm);
+      const exceedsLimit = maxFarePerKm > 0 && farePerKm > maxFarePerKm;
+      document.getElementById("tripFare").value = String(costSharing);
+      output.textContent = `Giá dự kiến: ${costSharing.toLocaleString("vi-VN")} đ/người (${farePerKm.toLocaleString("vi-VN")} đ/km)${maxFarePerKm > 0
+        ? ` · tối đa ${Math.floor(distanceKm * maxFarePerKm).toLocaleString("vi-VN")} đ/người (${maxFarePerKm.toLocaleString("vi-VN")} đ/km)`
+        : ""}${exceedsLimit ? " · Vượt mức trần" : ""}`;
+      output.classList.toggle("text-danger", exceedsLimit);
+      output.classList.toggle("text-success", !exceedsLimit);
+    }
+
+    function notifyDriverAssignment(driver, trip) {
+      window.Storage.insert("notifications", {
+        userId: driver.id,
+        title: "Bạn được phân công chuyến xe",
+        message: `Điều phối viên phân công chuyến ${trip.origin} → ${trip.destination}, ${trip.departureDate} lúc ${trip.departureTime}; dự kiến đến lúc ${trip.estimatedArrivalTime}.`,
+        time: "Vừa xong",
+        type: "trip_assigned",
+        unread: true,
+        link: "../driver/driver-schedule.html"
+      });
+    }
+
+    function editPlannedTrip(tripId) {
+      const trip = window.Storage.getById("trips", tripId);
+      if (!trip || trip.status !== "scheduled") {
+        window.Toast.show("Chỉ có thể sửa chuyến đang được lên lịch.", "error");
+        return;
+      }
+      editingTripId = trip.id;
+      document.getElementById("driverSearch").value = "";
+      renderDriverOptions();
+      document.getElementById("tripOrigin").value = trip.origin || "";
+      document.getElementById("tripDestination").value = trip.destination || "";
+      document.getElementById("tripStops").value = (trip.routePoints || []).slice(1, -1).join(", ");
+      document.getElementById("tripZone").value = trip.pickupZoneId || "";
+      document.getElementById("tripDriverId").value = trip.driverId || "";
+      showDriverIdentity();
+      document.getElementById("tripDate").value = trip.departureDate || "";
+      document.getElementById("tripTime").value = trip.departureTime || "";
+      document.getElementById("tripArrivalTime").value = trip.estimatedArrivalTime || "";
+      document.getElementById("tripDistance").value = trip.estimatedDistanceKm || "";
+      document.getElementById("tripSeats").value = trip.totalSeats || 6;
+      const distanceKm = Number(trip.estimatedDistanceKm);
+      document.getElementById("tripFarePerKm").value = trip.farePerKm != null
+        ? trip.farePerKm
+        : distanceKm > 0 ? Number(trip.costSharing || 0) / distanceKm : 0;
+      updateFareEstimate();
+      document.getElementById("createTripButton").textContent = "Lưu thay đổi chuyến";
+      document.getElementById("cancelTripEditButton").style.display = "";
+      document.getElementById("tripPlanForm").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function cancelTripEdit() {
+      editingTripId = null;
+      document.getElementById("tripPlanForm").reset();
+      document.getElementById("driverSearch").value = "";
+      renderDriverOptions();
+      document.getElementById("driverIdentity").textContent = "Nhập ID để kiểm tra tên tài xế và vai trò.";
+      document.getElementById("driverIdentity").classList.remove("text-danger", "text-success");
+      document.getElementById("tripSeats").value = "6";
+      document.getElementById("tripFarePerKm").value = "0";
+      updateFareEstimate();
+      document.getElementById("createTripButton").textContent = "Lưu & phân công chuyến";
+      document.getElementById("cancelTripEditButton").style.display = "none";
+    }
+
+    function renderPlannedTrips() {
+      const trips = window.Storage.get("trips").slice().sort((a, b) =>
+        `${a.departureDate} ${a.departureTime}`.localeCompare(`${b.departureDate} ${b.departureTime}`)
+      );
+      const host = document.getElementById("plannedTripsList");
+      host.innerHTML = trips.length ? trips.map((trip) => `
+        <div class="d-flex justify-between items-center flex-wrap gap-2" style="padding:.75rem 0;border-bottom:1px solid var(--border-color);">
+          <div>
+            <strong>${escapeHtml(trip.origin)} → ${escapeHtml(trip.destination)}</strong>
+            ${trip.isDemoRecord ? '<span class="badge badge-warning">Mô phỏng</span>' : ""}
+            <div class="text-muted" style="font-size:.85rem;">
+              ${escapeHtml(trip.departureDate)} · Khởi hành ${escapeHtml(trip.departureTime)} · Dự kiến đến ${escapeHtml(trip.estimatedArrivalTime || "Chưa cập nhật")} · Tài xế: ${escapeHtml(trip.driverName || "Chưa phân công")} · ID: ${escapeHtml(trip.driverId || "Chưa có")}
+              · ${escapeHtml(trip.pickupZoneName || "Chưa có trạm đón")} · ${Number(trip.estimatedDistanceKm) > 0 ? `${Number(trip.estimatedDistanceKm).toLocaleString("vi-VN")} km` : "Chưa có quãng đường"} · ${Number(trip.costSharing || 0).toLocaleString("vi-VN")} đ/người
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            ${trip.status === "scheduled" ? `<button class="btn btn-outline btn-sm" type="button" onclick="editPlannedTrip('${escapeHtml(trip.id)}')">Sửa chuyến</button>` : ""}
+            <a class="btn btn-outline btn-sm" href="../admin/admin-trip-audit.html">Kiểm toán</a>
+          </div>
+        </div>
+      `).join("") : '<div class="empty-state"><div class="empty-title">Chưa có chuyến được điều phối</div><div class="empty-desc">Tạo trạm đón và cấp vai trò tài xế trước khi lập chuyến.</div></div>';
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[character]);
+    }
+  </script>
+</body>
+</html>

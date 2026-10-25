@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi Tiết Chuyến Xe & Danh Sách Khách – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="driver-schedule.html">Lịch trình</a> / <span>Chi tiết chuyến xe</span>
+          </div>
+          <h1 class="page-title">Chi Tiết Chuyến Xe & Hành Khách</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="driver-schedule.html" class="btn btn-outline btn-sm">← Quay lại lịch trình</a>
+          <a href="#" id="btnGoExecution" class="btn btn-primary btn-sm"><i class='fas fa-traffic-light fa-ui-icon' aria-hidden='true'></i> Mở Phòng Điều Hành</a>
+        </div>
+      </div>
+
+      <div class="d-grid grid-cols-12 gap-3">
+        <!-- Cột trái: Thông tin chuyến xe -->
+        <div style="grid-column: span 7;" class="col-12 col-md-7">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Thông Tin Chuyến Xe</h3>
+              <span class="badge badge-success" id="badgeTripStatus">Đang mở đăng ký</span>
+            </div>
+            <div class="card-body">
+              <div class="font-bold mb-1" style="font-size: 1.25rem;" id="dtTripRoute">
+              </div>
+              <div style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+                <i class='fas fa-calendar-alt fa-ui-icon' aria-hidden='true'></i> Ngày: <strong id="dtTripDate"></strong> • Khởi hành lúc: <strong style="color: var(--primary);" id="dtTripTime"></strong> • Dự kiến đến: <strong id="dtArrivalTime"></strong>
+              </div>
+
+              <div class="d-grid grid-cols-3 gap-2 text-center mb-3">
+                <div style="background-color: var(--bg-muted); padding: 0.75rem; border-radius: var(--radius-md);">
+                  <div class="text-muted" style="font-size: 0.78rem;">Tổng số ghế</div>
+                  <strong class="font-bold" id="dtTotalSeats">—</strong>
+                </div>
+                <div style="background-color: var(--bg-muted); padding: 0.75rem; border-radius: var(--radius-md);">
+                  <div class="text-muted" style="font-size: 0.78rem;">Ghế còn trống</div>
+                  <strong class="font-bold text-success" id="dtAvailSeats">—</strong>
+                </div>
+                <div style="background-color: var(--bg-muted); padding: 0.75rem; border-radius: var(--radius-md);">
+                  <div class="text-muted" style="font-size: 0.78rem;">Bù tiền xăng</div>
+                  <strong class="font-bold text-primary" id="dtFare">—</strong>
+                </div>
+              </div>
+
+              <div style="font-size: 0.88rem; margin-bottom: 0.75rem;">
+                <i class='fas fa-map-signs fa-ui-icon' aria-hidden='true'></i> Trạm đón quy ước: <strong id="dtPickupName"></strong>
+              </div>
+              <div style="font-size: 0.88rem; margin-bottom: 0.75rem;">
+                <i class='fas fa-ruler fa-ui-icon' aria-hidden='true'></i> Khoảng cách dự kiến: <strong id="dtDistance"></strong>
+              </div>
+              <div style="font-size: 0.88rem; margin-bottom: 1.25rem;">
+                <i class='fas fa-car fa-ui-icon' aria-hidden='true'></i> Xe: <strong id="dtVehicle"></strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Danh sách hành khách trong chuyến -->
+        <div style="grid-column: span 5;" class="col-12 col-md-5">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Hành Khách Đã Nhận Ghế</h3>
+              <span class="badge badge-primary" id="passengersCountBadge">0 khách</span>
+            </div>
+            <div class="card-body p-0" id="passengersListContainer">
+              <!-- Loaded dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+
+  <script>
+    let activeTrip = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tripId = urlParams.get("id");
+
+      const user = window.Storage.getCurrentUser();
+      activeTrip = tripId && window.Storage.getById("trips", tripId);
+      if (!activeTrip || activeTrip.driverId !== user.id) {
+        document.getElementById("passengersListContainer").innerHTML =
+          '<div class="empty-state">Không tìm thấy chuyến được phân công cho tài khoản này.</div>';
+        document.getElementById("btnGoExecution").style.display = "none";
+        return;
+      }
+
+      document.getElementById("dtTripRoute").innerText = `${activeTrip.origin} → ${activeTrip.destination}`;
+      document.getElementById("dtTripDate").innerText = activeTrip.departureDate;
+      document.getElementById("dtTripTime").innerText = activeTrip.departureTime;
+      document.getElementById("dtArrivalTime").innerText = activeTrip.estimatedArrivalTime || "Chưa cập nhật";
+      document.getElementById("dtTotalSeats").innerText = `${activeTrip.totalSeats} chỗ`;
+      document.getElementById("dtAvailSeats").innerText = `${activeTrip.availableSeats} chỗ`;
+      document.getElementById("dtFare").innerText = `${Number(activeTrip.costSharing || 0).toLocaleString('vi-VN')} đ`;
+      document.getElementById("dtDistance").innerText = Number(activeTrip.estimatedDistanceKm) > 0
+        ? `${Number(activeTrip.estimatedDistanceKm).toLocaleString("vi-VN")} km`
+        : "Chưa cập nhật";
+      document.getElementById("dtPickupName").innerText = activeTrip.pickupZoneName || "Chưa thiết lập";
+      document.getElementById("dtVehicle").innerText = activeTrip.vehicleInfo || "Chưa cập nhật";
+
+      document.getElementById("btnGoExecution").href = `driver-trip-execution.html?id=${activeTrip.id}`;
+
+      // Render accepted passengers
+      renderPassengers();
+    });
+
+    function renderPassengers() {
+      const requests = window.Storage.get("joinRequests").filter(
+        r => r.tripId === activeTrip.id && (r.status === 'accepted' || r.status === 'pending')
+      );
+
+      const container = document.getElementById("passengersListContainer");
+      document.getElementById("passengersCountBadge").innerText = `${requests.length} người`;
+
+      if (requests.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state" style="padding: 2rem 1rem;">
+            <div style="font-size: 0.88rem; color: var(--text-muted);">Chưa có hành khách nào tham gia chuyến này.</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = requests.map(r => `
+        <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;">
+          <div class="d-flex items-center gap-2">
+            <div class="avatar" style="width: 40px; height: 40px; background-color: #059669; color: white;">${window.Storage.escapeHtml(r.riderAvatar || 'KH')}</div>
+            <div>
+              <div class="font-bold" style="font-size: 0.95rem;">${window.Storage.escapeHtml(r.riderName)}</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">${r.riderPhone ? `<i class='fas fa-phone fa-ui-icon' aria-hidden='true'></i> ${window.Storage.escapeHtml(r.riderPhone)}` : "Chưa cập nhật số điện thoại"}</div>
+              <div style="font-size: 0.78rem; color: var(--primary);">Đón: ${window.Storage.escapeHtml(r.pickupPoint)}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="badge ${r.status === 'accepted' ? 'badge-success' : 'badge-warning'} mb-1" style="font-size: 0.72rem;">
+              ${r.status === 'accepted' ? 'Đã duyệt' : 'Chờ duyệt'}
+            </span>
+            <div>
+              <a href="../account/messages-chat.html?userId=${encodeURIComponent(r.riderId || "")}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;"><i class='fas fa-comment-dots fa-ui-icon' aria-hidden='true'></i> Nhắn tin</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tin Nhắn Trao Đổi Chuyến Đi – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main" style="padding-bottom: 1rem;">
+      <div class="page-header mb-2">
+        <div>
+          <div class="breadcrumbs">
+            <a href="../../index.html">Trang chủ</a> / <span>Tin nhắn</span>
+          </div>
+          <h1 class="page-title"><i class='fas fa-comment-dots fa-ui-icon' aria-hidden='true'></i> Trao Đổi Chuyến Đi</h1>
+        </div>
+      </div>
+
+      <!-- Chat Container Grid -->
+      <div class="card" style="height: calc(100vh - 180px); min-height: 520px; display: flex; flex-direction: row; overflow: hidden;">
+        <!-- Cột trái: Danh sách hội thoại -->
+        <div style="width: 300px; min-width: 180px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; background-color: var(--bg-surface);">
+          <div style="padding: 1rem; border-bottom: 1px solid var(--border-color); font-weight: 700; font-size: 0.95rem;">Người cùng chuyến</div>
+          <div id="conversationList" style="flex: 1; overflow-y: auto;"></div>
+        </div>
+
+        <!-- Cột phải: Khung chat tin nhắn -->
+        <div style="flex: 1; display: flex; flex-direction: column; background-color: var(--bg-body);">
+          <!-- Chat Header -->
+          <div style="padding: 0.75rem 1.25rem; background-color: var(--bg-surface); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+            <div class="d-flex items-center gap-2">
+              <div class="avatar" id="chatAvatar" style="width: 38px; height: 38px; background-color: #0d9488; color: white;">?</div>
+              <div>
+                <a id="chatProfileLink" class="font-bold" style="font-size: 0.95rem;" href="#">Chọn người để nhắn tin</a>
+                <div id="chatRoleLabel" style="font-size: 0.75rem; color: var(--text-muted);"></div>
+              </div>
+            </div>
+            <div class="d-flex gap-1">
+              <a id="chatTargetProfile" href="#" class="btn btn-outline btn-sm" style="display: none;"><i class='fas fa-user fa-ui-icon' aria-hidden='true'></i> Xem hồ sơ</a>
+            </div>
+          </div>
+
+          <!-- Quick Context Banner -->
+          <div id="chatContextBanner" style="display: none; background-color: var(--bg-muted); padding: 0.5rem 1.25rem; font-size: 0.8rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+            <span id="chatTripContext"></span>
+          </div>
+
+          <!-- Messages Stream -->
+          <div id="messagesStream" style="flex: 1; padding: 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.85rem;">
+            <!-- Render dynamically -->
+          </div>
+
+          <!-- Quick replies chips -->
+          <div id="quickReplies" style="display: none; padding: 0.4rem 1.25rem; background-color: var(--bg-surface); border-top: 1px solid var(--border-color); gap: 0.5rem; overflow-x: auto;">
+            <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.78rem;" onclick="sendQuick('Em đã có mặt tại trạm đón rồi ạ!')"><i class='fas fa-map-marker-alt fa-ui-icon' aria-hidden='true'></i> Em đã có mặt tại trạm đón!</button>
+            <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.78rem;" onclick="sendQuick('Xe có sẵn nón bảo hiểm không anh?')"><i class='fas fa-shield-alt fa-ui-icon' aria-hidden='true'></i> Xe có nón bảo hiểm không?</button>
+            <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.78rem;" onclick="sendQuick('Em đang đi bộ ra, khoảng 2 phút nữa tới.')"><i class='fas fa-running fa-ui-icon' aria-hidden='true'></i> Em tới trong 2 phút nữa</button>
+          </div>
+
+          <!-- Chat Input Footer -->
+          <form id="chatForm" onsubmit="handleSendMessage(event)" style="padding: 0.75rem 1.25rem; background-color: var(--bg-surface); border-top: 1px solid var(--border-color); display: flex; gap: 0.75rem; align-items: center;">
+            <input type="text" id="msgInput" class="form-control" placeholder="Chọn người để bắt đầu trò chuyện..." required autocomplete="off" disabled>
+            <button id="sendMessageButton" type="submit" class="btn btn-primary" disabled>Gửi</button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+
+  <script>
+    let currentRecipientId = null;
+    let currentTripId = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const requestedRecipientId = new URLSearchParams(window.location.search).get("userId");
+      const requestedTripId = new URLSearchParams(window.location.search).get("tripId");
+      document.getElementById("chatContextBanner").style.display = "none";
+      renderConversationList();
+      if (requestedRecipientId) {
+        selectConversation(requestedRecipientId, false, requestedTripId);
+      }
+    });
+
+    window.addEventListener("storage", (event) => {
+      if (!event.key || event.key === "commutematch_messages" || event.key === "commutematch_users") {
+        renderConversationList();
+        renderMessages();
+      }
+    });
+
+    function getConversationUsers() {
+      const currentUser = window.Auth.getCurrentUser();
+      if (!currentUser) return [];
+      const allowedIds = new Set(window.Storage.getChatParticipantIds(currentUser.id));
+      return window.Storage.get("users")
+        .filter((user) => allowedIds.has(user.id) && !user.isSuspended)
+        .sort((a, b) => a.name.localeCompare(b.name, "vi"));
+    }
+
+    function renderConversationList() {
+      const users = getConversationUsers();
+      const messages = window.Storage.get("messages");
+      const currentUser = window.Auth.getCurrentUser();
+      const host = document.getElementById("conversationList");
+
+      host.innerHTML = users.length ? users.map((user) => {
+        const conversationMessages = messages.filter((message) =>
+          (message.senderId === currentUser.id && message.receiverId === user.id) ||
+          (message.senderId === user.id && message.receiverId === currentUser.id)
+        );
+        const lastMessage = conversationMessages.find((message) => message.createdAt) ||
+          conversationMessages[conversationMessages.length - 1];
+        const roles = Array.isArray(user.roles) ? user.roles : [user.role || "rider"];
+        const roleText = roles.map((role) => window.Auth.ROLE_LABELS[role] || role).join(" · ");
+        return `
+          <button type="button" onclick="selectConversation('${escapeHtml(user.id)}')" style="width:100%;text-align:left;border:0;border-bottom:1px solid var(--border-color);background:${currentRecipientId === user.id ? 'var(--primary-light)' : 'transparent'};padding:1rem;cursor:pointer;color:var(--text-main);">
+            <span class="d-flex items-center gap-2">
+              <span class="avatar" style="width:36px;height:36px;flex:none;background-color:${escapeHtml(user.avatarColor || "var(--primary)")};color:white;">${user.avatarImage
+                ? `<img src="${escapeHtml(user.avatarImage)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">`
+                : escapeHtml(user.avatar || "U")}</span>
+              <span style="min-width:0;flex:1;line-height:1.3;">
+                <span class="font-bold" style="display:block;font-size:.9rem;">${escapeHtml(user.name)}</span>
+                <span style="display:block;font-size:.75rem;color:var(--text-muted);">${escapeHtml(roleText)}</span>
+              </span>
+            </span>
+            <span style="display:block;margin-top:.5rem;font-size:.78rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${lastMessage ? escapeHtml(lastMessage.text) : "Bắt đầu trò chuyện"}</span>
+          </button>
+        `;
+      }).join("") : '<p class="p-3" style="color:var(--text-muted);">Chỉ người cùng chuyến hoặc yêu cầu ghép chuyến mới xuất hiện tại đây.</p>';
+    }
+
+    function selectConversation(userId, updateUrl = true, tripId = null) {
+      const currentUser = window.Auth.getCurrentUser();
+      const recipient = window.Storage.getById("users", userId);
+      if (!recipient || recipient.isSuspended ||
+          !window.Storage.canChatWith(currentUser.id, recipient.id, tripId)) {
+        window.Toast.show("Bạn chỉ có thể nhắn tin với người liên quan đến chuyến hoặc yêu cầu ghép của mình.", "error");
+        return;
+      }
+
+      currentRecipientId = recipient.id;
+      currentTripId = tripId || null;
+      if (updateUrl) {
+        const tripQuery = currentTripId ? `&tripId=${encodeURIComponent(currentTripId)}` : "";
+        history.replaceState(null, "", `messages-chat.html?userId=${encodeURIComponent(recipient.id)}${tripQuery}`);
+      }
+      const roles = Array.isArray(recipient.roles) ? recipient.roles : [recipient.role || "rider"];
+      const chatAvatar = document.getElementById("chatAvatar");
+      chatAvatar.style.backgroundColor = recipient.avatarColor || "var(--primary)";
+      chatAvatar.innerHTML = recipient.avatarImage
+        ? `<img src="${escapeHtml(recipient.avatarImage)}" alt="Ảnh đại diện của ${escapeHtml(recipient.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">`
+        : escapeHtml(recipient.avatar || "U");
+      const profileLink = document.getElementById("chatProfileLink");
+      profileLink.textContent = recipient.name;
+      profileLink.href = `profile-overview.html?userId=${encodeURIComponent(recipient.id)}`;
+      document.getElementById("chatRoleLabel").textContent = roles
+        .map((role) => window.Auth.ROLE_LABELS[role] || role)
+        .join(" · ");
+      document.getElementById("chatTargetProfile").href = profileLink.href;
+      document.getElementById("chatTargetProfile").style.display = "";
+      document.getElementById("msgInput").disabled = false;
+      document.getElementById("msgInput").placeholder = `Nhắn tin cho ${recipient.name}...`;
+      document.getElementById("sendMessageButton").disabled = false;
+      renderConversationList();
+      renderMessages();
+    }
+
+    function renderMessages() {
+      const currentUser = window.Auth.getCurrentUser();
+      const recipient = currentRecipientId && window.Storage.getById("users", currentRecipientId);
+      const container = document.getElementById("messagesStream");
+      if (!recipient || !window.Storage.canChatWith(currentUser.id, recipient.id, currentTripId)) {
+        currentRecipientId = null;
+        currentTripId = null;
+        container.innerHTML = '<div style="margin:auto;color:var(--text-muted);">Chọn một thành viên để bắt đầu trò chuyện.</div>';
+        document.getElementById("chatProfileLink").textContent = "Chọn người để nhắn tin";
+        document.getElementById("chatProfileLink").href = "#";
+        document.getElementById("chatAvatar").textContent = "?";
+        document.getElementById("chatRoleLabel").textContent = "";
+        document.getElementById("chatTargetProfile").style.display = "none";
+        document.getElementById("msgInput").disabled = true;
+        document.getElementById("sendMessageButton").disabled = true;
+        return;
+      }
+
+      const conversationMessages = window.Storage.get("messages").filter((message) =>
+        (message.senderId === currentUser.id && message.receiverId === recipient.id) ||
+        (message.senderId === recipient.id && message.receiverId === currentUser.id)
+      );
+      const legacyMessages = conversationMessages.filter((message) => !message.createdAt);
+      const newMessages = conversationMessages
+        .filter((message) => message.createdAt)
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      const messages = [...legacyMessages, ...newMessages];
+      container.innerHTML = messages.length ? messages.map((message) => {
+        const isMe = message.senderId === currentUser.id;
+        return `
+          <div style="display:flex;justify-content:${isMe ? "flex-end" : "flex-start"};">
+            <div style="max-width:70%;background-color:${isMe ? "var(--primary)" : "var(--bg-surface)"};color:${isMe ? "#ffffff" : "var(--text-main)"};padding:.75rem 1rem;border-radius:12px;box-shadow:var(--shadow-sm);border:1px solid ${isMe ? "transparent" : "var(--border-color)"};">
+              <div style="font-size:.72rem;opacity:.8;margin-bottom:.2rem;font-weight:600;">${isMe ? "Tôi" : escapeHtml(message.senderName || recipient.name)} · ${escapeHtml(message.timestamp || "")}</div>
+              <div style="font-size:.9rem;line-height:1.4;white-space:pre-wrap;">${escapeHtml(message.text)}</div>
+            </div>
+          </div>
+        `;
+      }).join("") : '<div style="margin:auto;color:var(--text-muted);">Chưa có tin nhắn. Hãy gửi lời chào đầu tiên!</div>';
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function handleSendMessage(event) {
+      event.preventDefault();
+      const input = document.getElementById("msgInput");
+      const text = input.value.trim();
+      const currentUser = window.Auth.getCurrentUser();
+      const recipient = currentRecipientId && window.Storage.getById("users", currentRecipientId);
+      if (!text || !recipient ||
+          !window.Storage.canChatWith(currentUser.id, recipient.id, currentTripId)) {
+        window.Toast.show("Hãy chọn người cùng chuyến để gửi tin nhắn.", "warning");
+        return;
+      }
+
+      try {
+        window.Storage.insert("messages", {
+          id: `msg_${Date.now()}`,
+          senderId: currentUser.id,
+          senderName: currentUser.name,
+          receiverId: recipient.id,
+          ...(currentTripId ? { tripId: currentTripId } : {}),
+          text,
+          timestamp: new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
+        });
+        input.value = "";
+        renderConversationList();
+        renderMessages();
+      } catch (error) {
+        console.error("Không thể lưu tin nhắn:", error);
+        window.Toast.show(
+          error.name === "QuotaExceededError"
+            ? "Không đủ dung lượng lưu tin nhắn trên trình duyệt này."
+            : "Không thể gửi tin nhắn. Vui lòng thử lại.",
+          "error"
+        );
+      }
+    }
+
+    function sendQuick(text) {
+      document.getElementById("msgInput").value = text;
+      document.getElementById("chatForm").requestSubmit();
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[character]);
+    }
+  </script>
+</body>
+</html>

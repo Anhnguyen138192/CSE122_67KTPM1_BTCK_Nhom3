@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lịch Sử Chia Sẻ Chi Phí Xăng – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="driver-dashboard.html">Tài xế</a> / <span>Lịch sử bù xăng</span>
+          </div>
+          <h1 class="page-title"><i class='fas fa-money-bill-wave fa-ui-icon' aria-hidden='true'></i> Lịch Sử Bù Đắp Chi Phí Xăng Xe</h1>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="exportReport()">
+          <i class='fas fa-inbox fa-ui-icon' aria-hidden='true'></i> Xuất Báo Cáo Tháng
+        </button>
+      </div>
+
+      <!-- Financial Metrics Grid -->
+      <div class="d-grid grid-cols-3 gap-3 mb-4">
+        <div class="stat-card">
+          <div class="stat-icon primary"><i class='fas fa-money-bill fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="totalEarned">0 đ</div>
+            <div class="stat-label">Mức chia sẻ của chuyến hoàn thành</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon secondary"><i class='fas fa-gas-pump fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="completedTripsCount">0</div>
+            <div class="stat-label">Chuyến hoàn thành</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon warning"><i class='fas fa-ticket-alt fa-ui-icon' aria-hidden='true'></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="completedRidersCount">0</div>
+            <div class="stat-label">Hành khách trong chuyến hoàn thành</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transaction Table Card -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Nhật Ký Đóng Góp Chi Phí Theo Chuyến</h3>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Chuyến đi</th>
+                  <th>Hành khách</th>
+                  <th>Mức chia sẻ</th>
+                  <th>Trạng thái chuyến</th>
+                </tr>
+              </thead>
+              <tbody id="earningsRows"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card-footer" style="font-size: 0.82rem; color: var(--text-muted);">
+          Lưu ý: CommuteMatch là nền tảng phi thương mại. Chi phí nhận được chỉ bù đắp chi phí tiêu hao nhiên liệu thực tế.
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", renderEarnings);
+
+    function renderEarnings() {
+      const user = window.Storage.getCurrentUser();
+      const trips = window.Storage.get("trips").filter((trip) =>
+        trip.driverId === user.id && trip.status === "completed"
+      );
+      const tripIds = new Set(trips.map((trip) => trip.id));
+      const requests = window.Storage.get("joinRequests").filter((request) =>
+        tripIds.has(request.tripId) && request.status === "completed"
+      );
+      const total = requests.reduce((sum, request) => sum + Number(request.cost || 0), 0);
+      document.getElementById("totalEarned").innerText = `${total.toLocaleString("vi-VN")} đ`;
+      document.getElementById("completedTripsCount").innerText = trips.length;
+      document.getElementById("completedRidersCount").innerText = requests.length;
+      document.getElementById("earningsRows").innerHTML = requests.length ? requests.map((request) => {
+        const trip = trips.find((item) => item.id === request.tripId);
+        return `
+          <tr>
+            <td>${trip.departureDate} <strong>${trip.departureTime}</strong></td>
+            <td>${trip.origin} → ${trip.destination}</td>
+            <td>${request.riderName || "Hành khách"}</td>
+            <td>${Number(request.cost || trip.costSharing || 0).toLocaleString("vi-VN")} đ</td>
+            <td><span class="badge badge-success">Hoàn thành</span></td>
+          </tr>
+        `;
+      }).join("") : '<tr><td colspan="5" class="text-center p-4">Chưa có dữ liệu chuyến hoàn thành.</td></tr>';
+    }
+
+    function exportReport() {
+      const rows = [...document.querySelectorAll("#earningsRows tr")].map((row) =>
+        [...row.cells].map((cell) => `"${cell.innerText.replace(/"/g, '""')}"`).join(",")
+      );
+      if (!rows.length || rows[0].includes("Chưa có dữ liệu")) {
+        window.Toast.show("Chưa có dữ liệu để xuất báo cáo.", "warning");
+        return;
+      }
+      const csv = ["Thời gian,Tuyến,Hành khách,Mức chia sẻ,Trạng thái", ...rows].join("\r\n");
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" }));
+      link.download = "commutematch-earnings.csv";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+  </script>
+</body>
+</html>

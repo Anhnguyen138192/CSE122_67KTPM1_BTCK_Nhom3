@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng Nhập – CommuteMatch</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/responsive.css">
+</head>
+<body style="background-color: var(--bg-body); display: flex; flex-direction: column; min-height: 100vh;">
+  <div id="app-header"></div>
+
+  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 2.5rem 1rem;">
+    <div class="card" style="max-width: 480px; width: 100%; box-shadow: var(--shadow-lg);">
+      <div class="card-body" style="padding: 2.2rem;">
+        <div class="text-center mb-3">
+          <div class="brand-icon" style="margin: 0 auto 0.75rem; width: 48px; height: 48px; font-size: 1.5rem;"><i class='fas fa-car fa-ui-icon' aria-hidden='true'></i></div>
+          <h2 style="font-size: 1.6rem; font-weight: 800;">Đăng Nhập Hệ Thống</h2>
+          <p style="font-size: 0.88rem; color: var(--text-muted);">
+            Đăng nhập bằng tên đăng nhập hoặc email
+          </p>
+        </div>
+
+        <!-- Báo lỗi đăng nhập nếu sai mật khẩu -->
+        <div id="loginErrorAlert" class="ai-panel mb-3 text-center" style="display: none; border-color: rgba(220, 38, 38, 0.4); background: rgba(220, 38, 38, 0.06); padding: 0.75rem;">
+          <span style="color: var(--danger); font-size: 0.88rem; font-weight: 600;" id="loginErrorMsg">
+            <i class='fas fa-exclamation-triangle fa-ui-icon' aria-hidden='true'></i> Email hoặc mật khẩu không chính xác!
+          </span>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLoginSubmit(event)" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Tên đăng nhập hoặc email <span class="required">*</span></label>
+            <input type="text" id="loginEmail" class="form-control" placeholder="Nhập tên đăng nhập hoặc email" autocomplete="username" required>
+            <div class="form-feedback" id="emailErr">Vui lòng nhập tên đăng nhập hoặc email.</div>
+          </div>
+
+          <div class="form-group">
+            <div class="d-flex justify-between items-center mb-1">
+              <label class="form-label" for="loginPass" style="margin-bottom: 0;">Mật khẩu <span class="required">*</span></label>
+              <a href="forgot-password.html" style="font-size: 0.82rem;">Quên mật khẩu?</a>
+            </div>
+            <input type="password" id="loginPass" class="form-control" placeholder="••••••••" autocomplete="current-password" required>
+            <div class="form-feedback" id="passErr">Vui lòng nhập mật khẩu.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="d-flex items-center gap-1" style="font-size: 0.88rem; cursor: pointer;">
+              <input type="checkbox" id="rememberMe" checked> Duy trì trạng thái đăng nhập
+            </label>
+          </div>
+
+          <button type="submit" id="loginSubmitBtn" class="btn btn-primary btn-block btn-lg">
+            Đăng Nhập
+          </button>
+        </form>
+
+        <div class="text-center mt-3" style="font-size: 0.88rem; color: var(--text-muted);">
+          Chưa có tài khoản? <a href="register.html" class="font-bold">Đăng ký tham gia ngay</a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="../../assets/data/mock-data.js"></script>
+  <script src="../../js/storage.js"></script>
+  <script src="../../js/modules/toast.js"></script>
+  <script src="../../js/modules/modal.js"></script>
+  <script src="../../js/modules/auth.js"></script>
+  <script src="../../js/modules/ai-engine.js"></script>
+  <script src="../../js/routes.js"></script>
+  <script src="../../js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Nếu đã có tham số redirect từ trang trước
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirect = urlParams.get("redirect");
+      if (redirect) {
+        window.Toast.show("Vui lòng đăng nhập để truy cập trang này!", "warning");
+      }
+    });
+
+    function handleLoginSubmit(e) {
+      if (e && e.preventDefault) e.preventDefault();
+
+      const emailInput = document.getElementById("loginEmail");
+      const passInput = document.getElementById("loginPass");
+      const errBox = document.getElementById("loginErrorAlert");
+      const errMsg = document.getElementById("loginErrorMsg");
+
+      const email = emailInput.value.trim();
+      const pass = passInput.value;
+
+      let hasError = false;
+
+      if (!email) {
+        emailInput.classList.add("is-invalid");
+        hasError = true;
+      } else {
+        emailInput.classList.remove("is-invalid");
+      }
+
+      if (!pass) {
+        passInput.classList.add("is-invalid");
+        hasError = true;
+      } else {
+        passInput.classList.remove("is-invalid");
+      }
+
+      if (hasError) return;
+
+      // Gọi hàm Auth.login thực tế
+      const res = window.Auth.login(email, pass);
+
+      if (!res.success) {
+        errBox.style.display = "block";
+        errMsg.innerText = "<i class='fas fa-exclamation-triangle fa-ui-icon' aria-hidden='true'></i> " + res.message;
+        window.Toast.show(res.message, "error");
+        return;
+      }
+
+      // Đăng nhập thành công!
+      errBox.style.display = "none";
+      window.Toast.show(`Đăng nhập thành công! Chào mừng ${res.user.name} (${res.user.roleLabel})`, "success");
+
+      // Chuyển hướng tới trang đã định hoặc dashboard theo vai trò
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirect = urlParams.get("redirect");
+
+      setTimeout(() => {
+        if (res.user.role === "superadmin") {
+          const nextPage = redirect && redirect !== "login.html" ? redirect : "../admin/admin-dashboard.html";
+          window.location.href = window.CommuteMatchRoutes.page(`superadmin-auth.html?redirect=${encodeURIComponent(nextPage)}`);
+        } else if (redirect && redirect !== "login.html") {
+          window.location.href = window.CommuteMatchRoutes.page(redirect);
+        } else {
+          window.location.href = window.CommuteMatchRoutes.page(window.Auth.ROLE_DASHBOARDS[res.user.role] || "rider-dashboard.html");
+        }
+      }, 500);
+    }
+  </script>
+</body>
+</html>
