@@ -58,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function triggerAiZoneRecommendation() {
       const origin = document.getElementById("tripOrigin").value.trim();
+      const destination = document.getElementById("tripDestination").value.trim();
       const box = document.getElementById("driverAiZoneBox");
       const status = document.getElementById("driverAiStatus");
       const result = document.getElementById("driverAiResult");
@@ -67,24 +68,40 @@ document.addEventListener("DOMContentLoaded", () => {
       const confidenceBadge = document.getElementById("driverAiConfidence");
       const applyButton = box.querySelector('[data-cm-action="apply-ai-zone"]');
       const supplementButton = box.querySelector('[data-cm-action="focus-trip-destination"]');
+      const originButton = box.querySelector('[data-cm-action="focus-trip-origin"]');
       const zoneSelectGroup = document.getElementById("zoneSelectGroup");
       const zoneSelect = document.getElementById("tripZoneSelect");
       pendingAiZoneRecommendation = null;
       applyButton.disabled = true;
       result.hidden = true;
 
-      if (!origin) {
-        status.textContent = "Thiếu điểm xuất phát. Hãy nhập điểm đi hoặc chọn trạm thủ công.";
-        zoneSelectGroup.hidden = false;
+      if (!origin || !destination) {
+        const missingFields = [];
+        if (!origin) missingFields.push("điểm xuất phát");
+        if (!destination) missingFields.push("điểm đến");
+        const message = `Vui lòng nhập ${missingFields.join(" và ")} trước khi yêu cầu AI gợi ý.`;
+
         confidenceBadge.textContent = "Thiếu dữ liệu";
+        status.setAttribute("role", "alert");
+        status.textContent = message;
+        title.textContent = "Chưa thể phân tích lộ trình";
+        reason.textContent = message;
+        reasons.replaceChildren();
+        originButton.hidden = Boolean(origin);
+        supplementButton.hidden = Boolean(destination);
+        result.hidden = false;
+        zoneSelectGroup.hidden = true;
+        box.setAttribute("aria-busy", "false");
         return;
       }
 
+      status.setAttribute("role", "status");
+      originButton.hidden = true;
+      supplementButton.hidden = true;
       box.setAttribute("aria-busy", "true");
       status.textContent = "AI đang phân tích lộ trình và các trạm đón an toàn…";
       confidenceBadge.textContent = "Đang phân tích";
       try {
-        const destination = document.getElementById("tripDestination").value.trim();
         const recommendation = await window.AIEngine.recommendPickupZone(origin, destination);
         if (!recommendation.success || !recommendation.zone) {
           confidenceBadge.textContent = "Chưa có kết quả";
