@@ -95,9 +95,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!origin || !destination) {
         const missingFields = [];
-        if (!origin) missingFields.push("điểm xuất phát");
-        if (!destination) missingFields.push("điểm đến");
-        const message = `Vui lòng chọn ${missingFields.join(" và ")} trước khi yêu cầu AI gợi ý.`;
+        if (!origin) {
+          const action = document.getElementById("tripOrigin").value === "__custom__" ? "nhập" : "chọn";
+          missingFields.push(`${action} điểm xuất phát`);
+        }
+        if (!destination) {
+          const action = document.getElementById("tripDestination").value === "__custom__" ? "nhập" : "chọn";
+          missingFields.push(`${action} điểm đến`);
+        }
+        const message = `Vui lòng ${missingFields.join(" và ")} trước khi yêu cầu AI gợi ý.`;
 
         confidenceBadge.textContent = "Thiếu dữ liệu";
         status.setAttribute("role", "alert");
