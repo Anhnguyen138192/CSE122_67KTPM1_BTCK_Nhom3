@@ -44,11 +44,35 @@
             <div class="d-grid grid-cols-2 gap-3 mb-3">
               <div class="form-group mb-0">
                 <label class="form-label" for="tripOrigin">Điểm xuất phát <span class="required">*</span></label>
-                <input type="text" id="tripOrigin" class="form-control" aria-describedby="driverAiStatus" placeholder="ví dụ: KTX Khu B ĐHQG..." required value="KTX Khu B ĐHQG (Cổng Sau)" data-cm-change-action="recommend-meeting-point">
+                <select id="tripOrigin" class="form-select" required aria-describedby="driverAiStatus" data-cm-change-action="recommend-meeting-point">
+                  <option value="">Chọn địa điểm…</option>
+                  <option value="KTX Khu B ĐHQG (Cổng Sau)">KTX Khu B ĐHQG (Cổng Sau)</option>
+                  <option value="Nhà Văn hóa Sinh viên ĐHQG">Nhà Văn hóa Sinh viên ĐHQG</option>
+                  <option value="ĐH Bách Khoa Cơ Sở 2 (Dĩ An)">ĐH Bách Khoa Cơ Sở 2 (Dĩ An)</option>
+                  <option value="ĐH Khoa Học Tự Nhiên CS2">ĐH Khoa Học Tự Nhiên CS2</option>
+                  <option value="Khu Công Nghệ Cao (SHTP)">Khu Công Nghệ Cao (SHTP)</option>
+                  <option value="Ngã Tư Hàng Xanh (Bình Thạnh)">Ngã Tư Hàng Xanh (Bình Thạnh)</option>
+                  <option value="Ngã Tư Thủ Đức">Ngã Tư Thủ Đức</option>
+                  <option value="Ga Metro Bình Thái">Ga Metro Bình Thái</option>
+                  <option value="ĐH Sư Phạm Kỹ Thuật TP.HCM">ĐH Sư Phạm Kỹ Thuật TP.HCM</option>
+                  <option value="Bến xe Miền Đông mới">Bến xe Miền Đông mới</option>
+                </select>
               </div>
               <div class="form-group mb-0">
                 <label class="form-label" for="tripDestination">Điểm đến <span class="required">*</span></label>
-                <input type="text" id="tripDestination" class="form-control" placeholder="Nhập điểm đến, ví dụ: ĐH Bách Khoa CS2..." required data-cm-change-action="recommend-meeting-point">
+                <select id="tripDestination" class="form-select" required aria-describedby="driverAiStatus" data-cm-change-action="recommend-meeting-point">
+                  <option value="">Chọn địa điểm…</option>
+                  <option value="KTX Khu B ĐHQG (Cổng Sau)">KTX Khu B ĐHQG (Cổng Sau)</option>
+                  <option value="Nhà Văn hóa Sinh viên ĐHQG">Nhà Văn hóa Sinh viên ĐHQG</option>
+                  <option value="ĐH Bách Khoa Cơ Sở 2 (Dĩ An)">ĐH Bách Khoa Cơ Sở 2 (Dĩ An)</option>
+                  <option value="ĐH Khoa Học Tự Nhiên CS2">ĐH Khoa Học Tự Nhiên CS2</option>
+                  <option value="Khu Công Nghệ Cao (SHTP)">Khu Công Nghệ Cao (SHTP)</option>
+                  <option value="Ngã Tư Hàng Xanh (Bình Thạnh)">Ngã Tư Hàng Xanh (Bình Thạnh)</option>
+                  <option value="Ngã Tư Thủ Đức">Ngã Tư Thủ Đức</option>
+                  <option value="Ga Metro Bình Thái">Ga Metro Bình Thái</option>
+                  <option value="ĐH Sư Phạm Kỹ Thuật TP.HCM">ĐH Sư Phạm Kỹ Thuật TP.HCM</option>
+                  <option value="Bến xe Miền Đông mới">Bến xe Miền Đông mới</option>
+                </select>
               </div>
             </div>
 
@@ -68,10 +92,10 @@
                     <i class="fa-solid fa-check" aria-hidden="true"></i> Áp dụng gợi ý
                   </button>
                   <button type="button" class="btn btn-outline btn-sm" data-cm-action="focus-trip-origin" hidden>
-                    Bổ sung điểm xuất phát
+                    Chọn điểm xuất phát
                   </button>
                   <button type="button" class="btn btn-outline btn-sm" data-cm-action="focus-trip-destination" hidden>
-                    Bổ sung điểm đến
+                    Chọn điểm đến
                   </button>
                   <button type="button" class="btn btn-outline btn-sm" data-cm-action="show-zone-options" aria-controls="zoneSelectGroup">
                     Tự chọn trạm
