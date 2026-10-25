@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         pendingAiZoneRecommendation = recommendation.zone;
-        const confidence = Number(recommendation.confidence) || 0;
+        const confidence = destination ? (Number(recommendation.confidence) || 0) : Math.min(Number(recommendation.confidence) || 0, 65);
         confidenceBadge.textContent = `Độ tin cậy ${confidence}%`;
         title.textContent = recommendation.zone.name;
         reason.textContent = confidence < 70
