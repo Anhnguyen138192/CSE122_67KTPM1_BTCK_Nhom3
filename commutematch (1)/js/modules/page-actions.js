@@ -17,8 +17,14 @@
     "close-modal": (el) => window.Modal?.close(el.dataset.modalId),
     "send-quick": (el) => invoke("sendQuick", el.dataset.cmMessage || ""),
     "recommend-meeting-point": () => invoke("triggerAiZoneRecommendation"),
-    "focus-trip-origin": () => document.getElementById("tripOrigin")?.focus(),
-    "focus-trip-destination": () => document.getElementById("tripDestination")?.focus(),
+    "focus-trip-origin": () => {
+      const select = document.getElementById("tripOrigin");
+      (select?.value === "__custom__" ? document.getElementById("tripOriginCustom") : select)?.focus();
+    },
+    "focus-trip-destination": () => {
+      const select = document.getElementById("tripDestination");
+      (select?.value === "__custom__" ? document.getElementById("tripDestinationCustom") : select)?.focus();
+    },
     "apply-ai-zone": () => invoke("applyAiZoneRecommendation"),
     "show-zone-options": () => {
       const group = document.getElementById("zoneSelectGroup");
