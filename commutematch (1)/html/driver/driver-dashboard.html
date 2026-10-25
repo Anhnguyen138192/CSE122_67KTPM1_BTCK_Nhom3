@@ -24,14 +24,14 @@
           </div>
           <h1 class="page-title"><i class="fa-solid fa-car" aria-hidden="true"></i> Bảng Điều Khiển Tài Xế: <span id="dashDriverName">Trần Minh Quân</span></h1>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 driver-dashboard-actions">
           <a href="driver/driver-trip-recurring.html" class="btn btn-outline btn-sm"><i class="fa-solid fa-rotate" aria-hidden="true"></i> Lịch trình lặp lại</a>
           <a href="driver/driver-trip-create.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus" aria-hidden="true"></i> Đăng Chuyến Mới</a>
         </div>
       </div>
 
       <!-- Driver Stats Grid -->
-      <div class="d-grid grid-cols-4 gap-3 mb-4">
+      <div class="d-grid grid-cols-4 gap-3 mb-4 driver-stat-grid">
         <div class="stat-card">
           <div class="stat-icon primary"><i class="fa-solid fa-wallet" aria-hidden="true"></i></div>
           <div class="stat-content">
@@ -81,8 +81,8 @@
           <span style="font-size: 0.85rem; color: var(--text-muted);" id="nextTripDeparture">—</span>
         </div>
         <div class="card-body">
-          <div class="d-grid grid-cols-12 gap-3 items-center">
-            <div style="grid-column: span 7;">
+          <div class="driver-upcoming-layout">
+            <div class="driver-upcoming-details">
               <div style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">
                 <i class="fa-solid fa-location-dot" aria-hidden="true"></i> Điểm hẹn đón khách: <strong id="nextTripPickup">—</strong>
               </div>
@@ -93,7 +93,7 @@
               </div>
             </div>
 
-            <div style="grid-column: span 5; border-left: 1px solid var(--border-color); padding-left: 1.5rem;">
+            <div class="driver-upcoming-actions">
               <div class="d-flex gap-2">
                 <a href="driver/driver-trip-execution.html" id="nextTripExecution" class="btn btn-secondary flex-1">
                   <i class="fa-solid fa-traffic-light" aria-hidden="true"></i> Phòng Điều Hành Chuyến

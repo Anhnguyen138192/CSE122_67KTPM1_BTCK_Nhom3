@@ -22,6 +22,39 @@
   display: none;
 }
 
+/* Keep keyboard focus visible throughout the interface. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* Driver dashboard layout */
+.driver-upcoming-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.driver-upcoming-actions {
+  min-width: 0;
+  border-left: 1px solid var(--border-color);
+  padding-left: 1.5rem;
+}
+
+.driver-upcoming-actions .d-flex {
+  flex-wrap: wrap;
+}
+
+.driver-upcoming-actions .btn {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.driver-dashboard-actions {
+  flex-wrap: wrap;
+}
+
 /* Tablet & Smaller Desktop (max-width: 1024px) */
 @media (max-width: 1024px) {
   .grid-cols-4 {
@@ -88,6 +121,36 @@
     grid-template-columns: 1fr;
   }
 
+  .driver-upcoming-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .driver-upcoming-actions {
+    border-left: 0;
+    border-top: 1px solid var(--border-color);
+    padding: 1rem 0 0;
+  }
+
+  .driver-upcoming-actions .btn {
+    flex-basis: 100%;
+  }
+
+  .driver-schedule-tabs {
+    flex-wrap: wrap;
+  }
+
+  .driver-schedule-tabs .tab-btn {
+    flex: 1 1 12rem;
+    text-align: left;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+
+  .driver-schedule-tabs .tab-btn.active {
+    border-color: var(--primary);
+    background: var(--bg-muted);
+  }
+
   .stat-card {
     padding: 1rem;
   }
@@ -127,6 +190,18 @@
     min-width: unset;
     width: 100%;
   }
+
+  .modal-box {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 2rem);
+  }
+
+  .modal-box .modal-body {
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+  }
 }
 
 /* Extra Small (max-width: 480px) */
@@ -138,5 +213,14 @@
   .btn {
     padding: 0.5rem 0.85rem;
     font-size: 0.85rem;
+  }
+
+  .driver-dashboard-actions,
+  .driver-dashboard-actions .btn {
+    width: 100%;
+  }
+
+  .driver-schedule-tabs .tab-btn {
+    flex-basis: 100%;
   }
 }

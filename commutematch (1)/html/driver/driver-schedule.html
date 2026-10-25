@@ -30,20 +30,20 @@
       </div>
 
       <!-- Tabs Lọc Trạng Thái -->
-      <div class="tabs-header">
-        <button class="tab-btn active" onclick="switchFilter('scheduled', this)">
+      <div class="tabs-header driver-schedule-tabs" role="group" aria-label="Lọc lịch trình theo trạng thái">
+        <button type="button" class="tab-btn active" aria-pressed="true" aria-controls="scheduleContainer" onclick="switchFilter('scheduled', this)">
           <i class="fa-solid fa-car" aria-hidden="true"></i> Sắp Chạy (<span id="countSched">0</span>)
         </button>
-        <button class="tab-btn" onclick="switchFilter('completed', this)">
+        <button type="button" class="tab-btn" aria-pressed="false" aria-controls="scheduleContainer" onclick="switchFilter('completed', this)">
           <i class="fa-solid fa-circle-check" aria-hidden="true"></i> Đã Hoàn Thành (<span id="countComp">0</span>)
         </button>
-        <button class="tab-btn" onclick="switchFilter('cancelled', this)">
+        <button type="button" class="tab-btn" aria-pressed="false" aria-controls="scheduleContainer" onclick="switchFilter('cancelled', this)">
           <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i> Đã Hủy (<span id="countCanc">0</span>)
         </button>
       </div>
 
       <!-- Schedule Trips List -->
-      <div id="scheduleContainer" class="d-flex flex-column gap-3">
+      <div id="scheduleContainer" class="d-flex flex-column gap-3" aria-live="polite" aria-relevant="additions text">
         <!-- Loaded dynamically -->
       </div>
     </main>
@@ -51,17 +51,17 @@
 
   <!-- Modal Hủy Chuyến Tài Xế -->
   <div class="modal-backdrop" id="driverCancelModal">
-    <div class="modal-box">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="driverCancelTitle" aria-describedby="driverCancelDescription" tabindex="-1">
       <div class="modal-header">
-        <h3 class="card-title text-danger">Hủy Chuyến Đi Đã Đăng</h3>
-        <button class="btn btn-outline btn-sm" onclick="window.Modal.close('driverCancelModal')">&times;</button>
+        <h3 class="card-title text-danger" id="driverCancelTitle">Hủy Chuyến Đi Đã Đăng</h3>
+        <button type="button" class="btn btn-outline btn-sm" aria-label="Đóng hộp thoại hủy chuyến" onclick="window.Modal.close('driverCancelModal')">&times;</button>
       </div>
       <div class="modal-body">
-        <p style="font-size: 0.88rem;">
+        <p id="driverCancelDescription" style="font-size: 0.88rem;">
           Nếu bạn hủy chuyến, hệ thống sẽ tự động gửi thông báo xin lỗi và hoàn trả lại trạng thái cho các hành khách đã đặt vé.
         </p>
         <div class="form-group">
-          <label class="form-label">Lý do hủy chuyến:</label>
+          <label class="form-label" for="driverCancelReason">Lý do hủy chuyến:</label>
           <select id="driverCancelReason" class="form-select">
             <option value="Xe gặp sự cố kỹ thuật">Xe gặp sự cố kỹ thuật đột xuất</option>
             <option value="Đột xuất bận việc học/cơ quan">Đột xuất bận việc học / cơ quan</option>

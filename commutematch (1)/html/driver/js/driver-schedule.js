@@ -97,8 +97,12 @@ let filterStatus = 'scheduled';
 
     function switchFilter(st, btn) {
       filterStatus = st;
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".driver-schedule-tabs .tab-btn").forEach(b => {
+        b.classList.remove("active");
+        b.setAttribute("aria-pressed", "false");
+      });
       btn.classList.add("active");
+      btn.setAttribute("aria-pressed", "true");
       renderSchedule();
     }
 
@@ -137,4 +141,5 @@ let filterStatus = 'scheduled';
       window.Modal.close("driverCancelModal");
       window.Toast.show("Đã hủy chuyến đi thành công.", "info");
       renderSchedule();
+      document.querySelector(".driver-schedule-tabs .tab-btn[aria-pressed='true']")?.focus();
     }
