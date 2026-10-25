@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Điều Hành Quản Trị Viên – CommuteMatch</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="index.html">Trang chủ</a> / <span>Quản trị viên</span>
+          </div>
+          <h1 class="page-title">⚡ Bảng Điều Hành Quản Trị Hệ Thống (Admin)</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="admin-platform-settings.html" class="btn btn-outline btn-sm">⚙️ Cấu hình hệ thống</a>
+          <a href="admin-user-management.html" class="btn btn-primary btn-sm">👥 Quản lý thành viên</a>
+        </div>
+      </div>
+
+      <!-- System Health Indicator -->
+      <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.75rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+        <div class="d-flex items-center gap-2">
+          <span style="font-size: 0.8rem; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: var(--success); box-shadow: 0 0 8px var(--success);"></span>
+          <span class="font-bold" style="font-size: 0.9rem;">Bản demo lưu dữ liệu trên trình duyệt</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">• Chưa kết nối giám sát máy chủ</span>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="admin-system-logs.html" class="btn btn-outline btn-sm" style="font-size: 0.78rem;">Xem Audit Logs</a>
+        </div>
+      </div>
+
+      <!-- Core System KPIs -->
+      <div class="d-grid grid-cols-4 gap-3 mb-4">
+        <div class="stat-card">
+          <div class="stat-icon primary">👥</div>
+          <div class="stat-content">
+            <div class="stat-value" id="statUsersCount">0</div>
+            <div class="stat-label">Tổng thành viên đăng ký</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon secondary">🛣️</div>
+          <div class="stat-content">
+            <div class="stat-value" id="statTripsCount">0</div>
+            <div class="stat-label">Chuyến được điều phối</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon warning">📄</div>
+          <div class="stat-content">
+            <div class="stat-value" id="statPendingKyc">0</div>
+            <div class="stat-label">Hồ sơ KYC chờ duyệt</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ai">🌱</div>
+          <div class="stat-content">
+            <div class="stat-value" id="statActiveZones">0</div>
+            <div class="stat-label">Trạm đón hoạt động</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Modules -->
+      <div class="d-grid grid-cols-12 gap-3 mb-4">
+        <!-- Module 1: Người dùng & KYC cần thẩm định -->
+        <div style="grid-column: span 6;" class="col-12 col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Hồ Sơ Cần Thẩm Định KYC</h3>
+              <a href="admin-user-management.html" style="font-size: 0.85rem;">Xem tất cả →</a>
+            </div>
+            <div class="card-body p-0">
+              <div id="pendingKycList"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Module 2: Giám sát tham số nền tảng -->
+        <div style="grid-column: span 6;" class="col-12 col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Tham Số Điều Hành Nền Tảng</h3>
+              <a href="admin-platform-settings.html" style="font-size: 0.85rem;">Cấu hình →</a>
+            </div>
+            <div class="card-body" style="font-size: 0.88rem;">
+              <div class="d-flex justify-between mb-2">
+                <span class="text-muted">Giá trần chia sẻ ô tô nhiều chỗ:</span>
+                <strong class="font-bold text-primary" id="maxFarePerKm">—</strong>
+              </div>
+              <div class="d-flex justify-between mb-2">
+                <span class="text-muted">Giá trần chia sẻ ô tô:</span>
+                <strong class="font-bold text-primary" id="maxFareCarPerKm">—</strong>
+              </div>
+              <div class="d-flex justify-between mb-2">
+                <span class="text-muted">Bán kính ghép nối tối đa:</span>
+                <strong id="maxDetourRadiusKm">—</strong>
+              </div>
+              <div class="d-flex justify-between">
+                <span class="text-muted">Điểm uy tín tối thiểu mở chuyến:</span>
+                <strong class="text-success" id="minTrustScore">—</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Audit Logs Preview -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Nhật Ký Kiểm Toán Hệ Thống Gần Nhất (Audit Trail)</h3>
+          <a href="admin-system-logs.html" style="font-size: 0.85rem;">Xem toàn bộ log →</a>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Tài khoản thực hiện</th>
+                  <th>Hành động</th>
+                  <th>Chi tiết</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody id="adminRecentLogs">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const logs = window.Storage.get("auditLogs");
+      const tbody = document.getElementById("adminRecentLogs");
+      const users = window.Storage.get("users");
+      const pendingKyc = users.filter((user) => user.kycStatus === "pending");
+      const settings = window.Storage.getSettings();
+      document.getElementById("statUsersCount").innerText = users.length;
+      document.getElementById("statTripsCount").innerText = window.Storage.get("trips").length;
+      document.getElementById("statPendingKyc").innerText = pendingKyc.length;
+      document.getElementById("statActiveZones").innerText = window.Storage.get("pickupZones")
+        .filter((zone) => zone.status === "active").length;
+      document.getElementById("maxFarePerKm").innerText = `${settings.maxFarePerKm} đ / km`;
+      document.getElementById("maxFareCarPerKm").innerText = `${settings.maxFareCarPerKm} đ / km`;
+      document.getElementById("maxDetourRadiusKm").innerText = `${settings.maxDetourRadiusKm} km`;
+      document.getElementById("minTrustScore").innerText = `${settings.minTrustScoreToShare} / 100 điểm`;
+      document.getElementById("pendingKycList").innerHTML = pendingKyc.length
+        ? pendingKyc.map((user) => `
+          <div class="d-flex justify-between items-center gap-2" style="padding:1rem;border-bottom:1px solid var(--border-color);">
+            <span class="font-bold">${user.name}</span>
+            <a href="admin-user-detail.html?id=${encodeURIComponent(user.id)}" class="btn btn-primary btn-sm">Thẩm định</a>
+          </div>
+        `).join("")
+        : '<div class="empty-state"><div class="empty-title">Không có hồ sơ chờ thẩm định</div></div>';
+
+      tbody.innerHTML = logs.length ? logs.slice(0, 4).map(l => `
+        <tr>
+          <td><span style="font-size: 0.8rem; color: var(--text-muted);">${l.timestamp}</span></td>
+          <td><strong>${l.user}</strong></td>
+          <td><span class="badge badge-primary" style="font-size: 0.72rem;">${l.action}</span></td>
+          <td style="font-size: 0.85rem;">${l.details}</td>
+          <td><span class="badge badge-success" style="font-size: 0.72rem;">${l.status}</span></td>
+        </tr>
+      `).join('') : '<tr><td colspan="5" class="text-center p-3">Chưa có nhật ký hệ thống.</td></tr>';
+    });
+  </script>
+</body>
+</html>

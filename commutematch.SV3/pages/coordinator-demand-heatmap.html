@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nhu Cầu Chuyến Xe – CommuteMatch</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs"><a href="coordinator-mobility-dashboard.html">Điều phối viên</a> / <span>Nhu cầu thực tế</span></div>
+          <h1 class="page-title">🔥 Nhu Cầu Theo Trạm Đón</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline btn-sm" onclick="loadDemand()">Làm mới số liệu</button>
+          <a href="coordinator-trip-management.html" class="btn btn-primary btn-sm">Lập & phân công chuyến</a>
+        </div>
+      </div>
+      <div class="ai-panel mb-4">
+        <p class="mb-0">Bảng này chỉ tổng hợp yêu cầu đang chờ và số chỗ trống của các chuyến đã điều phối. Không có dữ liệu dự báo hoặc số liệu mô phỏng.</p>
+      </div>
+      <div id="demandSummary" class="d-flex gap-3 flex-wrap mb-3"></div>
+      <div id="heatmapCardsGrid" class="d-grid grid-cols-3 gap-3"></div>
+    </main>
+  </div>
+  <div id="app-footer"></div>
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", loadDemand);
+
+    async function loadDemand() {
+      const result = await window.AIEngine.analyzeMobilityDemand();
+      document.getElementById("demandSummary").innerHTML = `
+        <span class="badge badge-primary">Yêu cầu chờ: ${result.summary.totalRidersLooking}</span>
+        <span class="badge badge-success">Số chỗ trống: ${result.summary.totalAvailableSeats}</span>
+      `;
+      const container = document.getElementById("heatmapCardsGrid");
+      container.innerHTML = result.zonesAnalysis.length ? result.zonesAnalysis.map((zone) => `
+        <article class="card">
+          <div class="card-body">
+            <div class="d-flex justify-between items-center mb-2">
+              <h2 class="card-title">${escapeHtml(zone.zoneName)}</h2>
+              <span class="badge ${zone.status === "high_congestion" ? "badge-danger" : zone.status === "moderate" ? "badge-warning" : "badge-success"}">${escapeHtml(zone.statusLabel)}</span>
+            </div>
+            <p class="text-muted">${escapeHtml(zone.area)}</p>
+            <div>Yêu cầu đang chờ: <strong>${zone.demandCount}</strong></div>
+            <div>Chỗ trống được điều phối: <strong>${zone.availableSeats}</strong></div>
+            <p class="mt-2 mb-0">${escapeHtml(zone.aiRecommendation)}</p>
+          </div>
+        </article>
+      `).join("") : '<div class="card"><div class="card-body empty-state"><div class="empty-title">Chưa có trạm đón để thống kê</div><div class="empty-desc">Thêm trạm và lập chuyến để bắt đầu ghi nhận nhu cầu.</div><a href="coordinator-pickup-zone-editor.html" class="btn btn-primary mt-2">Thêm trạm đón</a></div></div>';
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[character]);
+    }
+  </script>
+</body>
+</html>

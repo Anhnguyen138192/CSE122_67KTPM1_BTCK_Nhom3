@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kiểm Toán Chuyến Đi – CommuteMatch</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="admin-dashboard.html">Quản trị</a> / <span>Kiểm toán chuyến đi</span>
+          </div>
+          <h1 class="page-title">🔍 Giám Sát & Kiểm Toán Toàn Bộ Chuyến Xe</h1>
+        </div>
+      </div>
+
+      <section class="mb-3" aria-label="Tổng quan kiểm toán chuyến xe">
+        <div class="d-grid gap-2" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+          <div class="card"><div class="card-body"><div class="text-muted">Tổng chuyến</div><strong id="auditTotalCount">0</strong></div></div>
+          <div class="card"><div class="card-body"><div class="text-muted">Sắp khởi hành</div><strong id="auditScheduledCount">0</strong></div></div>
+          <div class="card"><div class="card-body"><div class="text-muted">Đã hoàn thành</div><strong id="auditCompletedCount">0</strong></div></div>
+          <div class="card"><div class="card-body"><div class="text-muted">Đã hủy</div><strong id="auditCancelledCount">0</strong></div></div>
+        </div>
+        <p class="text-muted mt-1" style="font-size:.82rem;">Các số liệu được tính từ chuyến đã lưu trên trình duyệt; tài khoản và bản ghi mô phỏng được ghi nhãn rõ ràng.</p>
+      </section>
+
+      <!-- Filters & Price Cap Alert -->
+      <div class="card mb-3">
+        <div class="card-body" style="padding: 1rem 1.25rem;">
+          <div class="d-flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex-1" style="min-width: 260px;">
+              <input type="text" id="auditSearchInput" class="form-control" placeholder="Tìm theo tài xế, tuyến đường, biển số..." oninput="filterAuditTable()">
+            </div>
+            <div class="d-flex gap-2">
+              <select id="auditStatusSelect" class="form-select" onchange="filterAuditTable()">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="scheduled">Sắp khởi hành</option>
+                <option value="completed">Đã hoàn thành</option>
+                <option value="cancelled">Đã hủy</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit Table Card -->
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Mã chuyến</th>
+                  <th>Lộ trình</th>
+                  <th>Thời gian</th>
+                  <th>Tài xế & Phương tiện</th>
+                  <th>Số ghế</th>
+                  <th>Mức chia sẻ</th>
+                  <th>Đối chiếu giá/km</th>
+                  <th>Trạng thái</th>
+                  <th>Can thiệp Admin</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", renderAuditTable);
+
+    function renderAuditTable() {
+      const trips = window.Storage.get("trips");
+      const tbody = document.getElementById("auditTableBody");
+      const maxFarePerKm = Number(window.Storage.getSettings().maxFareCarPerKm || 0);
+      document.getElementById("auditTotalCount").textContent = trips.length;
+      document.getElementById("auditScheduledCount").textContent = trips.filter((trip) => trip.status === "scheduled").length;
+      document.getElementById("auditCompletedCount").textContent = trips.filter((trip) => trip.status === "completed").length;
+      document.getElementById("auditCancelledCount").textContent = trips.filter((trip) => trip.status === "cancelled").length;
+
+      if (!trips.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center p-4">Chưa có chuyến nào được điều phối.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = trips.map(t => {
+        const distanceKm = Number(t.estimatedDistanceKm);
+        const farePerKm = distanceKm > 0
+          ? Number(t.farePerKm ?? (Number(t.costSharing || 0) / distanceKm))
+          : 0;
+        return `
+          <tr data-status="${window.Storage.escapeHtml(t.status)}">
+            <td><code>${window.Storage.escapeHtml(t.id)}</code>${t.isDemoRecord ? '<br><span class="badge badge-warning">Mô phỏng</span>' : ""}</td>
+            <td>
+              <strong style="color: var(--text-main); font-size: 0.92rem;">${window.Storage.escapeHtml(t.origin)}</strong><br>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">đến ${window.Storage.escapeHtml(t.destination)}</span>
+            </td>
+            <td>
+              ${window.Storage.escapeHtml(t.departureDate)}<br>
+              <strong>${window.Storage.escapeHtml(t.departureTime)}</strong>
+            </td>
+            <td>
+              <strong>${window.Storage.escapeHtml(t.driverName)}</strong><br>
+              <span style="font-size:0.78rem;color:var(--text-muted);">ID tài xế: ${window.Storage.escapeHtml(t.driverId || "Chưa có")}</span><br>
+              <span style="font-size: 0.78rem; color: var(--text-muted);">${window.Storage.escapeHtml(t.vehicleInfo)}</span>
+            </td>
+            <td>${Number(t.availableSeats)} / ${Number(t.totalSeats)} ghế</td>
+            <td>
+              <strong style="color: var(--primary);">${Number(t.costSharing || 0).toLocaleString('vi-VN')} đ</strong>
+            </td>
+            <td>${distanceKm > 0
+              ? `<strong style="color:${maxFarePerKm > 0 && farePerKm > maxFarePerKm ? 'var(--danger)' : 'inherit'};">${Math.round(farePerKm).toLocaleString("vi-VN")} đ/km</strong><br><span class="text-muted">${distanceKm.toLocaleString("vi-VN")} km · trần ${maxFarePerKm.toLocaleString("vi-VN")} đ/km</span>`
+              : '<span class="text-muted">Chưa có dữ liệu quãng đường.</span>'}</td>
+            <td>
+              <span class="badge ${
+                t.status === 'scheduled' ? 'badge-primary' :
+                t.status === 'completed' ? 'badge-success' : 'badge-danger'
+              }">
+                ${t.status === 'scheduled' ? 'Sắp đi' : t.status === 'completed' ? 'Đã chạy' : 'Đã hủy'}
+              </span>
+            </td>
+            <td>
+              <div class="d-flex gap-1">
+                ${t.status === 'scheduled' ? `
+                  <button class="btn btn-outline btn-sm text-danger" onclick="forceCancelTrip('${window.Storage.escapeHtml(t.id)}')">
+                    Buộc hủy
+                  </button>
+                ` : `
+                  <a href="rider-trip-detail.html?id=${encodeURIComponent(t.id)}" class="btn btn-outline btn-sm">Xem</a>
+                `}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterAuditTable() {
+      const q = document.getElementById("auditSearchInput").value.toLowerCase();
+      const st = document.getElementById("auditStatusSelect").value;
+      const rows = document.querySelectorAll("#auditTableBody tr");
+
+      rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        const matchesQ = text.includes(q);
+        const matchesSt = st === "all" || r.dataset.status === st;
+        r.style.display = matchesQ && matchesSt ? "" : "none";
+      });
+    }
+
+    function forceCancelTrip(tripId) {
+      if (!confirm("CAN THIỆP ADMIN: Bạn có chắc chắn muốn buộc hủy chuyến đi này do vi phạm điều khoản?")) return;
+      const trip = window.Storage.getById("trips", tripId);
+      if (!trip || trip.status !== "scheduled") {
+        window.Toast.show("Chỉ có thể hủy chuyến đang được lên lịch.", "error");
+        return;
+      }
+      window.Storage.update("trips", tripId, {
+        status: "cancelled",
+        cancelReason: "Hủy cưỡng chế bởi Quản trị viên"
+      });
+      window.Storage.get("joinRequests")
+        .filter((request) => request.tripId === trip.id && ["pending", "accepted"].includes(request.status))
+        .forEach((request) => {
+          window.Storage.update("joinRequests", request.id, {
+            status: "cancelled",
+            cancelReason: "Hủy cưỡng chế bởi Quản trị viên"
+          });
+          window.Storage.insert("notifications", {
+            userId: request.riderId,
+            title: "Chuyến được điều phối đã bị hủy",
+            message: `Chuyến ${trip.origin} → ${trip.destination} đã bị hủy bởi quản trị viên.`,
+            time: "Vừa xong",
+            type: "trip_cancelled",
+            unread: true,
+            link: "rider-my-trips.html"
+          });
+        });
+      window.Toast.show("Đã hủy cưỡng chế chuyến xe vi phạm.", "info");
+      renderAuditTable();
+    }
+  </script>
+</body>
+</html>
