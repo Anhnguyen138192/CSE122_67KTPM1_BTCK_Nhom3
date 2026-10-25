@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const missingFields = [];
         if (!origin) missingFields.push("điểm xuất phát");
         if (!destination) missingFields.push("điểm đến");
-        const message = `Vui lòng nhập ${missingFields.join(" và ")} trước khi yêu cầu AI gợi ý.`;
+        const message = `Vui lòng chọn ${missingFields.join(" và ")} trước khi yêu cầu AI gợi ý.`;
 
         confidenceBadge.textContent = "Thiếu dữ liệu";
         status.setAttribute("role", "alert");
