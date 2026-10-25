@@ -34,7 +34,7 @@ Không có tình trạng một người chỉ làm giao diện, một người c
   - Các màn hình đăng ký thành viên (`register.html`), quản lý xe cá nhân (`profile-vehicles.html`), khung chat tin nhắn nội bộ (`messages-chat.html`).
 * **Trách nhiệm xuyên suốt (Cross-cutting):**
   - **Tầng Dữ liệu Giả lập (Mock Data Engine & LocalStorage CRUD):** Thiết kế kiến trúc `storage.js`, dữ liệu ban đầu `mock-data.js`, validate biểu mẫu đa bước (Wizard validation), và quản lý đồng bộ trạng thái giữa các trang.
-* **Danh sách màn hình phụ trách (12 màn hình):**
+* **Danh sách màn hình phụ trách (11 màn hình):**
   - `register.html`, `profile-vehicles.html`, `messages-chat.html`
   - `driver-dashboard.html`, `driver-trip-create.html` (AI-2), `driver-trip-recurring.html`
   - `driver-schedule.html`, `driver-trip-detail.html`, `driver-join-requests.html`

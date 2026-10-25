@@ -224,3 +224,48 @@
     flex-basis: 100%;
   }
 }
+
+
+/* Small phones (320–375px): keep actions and cards inside the viewport. */
+@media (max-width: 375px) {
+  .app-main {
+    min-width: 0;
+    padding: 0.875rem 0.75rem;
+  }
+
+  .page-header,
+  .page-header > *,
+  .card,
+  .card-body,
+  .modal-box {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .page-title {
+    font-size: clamp(1.15rem, 6vw, 1.35rem);
+    overflow-wrap: anywhere;
+  }
+
+  .page-header .btn,
+  .driver-dashboard-actions .btn {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .table-responsive {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-box {
+    width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 1rem);
+  }
+}
+
+@media (max-width: 320px) {
+  .app-main { padding-inline: 0.625rem; }
+  .page-header .d-flex { flex-wrap: wrap; }
+}
