@@ -56,9 +56,27 @@ document.addEventListener("DOMContentLoaded", () => {
       showStep(0);
     }
 
+    function getRouteLocation(selectId, customInputId) {
+      const select = document.getElementById(selectId);
+      if (select.value !== "__custom__") return select.value.trim();
+      return document.getElementById(customInputId).value.trim();
+    }
+
+    function syncCustomRouteFields() {
+      [
+        ["tripOrigin", "tripOriginCustomGroup", "tripOriginCustom"],
+        ["tripDestination", "tripDestinationCustomGroup", "tripDestinationCustom"]
+      ].forEach(([selectId, groupId, inputId]) => {
+        const isCustom = document.getElementById(selectId).value === "__custom__";
+        document.getElementById(groupId).hidden = !isCustom;
+        document.getElementById(inputId).required = isCustom;
+      });
+    }
+
     async function triggerAiZoneRecommendation() {
-      const origin = document.getElementById("tripOrigin").value.trim();
-      const destination = document.getElementById("tripDestination").value.trim();
+      syncCustomRouteFields();
+      const origin = getRouteLocation("tripOrigin", "tripOriginCustom");
+      const destination = getRouteLocation("tripDestination", "tripDestinationCustom");
       const box = document.getElementById("driverAiZoneBox");
       const status = document.getElementById("driverAiStatus");
       const result = document.getElementById("driverAiResult");
@@ -194,8 +212,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const origin = document.getElementById("tripOrigin").value.trim();
-      const destination = document.getElementById("tripDestination").value.trim();
+      const origin = getRouteLocation("tripOrigin", "tripOriginCustom");
+      const destination = getRouteLocation("tripDestination", "tripDestinationCustom");
       const date = document.getElementById("tripDate").value;
       const time = document.getElementById("tripTime").value;
       const seats = parseInt(document.getElementById("tripSeats").value) || 1;
