@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đánh Giá & Phản Hồi Chuyến Đi – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider/rider-my-trips.html">Chuyến đi</a> / <span>Đánh giá</span>
+          </div>
+          <h1 class="page-title"><i class="fa-solid fa-star" aria-hidden="true"></i> Đánh Giá & Góp Ý Chuyến Đi</h1>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 680px; margin: 0 auto; box-shadow: var(--shadow-md);">
+        <div class="card-body" style="padding: 2rem;">
+          <div class="text-center mb-4">
+            <div class="avatar" id="revAvatar" style="width: 64px; height: 64px; font-size: 1.6rem; margin: 0 auto 0.75rem; background-color: #0d9488; color: white;">
+              MQ
+            </div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.2rem;" id="revDriverName">Trần Minh Quân</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+              Chuyến đi: <strong>KTX Khu B → ĐH Bách Khoa CS2</strong>
+            </p>
+          </div>
+
+          <form id="reviewForm" onsubmit="submitReview(event)">
+            <!-- Star Rating Interactive Selector -->
+            <div class="form-group text-center mb-4">
+              <label class="form-label" style="font-size: 1rem; margin-bottom: 0.5rem;">Trải nghiệm của bạn thế nào?</label>
+              <div id="starContainer" style="font-size: 2.5rem; cursor: pointer; color: #cbd5e1; display: inline-flex; gap: 0.5rem;">
+                <span onclick="setStars(1)"><i class="fa-solid fa-star" aria-hidden="true"></i></span>
+                <span onclick="setStars(2)"><i class="fa-solid fa-star" aria-hidden="true"></i></span>
+                <span onclick="setStars(3)"><i class="fa-solid fa-star" aria-hidden="true"></i></span>
+                <span onclick="setStars(4)"><i class="fa-solid fa-star" aria-hidden="true"></i></span>
+                <span onclick="setStars(5)"><i class="fa-solid fa-star" aria-hidden="true"></i></span>
+              </div>
+              <div id="starLabel" style="font-size: 0.9rem; font-weight: 700; color: var(--primary); margin-top: 0.25rem;">
+                Tuyệt vời (5 / 5 sao)
+              </div>
+            </div>
+
+            <!-- Compliment Tags -->
+            <div class="form-group mb-4">
+              <label class="form-label">Chọn điểm nổi bật của bạn đồng hành:</label>
+              <div class="d-flex flex-wrap gap-2" id="tagList">
+                <button type="button" class="btn btn-outline btn-sm active-tag" onclick="toggleTag(this)"><i class="fa-solid fa-stopwatch" aria-hidden="true"></i> Đúng giờ từng phút</button>
+                <button type="button" class="btn btn-outline btn-sm active-tag" onclick="toggleTag(this)"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Lái xe cẩn thận, an toàn</button>
+                <button type="button" class="btn btn-outline btn-sm active-tag" onclick="toggleTag(this)"><i class="fa-solid fa-sparkles" aria-hidden="true"></i> Xe sạch sẽ, tiện nghi</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="toggleTag(this)"><i class="fa-solid fa-face-smile" aria-hidden="true"></i> Thân thiện, hòa đồng</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="toggleTag(this)"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Đón đúng trạm quy ước</button>
+              </div>
+            </div>
+
+            <!-- Comment Box -->
+            <div class="form-group mb-4">
+              <label class="form-label" for="reviewComment">Nhận xét chi tiết (được hiển thị ẩn danh trên hồ sơ):</label>
+              <textarea id="reviewComment" class="form-control" rows="3" placeholder="Chia sẻ cảm nhận của bạn để giúp cộng đồng sinh viên chọn bạn đồng hành tin cậy..."></textarea>
+            </div>
+
+            <div class="d-flex justify-between items-center">
+              <a href="rider/rider-my-trips.html" class="btn btn-outline">Bỏ qua lúc này</a>
+              <button type="submit" class="btn btn-primary btn-lg">
+                Gửi Đánh Giá & Hoàn Tất
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <style>
+    .active-tag {
+      background-color: var(--primary-light) !important;
+      border-color: var(--primary) !important;
+      color: var(--primary) !important;
+      font-weight: 600;
+    }
+  </style>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/pages/rider/rider-trip-review.js"></script>
+</body>
+</html>

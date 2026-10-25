@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CommuteMatch – Ghép Chuyến Đi Chung Cho Cộng Đồng</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main style="flex: 1;">
+    <!-- Homepage image carousel -->
+    <section class="home-carousel-section" aria-label="Điểm nổi bật CommuteMatch">
+      <div id="homeCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-touch="true" data-bs-interval="5000">
+        <div class="carousel-indicators">
+          <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Ảnh 1"></button>
+          <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="1" aria-label="Ảnh 2"></button>
+          <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="2" aria-label="Ảnh 3"></button>
+        </div>
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="../assets/images/hero-electric-car.svg" class="d-block w-100 home-carousel-image" alt="Minh họa ô tô điện và trạm sạc trên cung đường xanh">
+            <div class="home-carousel-shade"></div>
+            <div class="carousel-caption home-carousel-caption">
+              <span class="home-carousel-kicker"><i class="fa-solid fa-bolt" aria-hidden="true"></i> Ô tô điện</span>
+              <h1>Điện sạch,<br><span>Hành trình xanh</span></h1>
+              <p>Khám phá lựa chọn di chuyển êm ái, hiện đại và thân thiện hơn với môi trường.</p>
+              <a href="rider/rider-trip-search.html" class="btn btn-primary btn-lg"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Tìm chuyến đi</a>
+              <a href="common/login.html" class="btn btn-outline btn-lg" id="heroLoginBtn">Đăng Nhập</a>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img src="../assets/images/hero-gas-car.svg" class="d-block w-100 home-carousel-image" alt="Minh họa ô tô chạy xăng bên trạm nhiên liệu">
+            <div class="home-carousel-shade"></div>
+            <div class="carousel-caption home-carousel-caption">
+              <span class="home-carousel-kicker"><i class="fa-solid fa-car-side" aria-hidden="true"></i> Ô tô chạy xăng</span>
+              <h2>Ô tô điện, ô tô xăng,<br><span>chọn chuyến hợp bạn</span></h2>
+              <p>Tìm chuyến đi phù hợp và cùng chia sẻ chi phí vận hành trên hành trình.</p>
+              <a href="common/login.html" class="btn btn-primary btn-lg">Đăng chuyến đi</a>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img src="../assets/images/hero-carpool.svg" class="d-block w-100 home-carousel-image" alt="Minh họa hai ô tô cùng đi chung trên cung đường xanh">
+            <div class="home-carousel-shade"></div>
+            <div class="carousel-caption home-carousel-caption">
+              <span class="home-carousel-kicker"><i class="fa-solid fa-heart" aria-hidden="true"></i> Đi chung xe</span>
+              <h2>Thêm bạn đồng hành,<br><span>thêm chuyến đi vui</span></h2>
+              <p>Chia sẻ hành trình bằng ô tô điện hoặc ô tô xăng cùng cộng đồng CommuteMatch.</p>
+              <a href="rider/rider-trip-search.html" class="btn btn-primary btn-lg">Khám phá ngay</a>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev" aria-label="Ảnh trước">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next" aria-label="Ảnh tiếp theo">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </button>
+      </div>
+    </section>
+    <!-- Real-time Community Stats -->
+    <section style="padding: 3rem 0; border-bottom: 1px solid var(--border-color); background-color: var(--bg-surface);">
+      <div class="container">
+        <div class="d-grid grid-cols-4 gap-3">
+          <div class="stat-card">
+            <div class="stat-icon primary"><i class="fa-solid fa-road" aria-hidden="true"></i></div>
+            <div class="stat-content">
+              <div class="stat-value">18.450+</div>
+              <div class="stat-label">Km đi chung an toàn</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon secondary"><i class="fa-solid fa-leaf" aria-hidden="true"></i></div>
+            <div class="stat-content">
+              <div class="stat-value">3.280 kg</div>
+              <div class="stat-label">CO2 đã cắt giảm</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon warning"><i class="fa-solid fa-users" aria-hidden="true"></i></div>
+            <div class="stat-content">
+              <div class="stat-value">1.420</div>
+              <div class="stat-label">Chuyến ghép thành công</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon ai"><i class="fa-solid fa-sparkles" aria-hidden="true"></i></div>
+            <div class="stat-content">
+              <div class="stat-value">96.4%</div>
+              <div class="stat-label">Tương thích AI Match</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 Core AI Highlights -->
+    <section style="padding: 4.5rem 0;">
+      <div class="container">
+        <div class="text-center mb-4">
+          <span class="badge badge-ai mb-1">CÔNG NGHỆ TRẢI NGHIỆM AI</span>
+          <h2 style="font-size: 1.8rem; margin: 0.5rem 0;">3 Trải Nghiệm AI Giải Thích Được (XAI)</h2>
+          <p>Mọi thuật toán đều có phân tích lý do minh bạch, đặt quyền kiểm soát vào tay người dùng.</p>
+        </div>
+
+        <div class="d-grid grid-cols-3 gap-3">
+          <div class="card">
+            <div class="card-body">
+              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;"><i class="fa-solid fa-bullseye" aria-hidden="true"></i></div>
+              <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">AI-1: Trip Matching Score</h3>
+              <p style="font-size: 0.9rem;">
+                Chấm điểm tương thích 0 - 100% dựa trên trùng khớp lộ trình, độ lệch giờ và uy tín hai bên kèm phân tích minh bạch lý do đề xuất.
+              </p>
+              <a href="rider/rider-match-results.html" class="btn btn-outline btn-sm mt-2">Thử nghiệm AI-1 →</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;"><i class="fa-solid fa-bus-simple" aria-hidden="true"></i></div>
+              <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">AI-2: Meeting Point Recommender</h3>
+              <p style="font-size: 0.9rem;">
+                Gợi ý điểm hẹn tối ưu nhất dọc theo tuyến đường: khoảng cách đi bộ &lt; 200m, không làm tài xế đi đường vòng, vỉa hè rộng an toàn.
+              </p>
+              <a href="common/login.html" class="btn btn-outline btn-sm mt-2">Thử nghiệm AI-2 →</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;"><i class="fa-solid fa-fire" aria-hidden="true"></i></div>
+              <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">AI-3: Mobility Demand Heatmap</h3>
+              <p style="font-size: 0.9rem;">
+                Mô phỏng bản đồ nhiệt nhu cầu di chuyển theo khung giờ cao điểm, tự động cảnh báo các điểm nghẽn thiếu xe cho điều phối viên.
+              </p>
+              <a href="rider/rider-trip-search.html" class="btn btn-outline btn-sm mt-2">Thử nghiệm AI-3 →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Role application information -->
+    <section style="background-color: var(--bg-muted); padding: 3.5rem 0; border-top: 1px solid var(--border-color);">
+      <div class="container text-center">
+        <h2>Bắt đầu với vai trò Hành khách</h2>
+        <p style="max-width: 620px; margin: 0 auto 2rem;">
+          Sau khi đăng nhập, bạn có thể gửi đơn riêng để ứng tuyển làm tài xế hoặc điều phối viên. Vai trò chỉ được bổ sung sau khi quản trị viên duyệt.
+        </p>
+        <div class="d-flex justify-center gap-2 flex-wrap">
+          <a class="btn btn-primary" href="common/login.html">Tạo tài khoản Hành khách</a>
+          <a class="btn btn-outline" href="common/login.html">Đăng nhập</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="../js/pages/common/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tìm Kiếm Chuyến Đi Nâng Cao – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider/rider-dashboard.html">Hành khách</a> / <span>Tìm chuyến</span>
+          </div>
+          <h1 class="page-title"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Tìm Kiếm Chuyến Đi Cùng Hướng</h1>
+        </div>
+      </div>
+
+      <!-- Quick Route Suggestions (Chips) -->
+      <div class="mb-3">
+        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-right: 0.5rem;">Tuyến phổ biến:</span>
+        <button class="btn btn-outline btn-sm" onclick="setQuickSearch('KTX Khu B', 'ĐH Bách Khoa CS2', '07:15')">
+          <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> KTX Khu B → Bách Khoa CS2 (07:15)
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="setQuickSearch('Hàng Xanh', 'Khu Công Nghệ Cao', '07:30')">
+          <i class="fa-solid fa-building" aria-hidden="true"></i> Hàng Xanh → Khu CNC Q9 (07:30)
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="setQuickSearch('ĐH Khoa Học Tự Nhiên', 'Ga Metro Bình Thái', '17:15')">
+          <i class="fa-solid fa-train-subway" aria-hidden="true"></i> KHTN → Metro Bình Thái (17:15)
+        </button>
+      </div>
+
+      <!-- Search Form Card -->
+      <div class="card mb-4" style="max-width: 840px;">
+        <div class="card-body">
+          <form id="searchForm" onsubmit="handleSearch(event)">
+            <div class="d-grid grid-cols-2 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchOrigin">
+                  <i class="fa-solid fa-location-dot" aria-hidden="true"></i> Điểm đón / Nơi khởi hành <span class="required">*</span>
+                </label>
+                <input type="text" id="searchOrigin" class="form-control" placeholder="ví dụ: KTX Khu B ĐHQG..." required value="KTX Khu B">
+                <div class="form-feedback">Vui lòng nhập điểm đón.</div>
+              </div>
+
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchDestination">
+                  <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Điểm đến <span class="required">*</span>
+                </label>
+                <input type="text" id="searchDestination" class="form-control" placeholder="ví dụ: ĐH Bách Khoa Cơ Sở 2..." required value="ĐH Bách Khoa Cơ Sở 2">
+                <div class="form-feedback">Vui lòng nhập điểm đến.</div>
+              </div>
+            </div>
+
+            <div class="d-grid grid-cols-3 gap-3 mb-3">
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchDate">Ngày đi <span class="required">*</span></label>
+                <input type="date" id="searchDate" class="form-control" required>
+              </div>
+
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchTime">Giờ muốn đi (Khoảng) <span class="required">*</span></label>
+                <input type="time" id="searchTime" class="form-control" value="07:15" required>
+              </div>
+
+              <div class="form-group mb-0">
+                <label class="form-label" for="searchSeats">Số chỗ cần đi</label>
+                <select id="searchSeats" class="form-select">
+                  <option value="1" selected>1 người (Ô tô điện hoặc ô tô xăng)</option>
+                  <option value="2">2 người (Cần xe ô tô)</option>
+                  <option value="3">3 người (Cần xe ô tô)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Bộ lọc nâng cao -->
+            <div style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+              <div class="font-bold mb-2" style="font-size: 0.88rem;">Bộ lọc bổ sung:</div>
+              <div class="d-flex items-center gap-3 flex-wrap">
+                <label class="d-flex items-center gap-2" style="font-size: 0.88rem;">
+                  <i class="fa-solid fa-car-side" aria-hidden="true"></i> Loại ô tô:
+                  <select id="filterVehicleType" class="form-select" style="width: auto; min-width: 180px;">
+                    <option value="all">Tất cả ô tô</option>
+                    <option value="electric">Ô tô điện</option>
+                    <option value="gasoline">Ô tô xăng</option>
+                  </select>
+                </label>
+                <label class="d-flex items-center gap-1" style="font-size: 0.88rem; cursor: pointer;">
+                  <input type="checkbox" id="filterHighRating" checked> Ưu tiên tài xế đánh giá <i class="fa-solid fa-star" aria-hidden="true"></i> 4.8+
+                </label>
+              </div>
+            </div>
+
+            <div class="d-flex justify-between items-center">
+              <span style="font-size: 0.85rem; color: var(--text-muted);">
+                <i class="fa-solid fa-sparkles" aria-hidden="true"></i> Thuật toán AI Matching sẽ tự động tính toán điểm tương thích ngay khi tìm kiếm.
+              </span>
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-rocket" aria-hidden="true"></i> Tìm Kiếm & Chấm Điểm AI
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/pages/rider/rider-trip-search.js"></script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chuyến Đi Của Tôi – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider/rider-dashboard.html">Hành khách</a> / <span>Chuyến đi của tôi</span>
+          </div>
+          <h1 class="page-title"><i class="fa-solid fa-ticket" aria-hidden="true"></i> Quản Lý Chuyến Đi Của Tôi</h1>
+        </div>
+        <a href="rider/rider-trip-search.html" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i> Tìm & Đặt Chuyến Mới
+        </a>
+      </div>
+
+      <!-- 4 Tabs Trạng thái Nghiệp vụ -->
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTripTab('pending', this)">
+          <i class="fa-solid fa-hourglass-half" aria-hidden="true"></i> Đang Chờ Duyệt (<span id="countPending">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchTripTab('accepted', this)">
+          <i class="fa-solid fa-car" aria-hidden="true"></i> Sắp Khởi Hành (<span id="countAccepted">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchTripTab('completed', this)">
+          <i class="fa-solid fa-circle-check" aria-hidden="true"></i> Đã Hoàn Thành (<span id="countCompleted">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchTripTab('cancelled', this)">
+          <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i> Đã Hủy (<span id="countCancelled">0</span>)
+        </button>
+      </div>
+
+      <!-- Container Danh sách Chuyến đi -->
+      <div id="myTripsList" class="d-flex flex-column gap-3">
+        <!-- Rendered dynamically -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Xác Nhận Hủy Chuyến -->
+  <div class="modal-backdrop" id="cancelModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="card-title text-danger">Xác Nhận Hủy Ghép Chuyến</h3>
+        <button class="btn btn-outline btn-sm" onclick="window.Modal.close('cancelModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.9rem;">
+          Bạn có chắc chắn muốn hủy yêu cầu chuyến đi này không? Việc hủy chuyến quá sát giờ hẹn có thể ảnh hưởng đến Điểm Uy Tín (Trust Score) của bạn.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Lý do hủy chuyến:</label>
+          <select id="cancelReason" class="form-select">
+            <option value="Đổi lịch học/làm việc đột xuất">Đổi lịch học / làm việc đột xuất</option>
+            <option value="Tìm được phương tiện khác">Đã tìm được phương tiện khác</option>
+            <option value="Lý do cá nhân khác">Lý do cá nhân khác</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="window.Modal.close('cancelModal')">Giữ lại vé</button>
+        <button type="button" class="btn btn-danger" onclick="confirmCancelTrip()">Đồng ý Hủy Vé</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/pages/rider/rider-my-trips.js"></script>
+</body>
+</html>

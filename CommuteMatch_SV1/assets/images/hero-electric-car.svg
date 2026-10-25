@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 760" role="img" aria-labelledby="title desc">
+<title id="title">Ô tô điện 3D trên cung đường xanh</title><desc id="desc">Minh họa vector 3D một chiếc crossover điện màu xanh ngọc, trạm sạc và phong cảnh đồi lúc bình minh.</desc>
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#66b9c1"/><stop offset=".58" stop-color="#c1e5d4"/><stop offset="1" stop-color="#f5dfb7"/></linearGradient>
+ <linearGradient id="hills" x2="0" y2="1"><stop stop-color="#56a995"/><stop offset="1" stop-color="#277568"/></linearGradient>
+ <linearGradient id="road" x2="0" y2="1"><stop stop-color="#506572"/><stop offset="1" stop-color="#233944"/></linearGradient>
+ <linearGradient id="paint" x1=".15" y1="0" x2=".74" y2="1"><stop stop-color="#b9fff0"/><stop offset=".18" stop-color="#5fe2c2"/><stop offset=".48" stop-color="#21b895"/><stop offset=".72" stop-color="#0a806b"/><stop offset="1" stop-color="#07564f"/></linearGradient>
+ <linearGradient id="glass" x2="0" y2="1"><stop stop-color="#e8ffff"/><stop offset=".5" stop-color="#8dcfd3"/><stop offset="1" stop-color="#386b78"/></linearGradient>
+ <linearGradient id="tire" x2="0" y2="1"><stop stop-color="#273943"/><stop offset="1" stop-color="#101c24"/></linearGradient>
+ <radialGradient id="sun"><stop stop-color="#fff6ca" stop-opacity=".9"/><stop offset="1" stop-color="#fff6ca" stop-opacity="0"/></radialGradient>
+ <filter id="blur"><feGaussianBlur stdDeviation="24"/></filter><filter id="shadow" x="-.2" y="-.3" width="1.4" height="1.8"><feGaussianBlur in="SourceAlpha" stdDeviation="14"/><feOffset dy="18"/><feComponentTransfer><feFuncA type="linear" slope=".32"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <linearGradient id="station" x2="0" y2="1"><stop stop-color="#f4fffb"/><stop offset="1" stop-color="#93cfc3"/></linearGradient>
+</defs>
+<rect width="1920" height="760" fill="url(#sky)"/><circle cx="1460" cy="185" r="230" fill="url(#sun)"/><circle cx="1460" cy="185" r="64" fill="#fff4c9" opacity=".88"/>
+<path d="M0 430Q270 315 520 398t445-4q250-120 505 8t450-16v222H0Z" fill="#8bc8a8"/><path d="M0 492q270-115 500-40t430-18q260-100 540 16t450-4v180H0Z" fill="url(#hills)" opacity=".94"/>
+<g opacity=".35" fill="#e9fff0"><circle cx="140" cy="215" r="46"/><circle cx="204" cy="190" r="63"/><circle cx="263" cy="224" r="42"/><circle cx="660" cy="290" r="28"/><circle cx="700" cy="270" r="42"/></g>
+<path d="M0 565 520 520q300-22 540 24t860 2v214H0Z" fill="url(#road)"/><path d="M0 645q420-28 720-2t1200-10" fill="none" stroke="#d5e1c0" stroke-width="9" stroke-dasharray="104 74" opacity=".8"/><path d="M0 572q500-36 880 12t1040 0" fill="none" stroke="#a6c2c1" stroke-width="3" opacity=".28"/>
+<!-- glossy EV charging post -->
+<g transform="translate(1740 286)" filter="url(#shadow)"><ellipse cx="52" cy="302" rx="88" ry="15" fill="#1c4144" opacity=".23"/><path d="M22 20Q22 0 44 0h66q22 0 22 22v238H22Z" fill="url(#station)" stroke="#2d8577" stroke-width="8"/><path d="M36 27h68v74H36z" rx="12" fill="#214c59"/><rect x="44" y="35" width="52" height="52" rx="11" fill="#a8f0d7"/><path d="m74 41-17 25h16l-8 18 27-31H75l8-12z" fill="#118f78"/><path d="M133 106q55 7 37 85v48" fill="none" stroke="#287b72" stroke-width="12" stroke-linecap="round"/><rect x="160" y="232" width="29" height="40" rx="8" fill="#236b65"/><path d="M22 186h110" stroke="#78b9ac" stroke-width="5" opacity=".8"/></g>
+<!-- 3D crossover -->
+<g filter="url(#shadow)"><ellipse cx="1412" cy="631" rx="485" ry="43" fill="#0b292b" opacity=".38"/>
+<path d="M1003 486q30-48 100-69l135-42q100-145 226-153h159q85 4 148 78l82 94q70 23 78 79l8 56H967q-9-29 36-43Z" fill="url(#paint)" stroke="#075d56" stroke-width="12" stroke-linejoin="round"/>
+<path d="M1230 381q93-137 205-142h87v140h-292Z" fill="url(#glass)" stroke="#267b75" stroke-width="8" stroke-linejoin="round"/><path d="M1540 239h75q61 5 111 66l60 74h-246Z" fill="url(#glass)" stroke="#267b75" stroke-width="8" stroke-linejoin="round"/>
+<path d="M1241 368q98-112 190-117" fill="none" stroke="#effffb" stroke-width="9" stroke-linecap="round" opacity=".72"/><path d="M1553 253q79 7 131 77" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".68"/>
+<path d="M991 493q62-38 120-45h508q102 0 238 30v42q-420-12-865 15Z" fill="#39c9a1" opacity=".74"/><path d="M1001 510q370-28 839 4" fill="none" stroke="#b5fff0" stroke-width="6" opacity=".65"/><path d="M1037 550h667" stroke="#075e56" stroke-width="14" opacity=".72"/>
+<path d="M989 486q22-32 55-42l-9 52q-23 7-49 10Z" fill="#fff1bd"/><path d="M1810 462q26 7 37 28l-43-3Z" fill="#ff7b66"/><path d="M1019 468q87-39 147-43" fill="none" stroke="#d5fff4" stroke-width="7" stroke-linecap="round" opacity=".74"/>
+<g><circle cx="1162" cy="590" r="77" fill="url(#tire)"/><circle cx="1162" cy="590" r="47" fill="#a9bdba"/><circle cx="1162" cy="590" r="33" fill="#e6f5ee"/><circle cx="1162" cy="590" r="14" fill="#5d7e7e"/><g stroke="#718e8d" stroke-width="8" stroke-linecap="round"><path d="M1162 560v60M1132 590h60M1141 569l42 42M1183 569l-42 42"/></g><circle cx="1669" cy="590" r="77" fill="url(#tire)"/><circle cx="1669" cy="590" r="47" fill="#a9bdba"/><circle cx="1669" cy="590" r="33" fill="#e6f5ee"/><circle cx="1669" cy="590" r="14" fill="#5d7e7e"/><g stroke="#718e8d" stroke-width="8" stroke-linecap="round"><path d="M1669 560v60M1639 590h60M1648 569l42 42M1690 569l-42 42"/></g></g>
+<path d="M1378 441v103" stroke="#d4fff4" stroke-width="6" opacity=".62"/><path d="M1361 457h38" stroke="#eafff9" stroke-width="6" opacity=".75"/><path d="M1318 526h206" stroke="#0a7566" stroke-width="5" opacity=".48"/></g>
+<g fill="#174f4c" opacity=".5"><path d="M360 565v-72h13v72zm-23-67 30-40 30 40zM620 554v-54h11v54zm-19-50 25-34 25 34z"/></g>
+</svg>

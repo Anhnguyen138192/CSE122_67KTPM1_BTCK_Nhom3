@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xác Nhận Đặt Chỗ & Gợi Ý Điểm Đón AI – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider/rider-trip-detail.html">Chi tiết chuyến</a> / <span>Xác nhận đặt chỗ</span>
+          </div>
+          <h1 class="page-title"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Xác Nhận Yêu Cầu Ghép Chuyến</h1>
+        </div>
+      </div>
+
+      <div class="d-grid grid-cols-12 gap-3" style="max-width: 980px;">
+        <!-- Cột trái: Form đặt chỗ & Chọn trạm đón -->
+        <div style="grid-column: span 7;" class="col-12 col-md-7">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Thiết Lập Điểm Hẹn & Ghi Chú</h3>
+            </div>
+            <div class="card-body">
+              <form id="bookingForm" onsubmit="submitBooking(event)">
+                <!-- AI-2: Meeting Point Recommendation Card -->
+                <div class="ai-panel mb-3" id="aiMeetingPointPanel">
+                  <div class="d-flex items-center justify-between mb-2">
+                    <span class="ai-badge">AI-2 GỢI Ý ĐIỂM HẸN TỐI ƯU</span>
+                    <span class="badge badge-success">Độ tin cậy: 94%</span>
+                  </div>
+                  <h4 style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.35rem;" id="aiZoneName">
+                    Trạm đón KTX Khu B - Cổng phụ Cây Xăng
+                  </h4>
+                  <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i> Địa chỉ: Đường Lưu Hữu Phước, Phường Đông Hòa, Dĩ An.
+                  </p>
+
+                  <div style="background-color: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 0.75rem;">
+                    <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: var(--primary); margin-bottom: 0.25rem;">
+                      <i class="fa-solid fa-lightbulb" aria-hidden="true"></i> Vì sao AI chọn điểm đón này?
+                    </div>
+                    <ul class="ai-reasons-list" id="aiReasonsList" style="margin: 0; gap: 0.25rem;">
+                      <li class="ai-reason-item">
+                        <span class="icon"><i class="fa-solid fa-person-walking" aria-hidden="true"></i></span>
+                        <span>Khoảng cách đi bộ chỉ 180m (~3 phút) từ sảnh KTX của bạn.</span>
+                      </li>
+                      <li class="ai-reason-item">
+                        <span class="icon"><i class="fa-solid fa-car" aria-hidden="true"></i></span>
+                        <span>Tài xế KHÔNG cần đi vòng (0 phút đường vòng) vì trạm nằm ngay trên lộ trình.</span>
+                      </li>
+                      <li class="ai-reason-item">
+                        <span class="icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+                        <span>Vỉa hè an toàn rộng 4m, đèn cao áp LED và camera an ninh KTX quan sát 24/7.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-primary btn-sm flex-1" id="btnAcceptZone" onclick="acceptAiZone()">
+                      <i class="fa-solid fa-check" aria-hidden="true"></i> Chấp nhận điểm đón này (Khuyến nghị)
+                    </button>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="toggleManualZone()">
+                      Chọn trạm khác
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Lựa chọn trạm đón thủ công (Ẩn mặc định) -->
+                <div class="form-group" id="manualZoneGroup" style="display: none;">
+                  <label class="form-label">Chọn điểm đón trong danh mục an toàn:</label>
+                  <select id="pickupSelect" class="form-select">
+                    <!-- Loaded dynamically -->
+                  </select>
+                </div>
+
+                <!-- Điểm trả mong muốn -->
+                <div class="form-group">
+                  <label class="form-label" for="dropoffInput">Điểm xuống xe mong muốn <span class="required">*</span></label>
+                  <input type="text" id="dropoffInput" class="form-control" value="ĐH Bách Khoa CS2 (Cổng 1)" required>
+                </div>
+
+                <!-- Ghi chú cho tài xế -->
+                <div class="form-group">
+                  <label class="form-label" for="riderNotes">Ghi chú cho tài xế (nhận diện, balo...)</label>
+                  <textarea id="riderNotes" class="form-control" rows="2" placeholder="Ví dụ: Em mang balo đen, mặc áo khoác xanh, đứng trước cửa hàng Circle K ạ..."></textarea>
+                </div>
+
+                <!-- Cam kết chi phí xăng xe -->
+                <div class="form-group">
+                  <label class="d-flex items-start gap-1" style="font-size: 0.85rem; cursor: pointer;">
+                    <input type="checkbox" id="agreeFare" checked required style="margin-top: 0.2rem;">
+                    <span>Tôi cam kết chuẩn bị đúng số tiền chia sẻ chi phí xăng xe (<strong id="confirmCost">12.000 đ</strong>) và có mặt tại trạm đón trước 5 phút.</span>
+                  </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                  <i class="fa-solid fa-rocket" aria-hidden="true"></i> Xác Nhận Gửi Yêu Cầu Ghép Chuyến
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Tóm tắt chuyến đi & Tài xế -->
+        <div style="grid-column: span 5;" class="col-12 col-md-5">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Tóm Tắt Chuyến Đi</h3>
+            </div>
+            <div class="card-body">
+              <div class="d-flex items-center gap-2 mb-3">
+                <div class="avatar" id="summaryAvatar" style="width: 44px; height: 44px; background-color: #0d9488; color: white;">
+                  MQ
+                </div>
+                <div>
+                  <div class="font-bold" id="summaryDriverName">Trần Minh Quân</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);" id="summaryVehicle">VinFast VF 8 (51H-888.99)</div>
+                </div>
+              </div>
+
+              <div style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md); font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+                <div class="d-flex justify-between">
+                  <span class="text-muted">Ngày đi:</span>
+                  <strong id="summaryDate">20/10/2026</strong>
+                </div>
+                <div class="d-flex justify-between">
+                  <span class="text-muted">Giờ xuất phát:</span>
+                  <strong style="color: var(--primary);" id="summaryTime">07:15</strong>
+                </div>
+                <div class="d-flex justify-between">
+                  <span class="text-muted">Tuyến đường:</span>
+                  <strong id="summaryRoute">KTX Khu B → Bách Khoa CS2</strong>
+                </div>
+                <div class="d-flex justify-between" style="border-top: 1px dashed var(--border-color); padding-top: 0.5rem;">
+                  <span class="text-muted">Chi phí chia sẻ:</span>
+                  <strong style="font-size: 1.1rem; color: var(--text-main);" id="summaryFare">12.000 đ</strong>
+                </div>
+              </div>
+
+              <div style="font-size: 0.78rem; color: var(--text-muted);">
+                <i class="fa-solid fa-lightbulb" aria-hidden="true"></i> Yêu cầu của bạn sẽ được gửi trực tiếp tới tài xế. Bạn sẽ nhận được thông báo ngay khi tài xế nhấn Duyệt.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/pages/rider/rider-booking-confirm.js"></script>
+</body>
+</html>

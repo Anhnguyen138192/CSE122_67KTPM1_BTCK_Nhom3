@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trung Tâm Tiếp Nhận & Xử Lý Sự Cố – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider/rider-dashboard.html">Điều phối viên</a> / <span>Báo cáo sự cố</span>
+          </div>
+          <h1 class="page-title"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Trung Tâm Xử Lý Báo Cáo & Khiếu Nại</h1>
+        </div>
+      </div>
+
+      <!-- Tabs Lọc Báo Cáo -->
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchReportTab('all', this)">
+          Tất cả báo cáo (<span id="repTotalCount">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchReportTab('investigating', this)">
+          <i class="fa-solid fa-hourglass-half" aria-hidden="true"></i> Đang Xử Lý / Hòa Giải (<span id="repActiveCount">0</span>)
+        </button>
+        <button class="tab-btn" onclick="switchReportTab('resolved', this)">
+          <i class="fa-solid fa-check" aria-hidden="true"></i> Đã Giải Quyết (<span id="repResolvedCount">0</span>)
+        </button>
+      </div>
+
+      <!-- Danh sách báo cáo sự cố -->
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Tiêu đề khiếu nại</th>
+                  <th>Người gửi báo cáo</th>
+                  <th>Đối tượng phản ánh</th>
+                  <th>Phân loại</th>
+                  <th>Mức ưu tiên</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="reportsTableBody">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/pages/coordinator/coordinator-report-center.js"></script>
+</body>
+</html>

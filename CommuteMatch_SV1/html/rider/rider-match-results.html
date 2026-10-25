@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kết Quả Ghép Chuyến & AI Matching – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider/rider-trip-search.html">Tìm chuyến</a> / <span>Kết quả AI Matching</span>
+          </div>
+          <h1 class="page-title"><i class="fa-solid fa-sparkles" aria-hidden="true"></i> Kết Quả Phù Hợp (AI-1 Trip Matching)</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="rider/rider-trip-search.html" class="btn btn-outline btn-sm"><i class="fa-solid fa-pen" aria-hidden="true"></i> Chỉnh sửa tìm kiếm</a>
+          <button class="btn btn-ai btn-sm" onclick="runMatching()"><i class="fa-solid fa-rotate" aria-hidden="true"></i> Tính toán lại AI</button>
+        </div>
+      </div>
+
+      <!-- Current Search Criteria Banner -->
+      <div style="background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.75rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: gap-2;">
+        <div class="d-flex items-center gap-2 flex-wrap" style="font-size: 0.88rem;">
+          <span>Lộ trình: <strong id="lblRoute">KTX Khu B → Bách Khoa CS2</strong></span>
+          <span>•</span>
+          <span>Giờ hẹn: <strong id="lblTime">07:15</strong></span>
+          <span>•</span>
+          <span>Số chỗ: <strong id="lblSeats">1 người</strong></span>
+        </div>
+        <span class="badge badge-ai" id="lblAiStatus">AI Đang Phân Tích</span>
+      </div>
+
+      <!-- AI Loading State (Skeleton) -->
+      <div id="aiLoadingState" style="display: none;">
+        <div class="ai-panel mb-3 text-center" style="padding: 2.5rem 1.5rem;">
+          <div class="spinner mb-2" style="font-size: 2rem; animation: spin 1s linear infinite; display: inline-block;"><i class="fa-solid fa-gear" aria-hidden="true"></i></div>
+          <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">AI đang tính toán độ tương thích hành trình...</h3>
+          <p style="font-size: 0.88rem; max-width: 500px; margin: 0 auto;">
+            Đang phân tích độ lệch lộ trình, thời gian xuất phát, điểm uy tín tài xế và tối ưu hóa lượng CO2 cắt giảm.
+          </p>
+          <div class="skeleton mt-3" style="height: 12px; width: 60%; margin: 1rem auto 0;"></div>
+        </div>
+      </div>
+
+      <!-- AI Empty / Fallback State -->
+      <div id="aiEmptyState" style="display: none;">
+        <div class="card">
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fa-solid fa-robot" aria-hidden="true"></i><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></div>
+            <div class="empty-title">AI chưa tìm thấy chuyến đi tương thích cao</div>
+            <div class="empty-desc">
+              Không có tài xế nào đi qua tuyến đường này trong khung giờ ±30 phút bạn chọn.
+            </div>
+            <div class="d-flex justify-center gap-2">
+              <button class="btn btn-primary btn-sm" onclick="relaxSearch()">
+                <i class="fa-solid fa-globe" aria-hidden="true"></i> Nới lỏng tìm kiếm (±2km & ±45 phút)
+              </button>
+              <a href="rider/rider-trip-search.html" class="btn btn-outline btn-sm">Đổi lộ trình khác</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Match Results List -->
+      <div id="aiResultsContainer" style="display: none;">
+        <div class="ai-panel mb-4">
+          <div class="d-flex items-center gap-2 mb-1">
+            <span class="ai-badge">BÁO CÁO PHÂN TÍCH AI-1</span>
+            <span id="aiSummaryText" style="font-size: 0.88rem; font-weight: 600;"></span>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Điểm số được tính toán dựa trên: 50% trùng khớp tuyến + 30% độ lệch giờ + 20% đánh giá tài xế.
+          </div>
+        </div>
+
+        <div id="tripsList" class="d-flex flex-column gap-3">
+          <!-- Render trips dynamically -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/pages/rider/rider-match-results.js"></script>
+</body>
+</html>

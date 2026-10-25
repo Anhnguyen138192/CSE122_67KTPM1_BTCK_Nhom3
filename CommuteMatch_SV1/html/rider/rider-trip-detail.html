@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi Tiết Chuyến Đi – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="rider/rider-trip-search.html">Tìm chuyến</a> / <span>Chi tiết chuyến xe</span>
+          </div>
+          <h1 class="page-title">Thông Tin Chuyến Xe Ghép</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="rider/rider-match-results.html" class="btn btn-outline btn-sm">← Quay lại kết quả</a>
+          <a href="#" id="btnBookTop" class="btn btn-primary btn-sm">Đặt Chỗ Này</a>
+        </div>
+      </div>
+
+      <div class="d-grid grid-cols-12 gap-3">
+        <!-- Cột trái: Lộ trình & Các trạm dừng -->
+        <div style="grid-column: span 8;" class="col-12 col-lg-8">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Hành Trình & Điểm Dừng</h3>
+              <span class="badge badge-primary" id="tripVehicleBadge">Ô tô</span>
+            </div>
+            <div class="card-body">
+              <div class="d-flex items-center justify-between mb-3" style="background-color: var(--bg-muted); padding: 1rem; border-radius: var(--radius-md);">
+                <div>
+                  <div class="text-muted" style="font-size: 0.8rem;">Ngày khởi hành</div>
+                  <strong class="font-bold" id="detailDate">20/10/2026</strong>
+                </div>
+                <div>
+                  <div class="text-muted" style="font-size: 0.8rem;">Giờ xuất phát</div>
+                  <strong class="font-bold" style="font-size: 1.2rem; color: var(--primary);" id="detailTime">07:15</strong>
+                </div>
+                <div>
+                  <div class="text-muted" style="font-size: 0.8rem;">Chỗ còn lại</div>
+                  <strong class="font-bold text-success" id="detailSeats">1 chỗ trống</strong>
+                </div>
+                <div>
+                  <div class="text-muted" style="font-size: 0.8rem;">Mức chia sẻ xăng</div>
+                  <strong class="font-bold" style="font-size: 1.2rem; color: var(--text-main);" id="detailCost">12.000 đ</strong>
+                </div>
+              </div>
+
+              <!-- Lộ trình từng trạm dừng (Route timeline) -->
+              <div class="mb-4">
+                <div class="font-bold mb-3" style="font-size: 0.95rem;">Trục đường & Trạm đón quy ước:</div>
+                <div id="routeTimeline" style="display: flex; flex-direction: column; gap: 1rem; position: relative; padding-left: 1.5rem; border-left: 2px dashed var(--primary); margin-left: 1rem;">
+                  <!-- Dynamically rendered -->
+                </div>
+              </div>
+
+              <!-- Ghi chú tài xế -->
+              <div class="ai-panel">
+                <div class="font-bold mb-1" style="font-size: 0.9rem;"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Ghi chú từ người lái xe:</div>
+                <p id="detailNotes" style="font-size: 0.88rem; margin: 0; color: var(--text-main);">
+                  Ưu tiên bạn có mang balo vừa phải, có dây an toàn luôn sẵn sàng.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bản đồ mô phỏng lộ trình -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Mô Phỏng Lộ Trình Tuyến Đường</h3>
+            </div>
+            <div class="card-body text-center" style="background-color: var(--bg-muted); padding: 2.5rem 1rem;">
+              <div style="font-size: 2.5rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-map" aria-hidden="true"></i></div>
+              <div class="font-bold">Bản đồ khu đô thị ĐHQG & Trục Xa Lộ Hà Nội</div>
+              <p style="font-size: 0.85rem; max-width: 480px; margin: 0.5rem auto 1rem;">
+                Tuyến đường đã được xác thực an toàn, tránh các điểm ngập nước và điểm đen ùn tắc giao thông.
+              </p>
+              <div class="d-flex justify-center gap-2">
+                <span class="badge badge-success"><i class="fa-solid fa-check" aria-hidden="true"></i> 100% đường có đèn cao áp</span>
+                <span class="badge badge-info"><i class="fa-solid fa-check" aria-hidden="true"></i> Tránh kẹt xe ngã tư Thủ Đức</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Thông tin tài xế & Cam kết -->
+        <div style="grid-column: span 4;" class="col-12 col-lg-4">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title">Người Chia Sẻ Xe</h3>
+            </div>
+            <div class="card-body text-center">
+              <div class="avatar" id="driverAvatar" style="width: 64px; height: 64px; font-size: 1.6rem; margin: 0 auto 0.75rem; background-color: #0d9488; color: white;">
+                MQ
+              </div>
+              <h3 id="driverName" style="font-size: 1.15rem; margin-bottom: 0.2rem;">Trần Minh Quân</h3>
+              <div class="d-flex justify-center items-center gap-1 mb-2">
+                <span style="color: var(--warning);"><i class="fa-solid fa-star" aria-hidden="true"></i><i class="fa-solid fa-star" aria-hidden="true"></i><i class="fa-solid fa-star" aria-hidden="true"></i><i class="fa-solid fa-star" aria-hidden="true"></i><i class="fa-solid fa-star" aria-hidden="true"></i></span>
+                <span class="font-bold" id="driverRating" style="font-size: 0.88rem;">4.95</span>
+                <span class="text-muted" style="font-size: 0.8rem;">(68 chuyến)</span>
+              </div>
+              <span class="badge badge-success mb-3"><i class="fa-solid fa-check" aria-hidden="true"></i> Đã duyệt bằng lái & CCCD</span>
+
+              <div style="text-align: left; background-color: var(--bg-muted); padding: 0.85rem; border-radius: var(--radius-md); font-size: 0.85rem; margin-bottom: 1rem;">
+                <div class="d-flex justify-between mb-1">
+                  <span class="text-muted">Phương tiện:</span>
+                  <strong id="driverVehicle">VinFast VF 8</strong>
+                </div>
+                <div class="d-flex justify-between">
+                  <span class="text-muted">Biển số xe:</span>
+                  <strong id="driverPlate">59-X3 888.99</strong>
+                </div>
+              </div>
+
+              <div class="d-flex flex-column gap-2">
+                <a href="#" id="btnBookSide" class="btn btn-primary btn-block">
+                  <i class="fa-solid fa-check" aria-hidden="true"></i> Gửi Yêu Cầu Ghép Chuyến
+                </a>
+                <a href="#" id="btnDriverProfile" class="btn btn-outline btn-block btn-sm">
+                  <i class="fa-solid fa-user" aria-hidden="true"></i> Xem hồ sơ tài xế
+                </a>
+                <a href="#" id="btnMessageDriver" class="btn btn-outline btn-block btn-sm">
+                  <i class="fa-solid fa-comment-dots" aria-hidden="true"></i> Nhắn tin hỏi tài xế
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tiêu chuẩn an toàn -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title" style="font-size: 0.95rem;">Tiêu Chuẩn Chuyến Đi</h3>
+            </div>
+            <div class="card-body" style="font-size: 0.85rem;">
+              <ul style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.4rem; color: var(--text-muted); margin: 0;">
+                <li>Có sẵn dây an toàn cho người đi cùng.</li>
+                <li>Hẹn tại trạm đón an toàn có camera quan sát.</li>
+                <li>Không thu thêm phụ phí ngoài tiền xăng công bố.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/pages/rider/rider-trip-detail.js"></script>
+</body>
+</html>

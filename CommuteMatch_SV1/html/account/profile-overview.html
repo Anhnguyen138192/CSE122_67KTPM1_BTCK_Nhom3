@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hồ Sơ Cá Nhân & Điểm Uy Tín – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="index.html">Trang chủ</a> / <span id="profileBreadcrumb">Hồ sơ cá nhân</span>
+          </div>
+          <h1 class="page-title">Hồ Sơ Thành Viên</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="rider/rider-my-trips.html" class="btn btn-primary btn-sm" id="btnMessageProfile" style="display: none;"><i class="fa-solid fa-comment-dots" aria-hidden="true"></i> Nhắn tin</a>
+          <a href="account/profile-edit.html" class="btn btn-primary btn-sm" id="btnEditProfile"><i class="fa-solid fa-pen" aria-hidden="true"></i> Chỉnh sửa hồ sơ</a>
+          <a href="account/profile-vehicles.html" class="btn btn-outline btn-sm" id="btnManageVehicle"><i class="fa-solid fa-car-side" aria-hidden="true"></i> Quản lý phương tiện</a>
+        </div>
+      </div>
+
+      <div class="d-grid grid-cols-12 gap-3">
+        <!-- Cột trái: Thẻ thông tin cá nhân & Điểm uy tín -->
+        <div style="grid-column: span 4;" class="col-12 col-lg-4">
+          <div class="card mb-3 text-center">
+            <div class="card-body">
+              <div class="avatar" id="userAvatar" style="width: 80px; height: 80px; font-size: 2rem; margin: 0 auto 1rem; color: white;">
+                U
+              </div>
+              <h2 id="userName" style="font-size: 1.35rem; margin-bottom: 0.2rem;">Họ Tên</h2>
+              <div id="userRoleBadge" class="badge badge-primary mb-2">Vai trò</div>
+              <p id="userBio" style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Mô tả giới thiệu bản thân...
+              </p>
+
+              <!-- Trust Score Box -->
+              <div class="ai-panel text-left" style="padding: 1rem; border-radius: var(--radius-md);">
+                <div class="d-flex justify-between items-center mb-1">
+                  <span class="font-bold" style="font-size: 0.88rem;">Điểm Uy Tín (Trust Score)</span>
+                  <span class="badge badge-success font-bold" id="trustScoreVal">98 / 100</span>
+                </div>
+                <div style="background-color: var(--border-color); height: 8px; border-radius: var(--radius-full); overflow: hidden; margin-bottom: 0.5rem;">
+                  <div id="trustBar" style="background: var(--ai-gradient); height: 100%; width: 98%;"></div>
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">
+                  <i class="fa-solid fa-star" aria-hidden="true"></i> Đánh giá trung bình: <strong id="ratingVal" style="color: var(--primary);">4.9 / 5.0</strong>
+                </div>
+              </div>
+
+              <!-- Badges -->
+              <div class="mt-3 text-left" id="communityBadges">
+                <div class="font-bold mb-2" style="font-size: 0.85rem;">Huy hiệu cộng đồng:</div>
+                <div class="d-flex flex-wrap gap-1">
+                  <span class="badge badge-primary"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> Sinh viên chuẩn mẫu</span>
+                  <span class="badge badge-success"><i class="fa-solid fa-stopwatch" aria-hidden="true"></i> Đúng giờ 100%</span>
+                  <span class="badge badge-ai"><i class="fa-solid fa-leaf" aria-hidden="true"></i> Hiệp sĩ Xanh</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trạng thái KYC -->
+          <div class="card" id="studentKycCard">
+            <div class="card-header">
+              <h3 class="card-title" style="font-size: 0.95rem;">Định danh sinh viên (KYC)</h3>
+            </div>
+            <div class="card-body" style="font-size: 0.88rem;">
+              <div class="d-flex justify-between mb-2">
+                <span class="text-muted">Trạng thái:</span>
+                <span class="badge badge-success" id="kycBadge">Đã xác thực</span>
+              </div>
+              <div class="d-flex justify-between mb-2">
+                <span class="text-muted">Trường:</span>
+                <span class="font-bold" id="univVal">ĐH Bách Khoa</span>
+              </div>
+              <div class="d-flex justify-between">
+                <span class="text-muted">MSSV / Mã NV:</span>
+                <span class="font-bold" id="idVal">2210045</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Thống kê chuyến đi & Hoạt động gần đây -->
+        <div style="grid-column: span 8;" class="col-12 col-lg-8">
+          <div class="d-grid grid-cols-3 gap-2 mb-3">
+            <div class="stat-card">
+              <div class="stat-icon primary"><i class="fa-solid fa-ticket" aria-hidden="true"></i></div>
+              <div class="stat-content">
+                <div class="stat-value" id="tripsCountVal">24</div>
+                <div class="stat-label">Chuyến đã hoàn thành</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon secondary"><i class="fa-solid fa-leaf" aria-hidden="true"></i></div>
+              <div class="stat-content">
+                <div class="stat-value" id="co2Val">42.5 kg</div>
+                <div class="stat-label">Lượng CO2 cắt giảm</div>
+              </div>
+            </div>
+            <div class="stat-card" id="moneyStatCard">
+              <div class="stat-icon warning"><i class="fa-solid fa-wallet" aria-hidden="true"></i></div>
+              <div class="stat-content">
+                <div class="stat-value" id="moneyVal">450.000 đ</div>
+                <div class="stat-label" id="moneyLabel">Tiền tiết kiệm được</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Thông tin liên hệ chi tiết -->
+          <div class="card mb-3">
+            <div class="card-header">
+              <h3 class="card-title" id="contactCardTitle">Thông Tin Liên Hệ</h3>
+            </div>
+            <div class="card-body">
+              <div class="d-grid grid-cols-2 gap-2" style="font-size: 0.9rem;">
+                <div id="emailContact">
+                  <span class="text-muted">Email liên lạc:</span>
+                  <div class="font-bold mt-1" id="emailVal">an.nguyen@sinhvien.edu.vn</div>
+                </div>
+                <div id="phoneContact">
+                  <span class="text-muted">Số điện thoại Zalo:</span>
+                  <div class="font-bold mt-1" id="phoneVal">0901 234 567</div>
+                </div>
+                <div>
+                  <span class="text-muted">Ngày tham gia:</span>
+                  <div class="font-bold mt-1" id="joinedVal">15/09/2023</div>
+                </div>
+                <div>
+                  <span class="text-muted">Phương tiện chính:</span>
+                  <div class="font-bold mt-1" id="vehicleSummary">Không có (Hành khách)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lịch sử đánh giá từ bạn đồng hành -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Đánh Giá Từ Bạn Đồng Hành (Ratings)</h3>
+            </div>
+            <div class="card-body" id="ratingsContainer">
+              <!-- Load from mock data -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="card mt-3" id="applicationDetailsCard" style="display: none;">
+        <div class="card-header">
+          <h2 class="card-title">Hồ sơ chi tiết đã nộp</h2>
+        </div>
+        <div class="card-body" id="applicationDetails"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/pages/account/profile-overview.js"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chỉnh Sửa Hồ Sơ & KYC – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="account/profile-overview.html">Hồ sơ</a> / <span>Chỉnh sửa</span>
+          </div>
+          <h1 class="page-title">Cập Nhật Thông Tin Cá Nhân & KYC</h1>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 720px;">
+        <div class="card-body">
+          <form id="editProfileForm" onsubmit="saveProfile(event)">
+            <div class="form-group">
+              <label class="form-label" for="editName">Họ và tên</label>
+              <input type="text" id="editName" class="form-control" required>
+            </div>
+
+            <div class="d-grid grid-cols-2 gap-2">
+              <div class="form-group">
+                <label class="form-label" for="editEmail">Email trường (Cố định để xác minh)</label>
+                <input type="email" id="editEmail" class="form-control" disabled style="background-color: var(--bg-muted);">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editPhone">Số điện thoại liên lạc Zalo <span class="required">*</span></label>
+                <input type="tel" id="editPhone" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="d-grid grid-cols-2 gap-2">
+              <div class="form-group">
+                <label class="form-label" for="editUniv">Trường / Đơn vị</label>
+                <input type="text" id="editUniv" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editId">MSSV / Mã nhân viên</label>
+                <input type="text" id="editId" class="form-control" disabled style="background-color: var(--bg-muted);">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="editBio">Giới thiệu ngắn (Bio)</label>
+              <textarea id="editBio" class="form-control" rows="3" placeholder="Chia sẻ lịch học, lộ trình quen thuộc hoặc lưu ý khi đi cùng..."></textarea>
+            </div>
+
+            <!-- KYC Document Status Box -->
+            <div class="ai-panel mb-3">
+              <div class="font-bold mb-1" style="color: var(--primary);"><i class="fa-solid fa-file-lines" aria-hidden="true"></i> Giấy tờ xác thực định danh (KYC)</div>
+              <p style="font-size: 0.85rem; margin-bottom: 0.75rem;">
+                Hồ sơ định danh giúp bạn đạt huy hiệu "Đã xác thực" và tăng tối đa điểm uy tín (Trust Score).
+              </p>
+              <div class="d-flex items-center gap-2">
+                <input type="file" id="newKycDoc" class="form-control" style="font-size: 0.85rem;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="window.Toast.show('Đã nạp ảnh tài liệu mới, nhấn Lưu để gửi phê duyệt.', 'info')">Tải lên</button>
+              </div>
+            </div>
+
+            <div class="d-flex justify-end gap-2 mt-4">
+              <a href="account/profile-overview.html" class="btn btn-outline">Hủy bỏ</a>
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Lưu Thay Đổi</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/pages/account/profile-edit.js"></script>
+</body>
+</html>

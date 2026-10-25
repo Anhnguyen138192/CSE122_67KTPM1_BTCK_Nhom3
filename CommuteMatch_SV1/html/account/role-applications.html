@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ứng Tuyển Vai Trò – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs"><a href="rider/rider-dashboard.html">Tài khoản</a> / <span>Ứng tuyển vai trò</span></div>
+          <h1 class="page-title">Ứng tuyển vai trò mới</h1>
+          <p>Gửi hồ sơ riêng cho từng vai trò. Vai trò mới chỉ được thêm sau khi quản trị viên duyệt.</p>
+        </div>
+      </div>
+
+      <div class="d-grid grid-cols-2 gap-3">
+        <section class="card">
+          <div class="card-body">
+            <h2><i class="fa-solid fa-car" aria-hidden="true"></i> Ứng tuyển làm tài xế</h2>
+            <p>Chia sẻ chuyến đi sau khi hồ sơ và phương tiện được xem xét.</p>
+            <form onsubmit="submitApplication(event, 'driver')">
+              <div class="form-group">
+                <label class="form-label" for="vehicleCategory">Loại ô tô</label>
+                <select class="form-select" id="vehicleCategory" required>
+                  <option value="electric">Ô tô điện</option>
+                  <option value="gasoline">Ô tô xăng</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="vehicleType">Hãng và mẫu ô tô</label>
+                <input class="form-control" id="vehicleType" required maxlength="100" placeholder="Ví dụ: Toyota Vios 2023 hoặc VinFast VF 8">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="vehiclePlate">Biển số xe</label>
+                <input class="form-control" id="vehiclePlate" required maxlength="20" placeholder="Ví dụ: 59-X1 123.45">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="driverLicense">Thông tin giấy phép lái xe</label>
+                <textarea class="form-control" id="driverLicense" required maxlength="500" rows="3" placeholder="Loại bằng và thông tin xác minh"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="vehiclePhoto">Ảnh phương tiện <span class="required">*</span></label>
+                <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; text-align: center; background-color: var(--bg-surface); cursor: pointer;" onclick="document.getElementById('vehiclePhoto').click()">
+                  <div style="font-size: 1.8rem;"><i class="fa-solid fa-camera" aria-hidden="true"></i></div>
+                  <div style="font-size: 0.88rem; font-weight: 600;" class="application-file-label" id="vehiclePhotoLabel">Nhấp để chọn ảnh phương tiện</div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Định dạng PNG, JPG (tối đa 5MB)</div>
+                  <input type="file" id="vehiclePhoto" style="display: none;" accept="image/*" aria-required="true" onchange="previewApplicationFile(this)">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="driverLicensePhoto">Ảnh giấy phép lái xe (GPLX) <span class="required">*</span></label>
+                <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; text-align: center; background-color: var(--bg-surface); cursor: pointer;" onclick="document.getElementById('driverLicensePhoto').click()">
+                  <div style="font-size: 1.8rem;"><i class="fa-solid fa-camera" aria-hidden="true"></i></div>
+                  <div style="font-size: 0.88rem; font-weight: 600;" class="application-file-label" id="driverLicensePhotoLabel">Nhấp để chọn ảnh GPLX</div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Định dạng PNG, JPG (tối đa 5MB)</div>
+                  <input type="file" id="driverLicensePhoto" style="display: none;" accept="image/*" aria-required="true" onchange="previewApplicationFile(this)">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="driverCitizenIdPhoto">Ảnh căn cước công dân (CCCD) <span class="required">*</span></label>
+                <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; text-align: center; background-color: var(--bg-surface); cursor: pointer;" onclick="document.getElementById('driverCitizenIdPhoto').click()">
+                  <div style="font-size: 1.8rem;"><i class="fa-solid fa-camera" aria-hidden="true"></i></div>
+                  <div style="font-size: 0.88rem; font-weight: 600;" class="application-file-label" id="driverCitizenIdPhotoLabel">Nhấp để chọn ảnh CCCD</div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Định dạng PNG, JPG (tối đa 5MB)</div>
+                  <input type="file" id="driverCitizenIdPhoto" style="display: none;" accept="image/*" aria-required="true" onchange="previewApplicationFile(this)">
+                </div>
+              </div>
+              <button class="btn btn-secondary" type="submit">Gửi đơn ứng tuyển tài xế</button>
+            </form>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-body">
+            <h2><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Ứng tuyển làm điều phối viên</h2>
+            <p>Hỗ trợ điều phối nhu cầu di chuyển, trạm đón và an toàn cộng đồng.</p>
+            <form onsubmit="submitApplication(event, 'coordinator')">
+              <div class="form-group">
+                <label class="form-label" for="coordAffiliation">Đơn vị / tổ chức</label>
+                <input class="form-control" id="coordAffiliation" required maxlength="120" placeholder="Trường, đơn vị hoặc cộng đồng">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="coordMotivation">Kinh nghiệm và lý do ứng tuyển</label>
+                <textarea class="form-control" id="coordMotivation" required maxlength="1000" rows="5" placeholder="Mô tả kinh nghiệm và đóng góp dự kiến"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="coordCitizenIdPhoto">Ảnh căn cước công dân (CCCD) <span class="required">*</span></label>
+                <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; text-align: center; background-color: var(--bg-surface); cursor: pointer;" onclick="document.getElementById('coordCitizenIdPhoto').click()">
+                  <div style="font-size: 1.8rem;"><i class="fa-solid fa-camera" aria-hidden="true"></i></div>
+                  <div style="font-size: 0.88rem; font-weight: 600;" class="application-file-label" id="coordCitizenIdPhotoLabel">Nhấp để chọn ảnh CCCD</div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Định dạng PNG, JPG (tối đa 5MB)</div>
+                  <input type="file" id="coordCitizenIdPhoto" style="display: none;" accept="image/*" aria-required="true" onchange="previewApplicationFile(this)">
+                </div>
+              </div>
+              <button class="btn btn-ai" type="submit">Gửi đơn ứng tuyển điều phối viên</button>
+            </form>
+          </div>
+        </section>
+      </div>
+
+      <section class="card mt-3">
+        <div class="card-body">
+          <h2>Đơn ứng tuyển của bạn</h2>
+          <div id="myApplications" class="mt-2"></div>
+        </div>
+      </section>
+      <section class="card mt-3">
+        <div class="card-body">
+          <h2>Đơn ứng tuyển</h2>
+          <div id="sharedApplications" class="mt-2"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="app-footer"></div>
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/pages/account/role-applications.js"></script>
+</body>
+</html>

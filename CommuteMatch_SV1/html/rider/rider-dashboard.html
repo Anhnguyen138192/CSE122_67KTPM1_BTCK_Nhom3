@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="../">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Điều Khiển Hành Khách – CommuteMatch</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="app-shell">
+    <div id="app-sidebar"></div>
+
+    <main class="app-main">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumbs">
+            <a href="index.html">Trang chủ</a> / <span>Hành khách</span>
+          </div>
+          <h1 class="page-title"><i class="fa-solid fa-hand" aria-hidden="true"></i> Xin chào, <span id="dashRiderName">Nguyễn Văn An</span>!</h1>
+        </div>
+        <a href="rider/rider-trip-search.html" class="btn btn-primary">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Tìm Chuyến Đi Mới
+        </a>
+      </div>
+
+      <!-- Quick Stats Row -->
+      <div class="d-grid grid-cols-4 gap-3 mb-4">
+        <div class="stat-card">
+          <div class="stat-icon primary"><i class="fa-solid fa-ticket" aria-hidden="true"></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="statRiderTrips">24</div>
+            <div class="stat-label">Chuyến đi đã ghép</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon secondary"><i class="fa-solid fa-leaf" aria-hidden="true"></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="statRiderCo2">42.5 kg</div>
+            <div class="stat-label">CO2 đã cắt giảm</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon warning"><i class="fa-solid fa-wallet" aria-hidden="true"></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="statRiderMoney">450.000 đ</div>
+            <div class="stat-label">Tiền xăng tiết kiệm</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon ai"><i class="fa-solid fa-star" aria-hidden="true"></i></div>
+          <div class="stat-content">
+            <div class="stat-value" id="statRiderTrust">98 / 100</div>
+            <div class="stat-label">Điểm uy tín (Trust Score)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chuyến đi sắp khởi hành (Active Trip Card) -->
+      <div class="card mb-4" style="border-left: 4px solid var(--primary);">
+        <div class="card-header">
+          <div class="d-flex items-center gap-2">
+            <span class="badge badge-success">SẮP KHỞI HÀNH</span>
+            <h3 class="card-title">Chuyến Xe Tiếp Theo Của Bạn</h3>
+          </div>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Khởi hành: <strong>07:15 sáng mai</strong></span>
+        </div>
+        <div class="card-body">
+          <div class="d-grid grid-cols-12 gap-3 items-center">
+            <div style="grid-column: span 7;">
+              <div class="d-flex items-center gap-2 mb-2">
+                <div class="font-bold" style="font-size: 1.15rem;">KTX Khu B ĐHQG</div>
+                <span style="color: var(--primary); font-size: 1.2rem;">→</span>
+                <div class="font-bold" style="font-size: 1.15rem;">ĐH Bách Khoa Cơ Sở 2</div>
+              </div>
+              <div style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                <i class="fa-solid fa-location-dot" aria-hidden="true"></i> Điểm hẹn an toàn: <strong>Trạm đón KTX Khu B - Cổng phụ Cây xăng</strong>
+              </div>
+              <div class="d-flex items-center gap-2">
+                <span class="badge badge-primary">VinFast VF 8</span>
+                <span class="badge badge-outline">Biển số: 59-X3 888.99</span>
+                <span class="badge badge-info">Chia sẻ xăng: 12.000 đ</span>
+              </div>
+            </div>
+
+            <div style="grid-column: span 5; border-left: 1px solid var(--border-color); padding-left: 1.5rem;">
+              <div class="d-flex items-center gap-2 mb-2">
+                <div class="avatar" style="width: 44px; height: 44px; background-color: #0d9488; color: white;">MQ</div>
+                <div>
+                  <div class="font-bold">Trần Minh Quân</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);"><i class="fa-solid fa-star" aria-hidden="true"></i> 4.95/5.0 (68 chuyến)</div>
+                </div>
+              </div>
+              <div class="d-flex gap-2">
+                <a href="rider/rider-trip-tracking.html" class="btn btn-primary btn-sm flex-1"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Theo dõi xe</a>
+                <a href="rider/rider-my-trips.html" class="btn btn-outline btn-sm"><i class="fa-solid fa-comment-dots" aria-hidden="true"></i> Nhắn tin</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick AI Matching Banner -->
+      <div class="ai-panel mb-4">
+        <div class="d-flex justify-between items-center flex-wrap gap-2">
+          <div>
+            <div class="d-flex items-center gap-2 mb-1">
+              <span class="ai-badge">AI MATCHING</span>
+              <h3 style="margin: 0; font-size: 1.1rem;">Bạn có chuyến đi học/làm việc định kỳ mỗi sáng?</h3>
+            </div>
+            <p style="font-size: 0.88rem; margin: 0;">
+              AI có thể phân tích lịch trình và tự động ghép bạn với tài xế có tỷ lệ tương thích >90%.
+            </p>
+          </div>
+          <a href="rider/rider-match-results.html" class="btn btn-ai btn-sm">Xem Gợi Ý AI Ngay →</a>
+        </div>
+      </div>
+
+      <!-- Danh sách chuyến đi gần đây -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Lịch Sử Chuyến Đi Gần Nhất</h3>
+          <a href="rider/rider-my-trips.html" style="font-size: 0.85rem;">Xem tất cả →</a>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Tuyến đường</th>
+                  <th>Thời gian</th>
+                  <th>Tài xế</th>
+                  <th>Phương tiện</th>
+                  <th>Chi phí</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="recentTripsTableBody">
+                <!-- Dynamically loaded -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="../js/data/mock-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/modules/toast.js"></script>
+  <script src="../js/modules/modal.js"></script>
+  <script src="../js/modules/auth.js"></script>
+  <script src="../js/modules/ai-engine.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script src="../js/pages/rider/rider-dashboard.js"></script>
+</body>
+</html>
