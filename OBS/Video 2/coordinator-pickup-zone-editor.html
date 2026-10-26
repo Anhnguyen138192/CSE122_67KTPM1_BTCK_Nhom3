@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo điểm đón xe</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+    <div id="app-header"></div>
+    <div class="app-shell">
+        <div id="app-sidebar"></div>
+        <main class="app-main">
+            <div class="page-header">
+            </div>
+            <div class="breadcrumbs">
+                <a hre\f="">Trạm đón</a> / <span>Biên tập trạm</span>
+            </div>
+            <h1 class="page-title" id="editorTitle">➕ Thêm Trạm Đón An Toàn Mới</h1>
+            <div class="card" style="max-width: 800px; margin: 0 auto;">
+                <div class="card-body" style="padding: 2rem;">
+                    <form id="zoneEditorForm">
+                        <div class="form-group">
+                            <label class="form-label" for="zName">Tên trạm đón quy ước <span class="required">*</span></label>
+                            <input type="text" id="zName" class="form-control" placeholder="Ví dụ: Điểm đón tại Bến xe Mỹ Đình (cổng chính)" required>
+                        </div>
+                        <div class="d-grid grid-cols-2 gap-3 mb-3">
+                            <div class="form-group mb-0">
+                                <label class="form-label" for="zArea">Khu vực quản lý <span class="required">*</span></label>
+                                <select id="zArea" class="form-select" required>
+                                    <option value="Bến xe Mỹ Đình">Bến xe Mỹ Đình</option>
+                                    <option value="Bến xe Giáp Bát">Bến xe Giáp Bát</option>
+                                    <option value="Bến xe Nước Ngầm">Bến xe Nước Ngầm</option>
+                                    <option value="Bến xe Gia Lâm">Bến xe Gia Lâm</option>
+                                    <option value="Bến xe Yên Nghĩa">Bến xe Yên Nghĩa</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label" for="zCoordinates">Tọa độ GPS (Vĩ độ, kinh độ) <span class="required">*</span></label>
+                                <input type="text" id="zCoordinates" class="form-control" placeholder="Ví dụ: 21.0285, 105.8542" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="zAddress">Địa chỉ chi tiết / Điểm mốc nhận diện <span class="required">*</span></label>
+                            <input type="text" id="zAddress" class="form-control" placeholder="Cổng chính sân vận động Mỹ Đình" required>
+                        </div>
+                        <div class="d-grid grid-cols-2 gap-3 mb-3">
+                            <div class="form-group mb-0">
+                                <label class="form-label" for="zCapacity">Sức chứa người chờ cùng lúc</label>
+                                <input type="number" id="zCapacity" class="form-control" min="5" max="100" step="1" required>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label" for="zSafetyScore">Điểm an toàn thẩm định (0 - 10)</label>
+                                <input type="number" id="zSafetyScore" class="form-control" min="0" max="10" step="0.1" required>
+                            </div>
+                        </div>
+                        <div class="ai-panel mb-3">
+                            <div class="font-bold mb-2">🛡️ Tiêu chuẩn hạ tầng an toàn:</div>
+                            <div class="d-grid grid-cols-2 gap-2" style="font-size: 0.88rem;">
+                                <label class="d-flex items-center gap-2" style="cursor: pointer;">
+                                    <input type="checkbox" id="zHasSidewalk"> Có vỉa hè rộng &gt; 3m cho người đi bộ
+                                </label>
+                                <label class="d-flex items-center gap-2" style="cursor: pointer;">
+                                    <input type="checkbox" id="zHasLighting"> Có hệ thống đèn chiếu sáng ban đêm
+                                </label>
+                                <label class="d-flex items-center gap-2" style="cursor: pointer;">
+                                    <input type="checkbox" id="zHasCCTV"> Có camera an ninh quan sát (CCTV)
+                                </label>
+                                <label class="d-flex items-center gap-2" style="cursor: pointer;">
+                                    <input type="checkbox" id="zHasShelter"> Có mái che mưa nắng / Gần bảo vệ
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="zNotes">Ghi chú lưu ý khi dừng đỗ:</label>
+                            <textarea id="zNotes" class="form-control" rows="2" placeholder="Nhập các lưu ý khi dừng đỗ"></textarea>
+                        </div>
+                        <div class="d-flex justify-between items-center mt-4">
+                            <a href="" class="btn btn-outline">Hủy bỏ</a>
+                            <button type="submit" class="btn btn-primary btn-lg">Lưu trạm đón</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div id="app-footer"></div>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/modal.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/ai-engine.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="coordinator-pickup-zone-editor.js"></script>
+</body>
+</html>

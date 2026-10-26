@@ -1,0 +1,38 @@
+.platform-settings-card {
+  max-width: 840px;
+  margin: 0 auto;
+}
+
+.platform-settings-card-body {
+  padding: 2rem;
+}
+
+.platform-settings-section {
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.platform-settings-section--primary {
+  color: var(--primary);
+}
+
+.platform-settings-section--ai {
+  color: var(--ai-purple);
+}
+
+.platform-settings-section--secondary {
+  color: var(--secondary);
+}
+
+.platform-settings-help {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.platform-settings-note {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
